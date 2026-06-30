@@ -1,0 +1,8 @@
+{
+  "ignore": [
+    "dev-data/data/student-passwords.json",
+    "dev-data/data/faculty-passwords.json",
+    "dev-data/data/security-passwords.json",
+    "dev-data/data/staff-passwords.json"
+  ]
+}
