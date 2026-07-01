@@ -1,0 +1,58 @@
+[
+  {
+    "id": 1,
+    "quote": "When Genie delivers on its promise, it'll be the tool startups have been wishing for.",
+    "name": "Lola Salehu",
+    "role": "Senior Product Designer",
+    "image": "https://i.pravatar.cc/100?img=1"
+  },
+  {
+    "id": 2,
+    "quote": "Genie would be really great for prototyping brand ideas.",
+    "name": "Michael Okoh",
+    "role": "Founder/CEO",
+    "image": "https://i.pravatar.cc/100?img=2"
+  },
+  {
+    "id": 3,
+    "quote": "Hard to believe no one built this before.",
+    "name": "Shedrack Akintayo",
+    "role": "Founder/CEO",
+    "image": "https://i.pravatar.cc/100?img=3"
+  },
+  {
+    "id": 4,
+    "quote": "Every creative director I know is going to want this.",
+    "name": "Uche Divine",
+    "role": "Senior Product Designer",
+    "image": "https://i.pravatar.cc/100?img=4"
+  },
+  {
+    "id": 5,
+    "quote": "When Genie delivers on its promise, it'll be the tool startups have been wishing for.",
+    "name": "Lola Salehu",
+    "role": "Senior Product Designer",
+    "image": "https://i.pravatar.cc/100?img=1"
+  },
+  {
+    "id": 6,
+    "quote": "Genie would be really great for prototyping brand ideas.",
+    "name": "Michael Okoh",
+    "role": "Founder/CEO",
+    "image": "https://i.pravatar.cc/100?img=2"
+  },
+  {
+    "id": 7,
+    "quote": "Hard to believe no one built this before.",
+    "name": "Shedrack Akintayo",
+    "role": "Founder/CEO",
+    "image": "https://i.pravatar.cc/100?img=3"
+  },
+  {
+    "id": 8,
+    "quote": "Every creative director I know is going to want this.",
+    "name": "Uche Divine",
+    "role": "Senior Product Designer",
+    "image": "https://i.pravatar.cc/100?img=4"
+  }
+]

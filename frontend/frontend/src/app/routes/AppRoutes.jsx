@@ -1,0 +1,92 @@
+import { Routes, Route } from "react-router-dom";
+import MainLayout from "../layouts/MainLayout";
+import HomePage from "../../features/home/pages/HomePage";
+import ProductsPage from "../../features/products/pages/ProductsPage";
+import OurProcessPage from "../../features/ourProcess/pages/OurProcessPage";
+import GlobalTradePage from "../../features/globalTrade/pages/GlobalTradePage";
+import PartnershipsPage from "../../features/partnerships/pages/PartnershipsPage";
+import ContactPage from "../../features/contact/pages/ContactPage";
+import Why7ALPsPage from "../../features/why7ALPs/pages/Why7ALPsPage";
+import B2BPortal from "../../features/b2bPortal/pages/B2BPortal";
+import CustomerLoginPage from "../../features/auth/pages/customer/CustomerLoginPage";
+import B2BLoginPage from "../../features/auth/pages/b2b/B2BLoginPage";
+import AdminLoginPage from "../../features/auth/pages/admin/AdminLoginPage";
+import AuthLayout from "../layouts/AuthLayout";
+import CustomerRegisterPage from "../../features/auth/pages/customer/CustomerRegisterPage";
+import B2BForgotPasswordPage from "../../features/auth/pages/b2b/B2BForgotPasswordPage";
+import AdminForgotPasswordPage from "../../features/auth/pages/admin/AdminForgotPasswordPage";
+import CustomerVerifyOTPPage from "../../features/auth/pages/customer/CustomerVerifyOTPPage";
+import AdminResetPasswordPage from "../../features/auth/pages/admin/AdminResetPasswordPage";
+import B2BResetPasswordPage from "../../features/auth/pages/b2b/B2BResetPasswordPage";
+import ProductDetailsPage from "../../features/products/pages/ProductDetailsPage";
+import CustomerLayout from "../layouts/CustomerLayout";
+import AdminLayout from "../layouts/AdminLayout";
+import B2BLayout from "../layouts/B2BLayout";
+import PageNotFound from "../../features/notFound/PageNotFound";
+import B2BDashboard from "../../features/b2b/pages/B2BDashboard";
+import CustomerDashboard from "../../features/customer/pages/CustomerDashboard";
+import AdminDashboard from "../../features/admin/pages/AdminDashboard";
+
+const AppRoutes = () => {
+  return (
+    <Routes>
+      <Route element={<MainLayout />}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/products" element={<ProductsPage />} />
+        <Route path="/products/:id" element={<ProductDetailsPage />} />
+        <Route path="/our-process" element={<OurProcessPage />} />
+        <Route path="/why-7alps" element={<Why7ALPsPage />} />
+        <Route path="/global-trade" element={<GlobalTradePage />} />
+        <Route path="/partners" element={<PartnershipsPage />} />
+        <Route path="/b2b-portal" element={<B2BPortal />} />
+        <Route path="/contact" element={<ContactPage />} />
+      </Route>
+
+      <Route path="/customer/dashboard" element={<CustomerLayout />}>
+        <Route index element={<CustomerDashboard />} />
+      </Route>
+
+      <Route path="/b2b/dashboard" element={<B2BLayout />}>
+        <Route index element={<B2BDashboard />} />
+      </Route>
+
+      <Route path="/admin/dashboard" element={<AdminLayout />}>
+        <Route index element={<AdminDashboard />} />
+      </Route>
+
+      <Route element={<AuthLayout />}>
+        <Route path="/customer/login" element={<CustomerLoginPage />} />
+        <Route path="/customer/register" element={<CustomerRegisterPage />} />
+        <Route
+          path="/customer/verify-otp"
+          element={<CustomerVerifyOTPPage />}
+        />
+
+        <Route
+          path="/admin/forgot-password"
+          element={<AdminForgotPasswordPage />}
+        />
+
+        <Route
+          path="/b2b/forgot-password"
+          element={<B2BForgotPasswordPage />}
+        />
+
+        <Route
+          path="/admin/reset-password"
+          element={<AdminResetPasswordPage />}
+        />
+
+        <Route path="/b2b/reset-password" element={<B2BResetPasswordPage />} />
+
+        <Route path="/b2b/login" element={<B2BLoginPage />} />
+        {/* <Route path="/b2b/register" element={<B2BRegisterPage />} /> */}
+
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+      </Route>
+      <Route path="*" element={<PageNotFound />} />
+    </Routes>
+  );
+};
+
+export default AppRoutes;
