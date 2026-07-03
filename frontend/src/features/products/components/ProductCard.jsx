@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { CiHeart } from "react-icons/ci";
 import { GrCart } from "react-icons/gr";
 import { motion } from "framer-motion";
@@ -14,6 +15,13 @@ const ProductCard = ({
   className = "",
 }) => {
   const navigate = useNavigate();
+  const [isAdded, setIsAdded] = useState(false);
+
+  const handleCartClick = (event, productItem) => {
+    event.stopPropagation();
+    onCartClick?.(productItem);
+    setIsAdded(true);
+  };
 
   return (
     <motion.div
@@ -30,11 +38,10 @@ const ProductCard = ({
 
         <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-100 xl:opacity-0 xl:group-hover:opacity-100 transition-all duration-300">
           <button
-            className="bg-white w-10 h-10 rounded-lg flex items-center justify-center shadow-md hover:shadow-lg hover:scale-110 transition-all cursor-pointer"
-            onClick={(e) => {
-              e.stopPropagation();
-              onCartClick?.(product);
-            }}
+            className={`w-10 h-10 rounded-lg flex items-center justify-center shadow-md hover:shadow-lg hover:scale-110 transition-all cursor-pointer ${
+              isAdded ? "bg-[#047B22] text-white" : "bg-white text-gray-700"
+            }`}
+            onClick={(e) => handleCartClick(e, product)}
           >
             <GrCart size={18} />
           </button>
@@ -43,7 +50,7 @@ const ProductCard = ({
             className="bg-white w-10 h-10 rounded-lg flex items-center justify-center shadow-md hover:shadow-lg hover:scale-110 transition-all cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
-              onCartClick?.(product);
+              onFavoriteClick?.(product);
             }}
           >
             <CiHeart size={22} />

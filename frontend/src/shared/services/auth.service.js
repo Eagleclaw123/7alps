@@ -1,7 +1,7 @@
 import api from "./api";
 
 export const adminLogin = (credentials) => {
-  return api.post("/admin/login", credentials);
+  return api.post("/auth/login", credentials);
 };
 
 export const customerLogin = (credentials) => {
@@ -13,7 +13,7 @@ export const b2bLogin = (credentials) => {
 };
 
 export const logout = () => {
-  return api.post("/logout");
+  return api.post("/auth/logout");
 };
 
 export const getCurrentUser = () => {

@@ -26,6 +26,9 @@ import PageNotFound from "../../features/notFound/PageNotFound";
 import B2BDashboard from "../../features/b2b/pages/B2BDashboard";
 import CustomerDashboard from "../../features/customer/pages/CustomerDashboard";
 import AdminDashboard from "../../features/admin/pages/AdminDashboard";
+import AdminProducts from "../../features/admin/pages/AdminProducts";
+import CartPage from "../../features/cart/pages/CartPage";
+import ProtectedRoute from "./ProtectedRoute";
 
 const AppRoutes = () => {
   return (
@@ -40,20 +43,39 @@ const AppRoutes = () => {
         <Route path="/partners" element={<PartnershipsPage />} />
         <Route path="/b2b-portal" element={<B2BPortal />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="cart" element={<CartPage />} />
       </Route>
 
-      <Route path="/customer/dashboard" element={<CustomerLayout />}>
-        <Route index element={<CustomerDashboard />} />
-      </Route>
+      <Route
+        path="/customer/dashboard"
+        element={
+          <ProtectedRoute role="customer">
+            <CustomerLayout />
+          </ProtectedRoute>
+        }
+      ></Route>
 
-      <Route path="/b2b/dashboard" element={<B2BLayout />}>
-        <Route index element={<B2BDashboard />} />
-      </Route>
+      <Route
+        path="/b2b/dashboard"
+        element={
+          <ProtectedRoute role="b2b">
+            <B2BLayout />
+          </ProtectedRoute>
+        }
+      ></Route>
 
-      <Route path="/admin/dashboard" element={<AdminLayout />}>
+      <Route
+        path="/admin"
+        element={
+          // <ProtectedRoute role="admin">
+          <AdminLayout />
+          // </ProtectedRoute>
+        }
+      >
         <Route index element={<AdminDashboard />} />
+        <Route path="products" element={<AdminProducts />} />
+        {/* Add more admin routes here */}
       </Route>
-
       <Route element={<AuthLayout />}>
         <Route path="/customer/login" element={<CustomerLoginPage />} />
         <Route path="/customer/register" element={<CustomerRegisterPage />} />

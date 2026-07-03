@@ -49,18 +49,12 @@ const b2bMenu = [
   },
   {
     id: 7,
-    title: "Support",
-    icon: FiHeadphones,
-    path: "/b2b/support",
-  },
-  {
-    id: 8,
     title: "Settings",
     icon: FiSettings,
     path: "/b2b/settings",
   },
   {
-    id: 9,
+    id: 8,
     title: "Logout",
     icon: FiLogOut,
     path: "/logout",

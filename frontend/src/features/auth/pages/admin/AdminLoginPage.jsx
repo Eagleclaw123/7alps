@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 
 import AuthButton from "../../components/AuthButton";
 import AuthCard from "../../components/AuthCard";
@@ -31,13 +30,17 @@ const AdminLoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Admin login info:", formData);
+
     try {
       setLoading(true);
 
-      const { data } = await adminLogin(formData);
+      const { data: responseData } = await adminLogin(formData);
 
-      localStorage.setItem("admin", JSON.stringify(data.admin));
+      const adminUser = responseData?.data?.user;
+
+      if (adminUser) {
+        localStorage.setItem("admin", JSON.stringify(adminUser));
+      }
 
       navigate("/admin/dashboard", {
         replace: true,

@@ -1,12 +1,22 @@
 import SidebarDesktop from "./SidebarDesktop";
 import SidebarMobile from "./SidebarMobile";
 
-const Sidebar = ({ menuItems, mobileOpen, onClose }) => {
+const Sidebar = ({
+  menuItems,
+  collapsed,
+  setCollapsed,
+  mobileOpen,
+  onClose,
+}) => {
   return (
     <>
       {/* Desktop */}
       <div className="hidden lg:block">
-        <SidebarDesktop menuItems={menuItems} />
+        <SidebarDesktop
+          menuItems={menuItems}
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
+        />
       </div>
 
       {/* Mobile */}

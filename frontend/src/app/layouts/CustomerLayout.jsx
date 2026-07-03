@@ -6,14 +6,26 @@ import Sidebar from "../../shared/dashboard/components/Sidebar";
 import Header from "../../shared/dashboard/components/Header";
 
 import customerMenu from "../../shared/dashboard/data/customerMenu";
+import { useNavigate } from "react-router-dom";
 
 const CustomerLayout = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const menuItems = customerMenu.map((item) =>
+    item.title === "Logout"
+      ? {
+          ...item,
+          onClick: () => handleLogout("customer", navigate),
+        }
+      : item,
+  );
 
   return (
     <DashboardLayout
-      Sidebar={() => (
+      Sidebar={(props) => (
         <Sidebar
+          {...props}
           menuItems={customerMenu}
           mobileOpen={mobileOpen}
           onClose={() => setMobileOpen(false)}

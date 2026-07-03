@@ -49,18 +49,12 @@ const adminMenu = [
   },
   {
     id: 7,
-    title: "Analytics",
-    icon: FiBarChart2,
-    path: "/admin/analytics",
-  },
-  {
-    id: 8,
     title: "Settings",
     icon: FiSettings,
     path: "/admin/settings",
   },
   {
-    id: 9,
+    id: 8,
     title: "Logout",
     icon: FiLogOut,
     path: "/logout",

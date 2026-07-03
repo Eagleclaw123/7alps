@@ -1,5 +1,8 @@
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 import { IoIosStar } from "react-icons/io";
+
+import { addItem } from "../../../store/slices/cartSlice";
 
 const weights = [
   { id: 1, weight: "100g", price: 249 },
@@ -9,14 +12,31 @@ const weights = [
 ];
 
 const ProductInfo = ({ product }) => {
+  const dispatch = useDispatch();
   const [quantity, setQuantity] = useState(1);
   const [selectedWeight, setSelectedWeight] = useState(weights[0]);
+  const [isAdded, setIsAdded] = useState(false);
 
   const rating = Number(5);
 
   const fullStars = Math.floor(rating);
   const hasHalfStar = rating % 1 >= 0.5;
   const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+  const handleAddToCart = () => {
+    dispatch(
+      addItem({
+        id: product.id,
+        name: product.ProductName,
+        image: product.ProductImage,
+        weight: selectedWeight.weight,
+        category: product.ProductCategory,
+        price: selectedWeight.price,
+        quantity,
+      }),
+    );
+    setIsAdded(true);
+  };
 
   return (
     <div>
@@ -144,8 +164,11 @@ const ProductInfo = ({ product }) => {
       </div>
 
       <div className="mt-8 flex gap-4">
-        <button className="rounded-xl bg-[#0F6B3E] px-8 py-4 text-white">
-          Add to Cart
+        <button
+          onClick={handleAddToCart}
+          className="rounded-xl bg-[#0F6B3E] px-8 py-4 text-white"
+        >
+          {isAdded ? "Added to Cart" : "Add to Cart"}
         </button>
 
         <button className="rounded-xl border px-8 py-4">Buy Now</button>

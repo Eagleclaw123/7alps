@@ -1,15 +1,19 @@
 import AnimatedPage from "../../../shared/components/ui/AnimatedPage";
 import { globalTradeSEO, SEO } from "../../../shared/seo";
+import FeatureMarquee from "../../home/sections/FeatureMarquee";
+import GlobalTrade from "../sections/GlobalTrade";
+import GlobalTradeHero from "../sections/GlobalTradeHero";
+import Where7ALPTravels from "../sections/Where7ALPTravels";
 
 const GlobalTradePage = () => {
   return (
     <>
       <SEO {...globalTradeSEO} />
       <AnimatedPage>
-        <div className="flex flex-col items-center justify-center min-h-screen">
-          <h1>Global Trade Page</h1>
-          <p>This is the global trade page of the application.</p>
-        </div>
+        <GlobalTradeHero />
+        <FeatureMarquee />
+        <GlobalTrade />
+        <Where7ALPTravels />
       </AnimatedPage>
     </>
   );

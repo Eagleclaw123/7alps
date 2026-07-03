@@ -9,11 +9,17 @@ export const getProductById = (id) => {
 };
 
 export const createProduct = (data) => {
-  return api.post("/products", data);
+  return api.post("/products", data, {
+    headers: data instanceof FormData ? {} : {},
+  });
 };
 
 export const updateProduct = (id, data) => {
-  return api.put(`/products/${id}`, data);
+  return api.patch(`/products/${id}`, data);
+};
+
+export const toggleProductStatus = (id) => {
+  return api.patch(`/products/${id}/toggle-status`);
 };
 
 export const deleteProduct = (id) => {

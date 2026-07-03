@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { FiHeadphones } from "react-icons/fi";
 
 import SidebarItem from "./SidebarItem";
 import Logo from "./Logo";
 
-const SidebarDesktop = ({ menuItems }) => {
-  const [collapsed, setCollapsed] = useState(false);
-
+const SidebarDesktop = ({ menuItems, collapsed, setCollapsed }) => {
   return (
     <motion.aside
       animate={{
@@ -17,7 +16,7 @@ const SidebarDesktop = ({ menuItems }) => {
         duration: 0.35,
         ease: [0.22, 1, 0.36, 1],
       }}
-      className="relative hidden min-h-full border-r border-gray-200 bg-white shadow-sm lg:flex lg:flex-col"
+      className="fixed left-0 top-0 z-40 hidden h-screen border-r border-gray-200 bg-white shadow-sm lg:flex lg:flex-col"
     >
       {/* Header */}
       <div
@@ -41,28 +40,19 @@ const SidebarDesktop = ({ menuItems }) => {
           )}
         </button>
       </div>
-
       {/* Navigation */}
       <nav className="flex-1 space-y-2 overflow-y-auto px-3 py-6">
         {menuItems.map((item) => (
           <SidebarItem key={item.id} item={item} collapsed={collapsed} />
         ))}
       </nav>
-
       {/* Footer */}
       {!collapsed && (
         <div className="border-t border-gray-200 p-5">
-          <div className="rounded-2xl bg-gradient-to-r from-[#0F6B3E] to-[#1A8F55] p-5 text-white">
-            <h3 className="font-semibold">Need Help?</h3>
-
-            <p className="mt-2 text-sm opacity-90">
-              Contact our support team anytime.
-            </p>
-
-            <button className="mt-4 w-full rounded-xl bg-white py-2 text-sm font-semibold text-[#0F6B3E] transition hover:scale-[1.02]">
-              Contact Support
-            </button>
-          </div>
+          <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0F6B3E] to-[#1A8F55] py-3 text-sm font-semibold text-white shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+            <FiHeadphones size={18} />
+            Contact Support
+          </button>
         </div>
       )}
     </motion.aside>

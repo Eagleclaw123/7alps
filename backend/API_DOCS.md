@@ -9,13 +9,17 @@
 ## Auth — `/api/v1/auth`
 
 ### POST `/auth/login`
+
 Admin login. No auth required.
 
 **Body:**
+
 ```json
 { "email": "string", "password": "string" }
 ```
+
 **Response `200`:**
+
 ```json
 {
   "status": "success",
@@ -31,6 +35,7 @@ Admin login. No auth required.
 ---
 
 ### POST `/auth/logout`
+
 🔒 Requires auth.
 
 **Response `200`:** `{ "status": "success", "message": "Logged out successfully" }`
@@ -38,6 +43,7 @@ Admin login. No auth required.
 ---
 
 ### GET `/auth/status`
+
 🔒 Requires auth. Returns the currently logged-in admin's profile.
 
 **Response `200`:** `{ "status": "success", "data": { "user": {...} } }`
@@ -45,38 +51,60 @@ Admin login. No auth required.
 ---
 
 ### GET `/auth/health`
+
 Server + DB health check. No auth required.
 
 **Response `200`:**
+
 ```json
-{ "status": "success", "data": { "server": "up", "database": "connected", "timestamp": "..." } }
+{
+  "status": "success",
+  "data": { "server": "up", "database": "connected", "timestamp": "..." }
+}
 ```
 
 ---
 
 ### POST `/auth/signup/send-otp`
+
 Step 1 of admin signup. Sends OTP to email. No auth required.
 
 **Body:**
+
 ```json
-{ "email": "string", "name": "string", "phoneNumber": "string", "role": "Admin | SuperAdmin" }
+{
+  "email": "string",
+  "name": "string",
+  "phoneNumber": "string",
+  "role": "Admin | SuperAdmin"
+}
 ```
+
 **Response `200`:** `{ "status": "success", "message": "OTP sent to email..." }`
 
 ---
 
 ### POST `/auth/signup/verify-otp`
+
 Step 2 of admin signup. Verifies OTP and creates account. No auth required.
 
 **Body:**
+
 ```json
-{ "email": "string", "otp": "string", "password": "string", "passwordConfirm": "string" }
+{
+  "email": "string",
+  "otp": "string",
+  "password": "string",
+  "passwordConfirm": "string"
+}
 ```
+
 **Response `201`:** Same shape as login response.
 
 ---
 
 ### POST `/auth/signup/resend-otp`
+
 Resend signup OTP. No auth required.
 
 **Body:** `{ "email": "string" }`  
@@ -85,6 +113,7 @@ Resend signup OTP. No auth required.
 ---
 
 ### POST `/auth/forgotPassword`
+
 Sends a password-reset OTP to the email. No auth required.
 
 **Body:** `{ "email": "string" }`  
@@ -93,6 +122,7 @@ Sends a password-reset OTP to the email. No auth required.
 ---
 
 ### POST `/auth/verifyOTP`
+
 Verifies the password-reset OTP. No auth required.
 
 **Body:** `{ "email": "string", "otp": "string" }`  
@@ -101,6 +131,7 @@ Verifies the password-reset OTP. No auth required.
 ---
 
 ### POST `/auth/resetPasswordAfterOTP`
+
 Sets a new password after OTP verification. No auth required.
 
 **Body:** `{ "email": "string", "password": "string", "passwordConfirm": "string" }`  
@@ -109,6 +140,7 @@ Sets a new password after OTP verification. No auth required.
 ---
 
 ### PATCH `/auth/reset-password/:token`
+
 🔒 Requires auth. Resets password via token (alternative flow).
 
 **Body:** `{ "password": "string", "passwordConfirm": "string" }`  
@@ -117,6 +149,7 @@ Sets a new password after OTP verification. No auth required.
 ---
 
 ### PATCH `/auth/updatePassword`
+
 🔒 Requires auth. Change password while logged in.
 
 **Body:** `{ "currentPassword": "string", "newPassword": "string", "confirmPassword": "string" }`  
@@ -125,12 +158,15 @@ Sets a new password after OTP verification. No auth required.
 ---
 
 ## Admin Management — `/api/v1/admin`
+
 🔒 All routes require auth + role `Admin` or `SuperAdmin`.
 
 ### GET `/admin/dashboard/stats`
+
 Returns total active admin count.
 
 **Response `200`:**
+
 ```json
 { "status": "success", "data": { "totalAdmins": 2 } }
 ```
@@ -138,6 +174,7 @@ Returns total active admin count.
 ---
 
 ### GET `/admin`
+
 Get all active admins.
 
 **Response `200`:** `{ "status": "success", "results": N, "data": { "admins": [...] } }`
@@ -145,6 +182,7 @@ Get all active admins.
 ---
 
 ### GET `/admin/:id`
+
 Get a single admin by ID.
 
 **Response `200`:** `{ "status": "success", "data": { "admin": {...} } }`
@@ -152,6 +190,7 @@ Get a single admin by ID.
 ---
 
 ### PATCH `/admin/:id`
+
 Update an admin (name, phone, role). Do **not** send `password` here.
 
 **Body:** `{ "Name": "string", "PhoneNumber": "string", "role": "Admin | SuperAdmin" }`  
@@ -160,6 +199,7 @@ Update an admin (name, phone, role). Do **not** send `password` here.
 ---
 
 ### DELETE `/admin/:id`
+
 Soft-delete (sets `active: false`).
 
 **Response `204`:** No body.
@@ -171,13 +211,15 @@ Soft-delete (sets `active: false`).
 ### 🌐 Public endpoints (no auth)
 
 #### GET `/products/public`
+
 Returns all **active** products. Optional query params:
 
-| Param | Type | Description |
-|---|---|---|
+| Param      | Type   | Description                                                                            |
+| ---------- | ------ | -------------------------------------------------------------------------------------- |
 | `category` | string | Filter by category (`Soap`, `Shampoo`, `Hair Care`, `Skin Care`, `Body Care`, `Other`) |
 
 **Response `200`:**
+
 ```json
 {
   "status": "success",
@@ -213,6 +255,7 @@ Returns all **active** products. Optional query params:
 ---
 
 #### GET `/products/public/:idOrSlug`
+
 Returns a single active product by MongoDB `_id` or `slug`.
 
 **Response `200`:** `{ "status": "success", "data": { "product": {...} } }`  
@@ -223,40 +266,43 @@ Returns a single active product by MongoDB `_id` or `slug`.
 ### 🔒 Admin endpoints (auth + Admin/SuperAdmin role)
 
 #### GET `/products`
+
 Returns **all** products including inactive ones.
 
-| Param | Type | Description |
-|---|---|---|
-| `active` | `true` / `false` | Filter by active status |
-| `category` | string | Filter by category |
+| Param      | Type             | Description             |
+| ---------- | ---------------- | ----------------------- |
+| `active`   | `true` / `false` | Filter by active status |
+| `category` | string           | Filter by category      |
 
 **Response `200`:** Same shape as public GET, but includes inactive products.
 
 ---
 
 #### POST `/products`
+
 Create a new product. Send as `multipart/form-data`.
 
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `name` | string | ✅ | Product name (slug auto-generated) |
-| `category` | string | ✅ | One of the 6 categories |
-| `price` | number | ✅ | Selling price |
-| `mrp` | number | | Original / crossed-out price |
-| `shortDescription` | string | | One-liner |
-| `description` | string | | Full description |
-| `weight` | string | | e.g. `100g`, `200ml` |
-| `tags` | string | | Comma-separated: `natural,organic` |
-| `active` | boolean | | Default `true` |
-| `inStock` | boolean | | Default `true` |
-| `coverImage` | file | | Main image (max 5 MB) |
-| `images` | file[] | | Gallery images, up to 5 (max 5 MB each) |
+| Field              | Type    | Required | Description                             |
+| ------------------ | ------- | -------- | --------------------------------------- |
+| `name`             | string  | ✅       | Product name (slug auto-generated)      |
+| `category`         | string  | ✅       | One of the 6 categories                 |
+| `price`            | number  | ✅       | Selling price                           |
+| `mrp`              | number  |          | Original / crossed-out price            |
+| `shortDescription` | string  |          | One-liner                               |
+| `description`      | string  |          | Full description                        |
+| `weight`           | string  |          | e.g. `100g`, `200ml`                    |
+| `tags`             | string  |          | Comma-separated: `natural,organic`      |
+| `active`           | boolean |          | Default `true`                          |
+| `inStock`          | boolean |          | Default `true`                          |
+| `coverImage`       | file    |          | Main image (max 5 MB)                   |
+| `images`           | file[]  |          | Gallery images, up to 5 (max 5 MB each) |
 
 **Response `201`:** `{ "status": "success", "data": { "product": {...} } }`
 
 ---
 
 #### GET `/products/:id`
+
 Get a single product by ID (admin view — works even if inactive).
 
 **Response `200`:** `{ "status": "success", "data": { "product": {...} } }`
@@ -264,6 +310,7 @@ Get a single product by ID (admin view — works even if inactive).
 ---
 
 #### PATCH `/products/:id`
+
 Update a product. Send as `multipart/form-data`. Only send fields you want to change.  
 Uploading new `coverImage` / `images` replaces and deletes the old files from disk.
 
@@ -273,6 +320,7 @@ Uploading new `coverImage` / `images` replaces and deletes the old files from di
 ---
 
 #### PATCH `/products/:id/toggle-status`
+
 Toggle a product's `active` field between `true` and `false`.
 
 **Body:** none  
@@ -281,6 +329,7 @@ Toggle a product's `active` field between `true` and `false`.
 ---
 
 #### DELETE `/products/:id`
+
 Permanently deletes the product and removes its images from disk.
 
 **Response `204`:** No body.
@@ -295,11 +344,11 @@ All errors follow this shape:
 { "status": "fail" | "error", "message": "Human-readable message" }
 ```
 
-| Status | Meaning |
-|---|---|
-| `400` | Bad request / validation error |
-| `401` | Not authenticated / wrong credentials |
-| `403` | Authenticated but not authorised |
-| `404` | Resource not found |
-| `429` | Rate limit exceeded (100 req / 5 min per IP) |
-| `500` | Internal server error |
+| Status | Meaning                                      |
+| ------ | -------------------------------------------- |
+| `400`  | Bad request / validation error               |
+| `401`  | Not authenticated / wrong credentials        |
+| `403`  | Authenticated but not authorised             |
+| `404`  | Resource not found                           |
+| `429`  | Rate limit exceeded (100 req / 5 min per IP) |
+| `500`  | Internal server error                        |
