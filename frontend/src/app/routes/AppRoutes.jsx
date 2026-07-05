@@ -28,6 +28,8 @@ import CustomerDashboard from "../../features/customer/pages/CustomerDashboard";
 import AdminDashboard from "../../features/admin/pages/AdminDashboard";
 import AdminProducts from "../../features/admin/pages/AdminProducts";
 import CartPage from "../../features/cart/pages/CartPage";
+import CheckoutPage from "../../features/cart/pages/CheckoutPage";
+import CustomerOrders from "../../features/customer/pages/CustomerOrders";
 import ProtectedRoute from "./ProtectedRoute";
 
 const AppRoutes = () => {
@@ -44,16 +46,28 @@ const AppRoutes = () => {
         <Route path="/b2b-portal" element={<B2BPortal />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="cart" element={<CartPage />} />
+        <Route
+          path="checkout"
+          element={
+            <ProtectedRoute role="customer">
+              <CheckoutPage />
+            </ProtectedRoute>
+          }
+        />
       </Route>
 
       <Route
-        path="/customer/dashboard"
+        path="/customer"
         element={
           <ProtectedRoute role="customer">
             <CustomerLayout />
           </ProtectedRoute>
         }
-      ></Route>
+      >
+        <Route index element={<CustomerDashboard />} />
+        <Route path="dashboard" element={<CustomerDashboard />} />
+        <Route path="orders" element={<CustomerOrders />} />
+      </Route>
 
       <Route
         path="/b2b/dashboard"
