@@ -120,7 +120,7 @@ export const updateQuantity = createAsyncThunk(
   },
 );
 
-export const removeItem = createAsyncThunk(
+export const removeCartItemAsync = createAsyncThunk(
   "cart/removeItem",
   async ({ productId, variantLabel }, { getState }) => {
     if (isLoggedIn()) {
@@ -135,7 +135,7 @@ export const removeItem = createAsyncThunk(
   },
 );
 
-export const clearCart = createAsyncThunk("cart/clear", async () => {
+export const clearCartAsync = createAsyncThunk("cart/clear", async () => {
   if (isLoggedIn()) {
     await clearServerCart();
   } else {
