@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { GoArrowRight } from "react-icons/go";
 import { motion } from "framer-motion";
 
 import ProductCard from "../../products/components/ProductCard";
-import productsData from "../../products/data/productsData.json";
+import { getPublicProducts } from "../../../shared/services/product.service";
+import { normalizeProducts } from "../../products/utils/normalizeProduct";
 import SectionHeading from "../components/SectionHeading";
 
 const tabs = ["All", "Hair Care", "Skin Care", "Health & Wellness"];
@@ -34,12 +35,25 @@ const cardVariants = {
 
 const OurFeaturedProducts = () => {
   const [activeTab, setActiveTab] = useState("All");
+  const [productsData, setProductsData] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    getPublicProducts().then(({ data }) => {
+      if (!cancelled) setProductsData(normalizeProducts(data?.data?.products));
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filteredProducts = useMemo(() => {
     return activeTab === "All"
       ? productsData
       : productsData.filter((product) => product.ProductCategory === activeTab);
-  }, [activeTab]);
+  }, [activeTab, productsData]);
 
   return (
     <section className="px-6 xl:px-0 mt-16">

@@ -1,12 +1,17 @@
 import { FiCheckCircle } from "react-icons/fi";
 
+const DEFAULT_BENEFITS = [
+  "100% Natural Ingredients",
+  "Chemical Free",
+  "Premium Quality",
+  "Rich in Nutrients",
+];
+
 const ProductBenefits = ({ product }) => {
-  const benefits = [
-    "100% Natural Ingredients",
-    "Chemical Free",
-    "Premium Quality",
-    "Rich in Nutrients",
-  ];
+  const benefits =
+    Array.isArray(product?.keyHighlights) && product.keyHighlights.length
+      ? product.keyHighlights
+      : DEFAULT_BENEFITS;
 
   return (
     <section className="bg-[#F8FAF8] py-16">

@@ -3,11 +3,12 @@ import { useEffect, useState } from "react";
 import { CgMenuRight } from "react-icons/cg";
 import { useDispatch } from "react-redux";
 
-import productsData from "../data/productsData.json";
+import { getPublicProducts } from "../../../shared/services/product.service";
+import { normalizeProducts } from "../utils/normalizeProduct";
 import ProductFilter from "../components/ProductFilter";
 import ProductPagination from "../components/ProductPagination";
 import ProductCard from "../components/ProductCard";
-import { addItem } from "../../../store/slices/cartSlice";
+import { addToCart } from "../../../store/slices/cartSlice";
 
 const containerVariants = {
   hidden: {},
@@ -36,14 +37,33 @@ const cardVariants = {
 const Products = () => {
   const dispatch = useDispatch();
   const productsPerPage = 9;
+  const [productsData, setProductsData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState(["All"]);
-  const [maxPrice, setMaxPrice] = useState(
-    Math.max(...productsData.map((product) => product.ProductPrice || 0)),
-  );
+  const [maxPrice, setMaxPrice] = useState(0);
   const [ratingSort, setRatingSort] = useState("none");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    getPublicProducts()
+      .then(({ data }) => {
+        if (cancelled) return;
+        const products = normalizeProducts(data?.data?.products);
+        setProductsData(products);
+        setMaxPrice(Math.max(...products.map((p) => p.ProductPrice || 0), 0));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const categories = [
     "All",
@@ -127,15 +147,19 @@ const Products = () => {
   };
 
   const handleAddToCart = (product) => {
+    const defaultVariant =
+      product.variants?.find((v) => v.isDefault) || product.variants?.[0];
+    if (!defaultVariant) return;
+
     dispatch(
-      addItem({
-        id: product.id,
+      addToCart({
+        productId: product.id,
+        variantLabel: defaultVariant.label,
+        quantity: 1,
         name: product.ProductName,
         image: product.ProductImage,
-        weight: "250g",
         category: product.ProductCategory,
-        price: Number(product.ProductPrice) || 0,
-        quantity: 1,
+        price: defaultVariant.price,
       }),
     );
   };
@@ -180,7 +204,11 @@ const Products = () => {
             initial="hidden"
             animate="visible"
           >
-            {currentProducts.length === 0 ? (
+            {loading ? (
+              <div className="col-span-full py-24 text-center text-gray-500">
+                Loading products...
+              </div>
+            ) : currentProducts.length === 0 ? (
               <div className="col-span-full py-24 text-center text-gray-500">
                 No products match your filters.
               </div>

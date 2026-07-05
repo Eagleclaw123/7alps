@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import productsData from "../data/productsData.json";
+import { getPublicProducts } from "../../../shared/services/product.service";
+import { normalizeProducts } from "../utils/normalizeProduct";
 import ProductCard from "../components/ProductCard";
 
 const cardVariants = {
@@ -18,13 +20,27 @@ const cardVariants = {
 };
 
 const RelatedProducts = ({ currentProduct }) => {
-  const relatedProducts = productsData
-    .filter(
-      (item) =>
-        item.ProductCategory === currentProduct.ProductCategory &&
-        item.id !== currentProduct.id,
-    )
-    .slice(0, 4);
+  const [relatedProducts, setRelatedProducts] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    getPublicProducts({ category: currentProduct.ProductCategory }).then(
+      ({ data }) => {
+        if (cancelled) return;
+        const products = normalizeProducts(data?.data?.products).filter(
+          (item) => item.id !== currentProduct.id,
+        );
+        setRelatedProducts(products.slice(0, 4));
+      },
+    );
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentProduct.ProductCategory, currentProduct.id]);
+
+  if (!relatedProducts.length) return null;
 
   return (
     <section className="pb-16 px-6 xl:px-0">

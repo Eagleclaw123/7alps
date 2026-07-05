@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import productsData from "../data/productsData.json";
+import { getPublicProduct } from "../../../shared/services/product.service";
+import { normalizeProduct } from "../utils/normalizeProduct";
 
 import ProductGallery from "../sections/ProductGallery";
 import ProductInfo from "../sections/ProductInfo";
@@ -11,10 +13,36 @@ import AnimatedPage from "../../../shared/components/ui/AnimatedPage";
 
 const ProductDetailsPage = () => {
   const { id } = useParams();
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
-  const product = productsData.find((item) => item.id === Number(id));
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setNotFound(false);
 
-  if (!product) {
+    getPublicProduct(id)
+      .then(({ data }) => {
+        if (!cancelled) setProduct(normalizeProduct(data?.data?.product));
+      })
+      .catch(() => {
+        if (!cancelled) setNotFound(true);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  if (loading) {
+    return <div className="py-20 text-center">Loading product...</div>;
+  }
+
+  if (notFound || !product) {
     return <div className="py-20 text-center">Product not found</div>;
   }
 

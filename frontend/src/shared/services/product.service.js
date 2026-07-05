@@ -1,5 +1,17 @@
 import api from "./api";
 
+// ── Public (no auth) ─────────────────────────────────────────────────────────
+
+export const getPublicProducts = (params) => {
+  return api.get("/products/public", { params });
+};
+
+export const getPublicProduct = (idOrSlug) => {
+  return api.get(`/products/public/${idOrSlug}`);
+};
+
+// ── Admin ─────────────────────────────────────────────────────────────────────
+
 export const getProducts = () => {
   return api.get("/products");
 };

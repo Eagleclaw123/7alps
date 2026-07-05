@@ -1,20 +1,16 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { IoIosStar } from "react-icons/io";
+import { IoIosStar, IoIosStarHalf, IoIosStarOutline } from "react-icons/io";
 
-import { addItem } from "../../../store/slices/cartSlice";
-
-const weights = [
-  { id: 1, weight: "100g", price: 249 },
-  { id: 2, weight: "250g", price: 499 },
-  { id: 3, weight: "500g", price: 899 },
-  { id: 4, weight: "1000g", price: 1599 },
-];
+import { addToCart } from "../../../store/slices/cartSlice";
 
 const ProductInfo = ({ product }) => {
   const dispatch = useDispatch();
+  const variants = Array.isArray(product.variants) ? product.variants : [];
   const [quantity, setQuantity] = useState(1);
-  const [selectedWeight, setSelectedWeight] = useState(weights[0]);
+  const [selectedVariant, setSelectedVariant] = useState(
+    variants.find((v) => v.isDefault) || variants[0],
+  );
   const [isAdded, setIsAdded] = useState(false);
 
   const rating = Number(5);
@@ -24,15 +20,17 @@ const ProductInfo = ({ product }) => {
   const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
 
   const handleAddToCart = () => {
+    if (!selectedVariant) return;
+
     dispatch(
-      addItem({
-        id: product.id,
+      addToCart({
+        productId: product.id,
+        variantLabel: selectedVariant.label,
+        quantity,
         name: product.ProductName,
         image: product.ProductImage,
-        weight: selectedWeight.weight,
         category: product.ProductCategory,
-        price: selectedWeight.price,
-        quantity,
+        price: selectedVariant.price,
       }),
     );
     setIsAdded(true);
@@ -68,81 +66,75 @@ const ProductInfo = ({ product }) => {
           {/* Divider */}
           <div className="h-5 w-px bg-gray-300" />
 
-          {/* Reviews */}
-          {/* <span>{product.ProductReviews} Reviews</span> */}
-
-          {/* Divider */}
-          {/* <div className="h-5 w-px bg-gray-300" /> */}
-
           {/* Stock */}
           <div className="flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-[#047B22] mt-1" />
 
             <span className="font-medium text-[#047B22]">
-              {product.InStock ? "In Stock" : "Out of Stock"}
+              {selectedVariant && selectedVariant.stock > 0
+                ? "In Stock"
+                : "Out of Stock"}
             </span>
           </div>
         </div>
         <p className="text-3xl font-semibold text-[#0F6B3E]">
-          ₹{product.ProductPrice}
+          ₹{selectedVariant?.price ?? product.ProductPrice}
         </p>
         <p className="text-gray-600">
-          A modern reading of the classic Ayurvedic night oil. Saffron and
-          sandalwood lift dullness and even tone, while 24 supporting botanicals
-          steady the skin barrier — so you wake to a calmer, lit-from-within
-          face. Non-greasy, never tested on animals.
+          {product.description || product.ProductDescription}
         </p>
 
-        <div className="space-y-5">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <p className="text-lg font-semibold text-[#2C2C2C]">
-              Choose Weight
-            </p>
+        {variants.length ? (
+          <div className="space-y-5">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <p className="text-lg font-semibold text-[#2C2C2C]">
+                Choose Weight
+              </p>
+            </div>
 
-            <p className="text-sm font-medium text-[#047B22]">
-              250g • Best Seller
-            </p>
+            {/* Variant Options */}
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              {variants.map((variant) => {
+                const isSelected = selectedVariant?.label === variant.label;
+
+                return (
+                  <button
+                    key={variant.label}
+                    type="button"
+                    onClick={() => {
+                      setSelectedVariant(variant);
+                      setIsAdded(false);
+                    }}
+                    className={`rounded-xl border px-5 py-4 transition-all duration-300 ${
+                      isSelected
+                        ? "border-[#047B22] bg-[#F4FBF6]"
+                        : "border-gray-200 bg-white hover:border-[#047B22] hover:bg-[#F8FAF8]"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span
+                        className={`font-semibold ${
+                          isSelected ? "text-[#047B22]" : "text-[#2C2C2C]"
+                        }`}
+                      >
+                        {variant.label}
+                      </span>
+
+                      <span
+                        className={`text-sm ${
+                          isSelected ? "text-[#047B22]" : "text-gray-500"
+                        }`}
+                      >
+                        ₹{variant.price}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-
-          {/* Weight Options */}
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            {weights.map((item) => {
-              const isSelected = selectedWeight.id === item.id;
-
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setSelectedWeight(item)}
-                  className={`rounded-xl border px-5 py-4 transition-all duration-300 ${
-                    isSelected
-                      ? "border-[#047B22] bg-[#F4FBF6]"
-                      : "border-gray-200 bg-white hover:border-[#047B22] hover:bg-[#F8FAF8]"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span
-                      className={`font-semibold ${
-                        isSelected ? "text-[#047B22]" : "text-[#2C2C2C]"
-                      }`}
-                    >
-                      {item.weight}
-                    </span>
-
-                    <span
-                      className={`text-sm ${
-                        isSelected ? "text-[#047B22]" : "text-gray-500"
-                      }`}
-                    >
-                      ₹{item.price}
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        ) : null}
       </div>
 
       <div className="mt-8 flex items-center gap-5">
@@ -166,7 +158,8 @@ const ProductInfo = ({ product }) => {
       <div className="mt-8 flex gap-4">
         <button
           onClick={handleAddToCart}
-          className="rounded-xl bg-[#0F6B3E] px-8 py-4 text-white"
+          disabled={!selectedVariant || selectedVariant.stock <= 0}
+          className="rounded-xl bg-[#0F6B3E] px-8 py-4 text-white disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isAdded ? "Added to Cart" : "Add to Cart"}
         </button>
