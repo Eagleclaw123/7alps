@@ -11,15 +11,30 @@ import ProductListTable from "../components/ProductListTable";
 
 const CATEGORY_OPTIONS = ["Hair Care", "Skin Care", "Health & Wellness"];
 
-const initialFormData = {
-  name: "",
-  category: "Other",
-  subCategory: "",
+const emptyVariant = () => ({
+  label: "",
   price: "",
   mrp: "",
+  stock: "",
+  isDefault: true,
+});
+
+const initialFormData = {
+  name: "",
+  category: CATEGORY_OPTIONS[0],
+  subCategory: "",
   shortDescription: "",
+  description: "",
+  storageInstructions: "",
   active: true,
-  inStock: true,
+};
+
+const initialLists = {
+  tags: [],
+  taglines: [],
+  keyHighlights: [],
+  ingredients: [],
+  usageSuggestions: [],
 };
 
 const AdminProducts = () => {
@@ -27,22 +42,19 @@ const AdminProducts = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState(initialFormData);
+  const [variants, setVariants] = useState([emptyVariant()]);
+  const [lists, setLists] = useState(initialLists);
 
   // Unified image list: first image = cover, rest = gallery.
   const [images, setImages] = useState([]); // [{ id, file, preview }]
   const [existingCoverImage, setExistingCoverImage] = useState("");
-  const [tags, setTags] = useState([]);
 
   const [editingProductId, setEditingProductId] = useState(null);
   const [error, setError] = useState("");
   const formTopRef = useRef(null);
 
-  const apiRootUrl = (
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api/v1"
-  ).replace(/\/api\/v1\/?$/, "");
-
-  const getImageUrl = (filename) =>
-    filename ? `${apiRootUrl}/images/products/${filename}` : "";
+  // coverImage/images are already full Cloudflare R2 URLs from the API.
+  const getImageUrl = (url) => url || "";
 
   const loadProducts = async () => {
     try {
@@ -101,15 +113,30 @@ const AdminProducts = () => {
     });
   };
 
-  const addTag = (value) => {
+  const addListItem = (listName, value) => {
     const trimmed = value.trim();
     if (!trimmed) return;
-    setTags((prev) => (prev.includes(trimmed) ? prev : [...prev, trimmed]));
+    setLists((prev) => ({
+      ...prev,
+      [listName]: prev[listName].includes(trimmed)
+        ? prev[listName]
+        : [...prev[listName], trimmed],
+    }));
   };
 
-  const removeTag = (tag) => {
-    setTags((prev) => prev.filter((t) => t !== tag));
+  const removeListItem = (listName, value) => {
+    setLists((prev) => ({
+      ...prev,
+      [listName]: prev[listName].filter((item) => item !== value),
+    }));
   };
+
+  const asList = (value) =>
+    Array.isArray(value)
+      ? value
+      : typeof value === "string" && value
+        ? value.split(",").map((t) => t.trim()).filter(Boolean)
+        : [];
 
   const resetForm = () => {
     setFormData(initialFormData);
@@ -117,7 +144,8 @@ const AdminProducts = () => {
       if (preview.startsWith("blob:")) URL.revokeObjectURL(preview);
     });
     setImages([]);
-    setTags([]);
+    setVariants([emptyVariant()]);
+    setLists(initialLists);
     setExistingCoverImage("");
     setEditingProductId(null);
     setError("");
@@ -127,21 +155,31 @@ const AdminProducts = () => {
     setEditingProductId(product._id);
     setFormData({
       name: product.name || "",
-      category: product.category || "Other",
+      category: product.category || CATEGORY_OPTIONS[0],
       subCategory: product.subCategory || "",
-      price: product.price ?? "",
-      mrp: product.mrp ?? "",
       shortDescription: product.shortDescription || "",
+      description: product.description || "",
+      storageInstructions: product.storageInstructions || "",
       active: product.active ?? true,
-      inStock: product.inStock ?? true,
     });
-    setTags(
-      Array.isArray(product.tags)
-        ? product.tags
-        : typeof product.tags === "string" && product.tags
-          ? product.tags.split(",").map((t) => t.trim())
-          : [],
+    setVariants(
+      Array.isArray(product.variants) && product.variants.length
+        ? product.variants.map((v) => ({
+            label: v.label || "",
+            price: v.price ?? "",
+            mrp: v.mrp ?? "",
+            stock: v.stock ?? "",
+            isDefault: Boolean(v.isDefault),
+          }))
+        : [emptyVariant()],
     );
+    setLists({
+      tags: asList(product.tags),
+      taglines: asList(product.taglines),
+      keyHighlights: asList(product.keyHighlights),
+      ingredients: asList(product.ingredients),
+      usageSuggestions: asList(product.usageSuggestions),
+    });
     images.forEach(({ preview }) => {
       if (preview.startsWith("blob:")) URL.revokeObjectURL(preview);
     });
@@ -163,15 +201,25 @@ const AdminProducts = () => {
 
       const payload = {
         ...formData,
-        price: Number(formData.price),
-        mrp: formData.mrp ? Number(formData.mrp) : undefined,
-        tags: tags.length ? tags.join(",") : undefined,
+        variants: JSON.stringify(
+          variants.map((v) => ({
+            label: v.label,
+            price: Number(v.price),
+            mrp: v.mrp !== "" ? Number(v.mrp) : undefined,
+            stock: v.stock !== "" ? Number(v.stock) : 0,
+            isDefault: v.isDefault,
+          })),
+        ),
       };
 
       const formDataToSend = new FormData();
       Object.entries(payload).forEach(([key, value]) => {
         if (value === undefined || value === null || value === "") return;
         formDataToSend.append(key, value);
+      });
+
+      Object.entries(lists).forEach(([key, values]) => {
+        if (values.length) formDataToSend.append(key, JSON.stringify(values));
       });
 
       const [coverImage, ...galleryImages] = images.map((img) => img.file);
@@ -241,13 +289,15 @@ const AdminProducts = () => {
         onFormChange={handleChange}
         onFilesAdded={addFiles}
         onRemoveImage={removeImage}
-        onAddTag={addTag}
-        onRemoveTag={removeTag}
+        variants={variants}
+        onVariantsChange={setVariants}
+        lists={lists}
+        onAddListItem={addListItem}
+        onRemoveListItem={removeListItem}
         onCancelEdit={handleCancelEdit}
         onSubmit={handleSubmit}
         submitting={submitting}
         error={error}
-        tags={tags}
         getImageUrl={getImageUrl}
       />
 

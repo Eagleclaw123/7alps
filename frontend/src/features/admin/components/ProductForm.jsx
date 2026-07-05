@@ -1,6 +1,7 @@
 import { forwardRef } from "react";
 import ProductImageUploader from "./ProductImageUploader";
 import ProductTagInput from "./ProductTagInput";
+import ProductVariantInput from "./ProductVariantInput";
 
 const ProductForm = forwardRef(
   (
@@ -13,9 +14,11 @@ const ProductForm = forwardRef(
       onFormChange,
       onFilesAdded,
       onRemoveImage,
-      tags,
-      onAddTag,
-      onRemoveTag,
+      variants,
+      onVariantsChange,
+      lists,
+      onAddListItem,
+      onRemoveListItem,
       onCancelEdit,
       onSubmit,
       submitting,
@@ -66,7 +69,7 @@ const ProductForm = forwardRef(
                 value={formData.name}
                 onChange={onFormChange}
                 required
-                placeholder="e.g. Navy Blue Sneakers Shoe"
+                placeholder="e.g. Sun-Dried Organic Sandalwood Powder"
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#0F6B3E]"
               />
             </div>
@@ -104,86 +107,121 @@ const ProductForm = forwardRef(
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  Price
-                </label>
-                <input
-                  name="price"
-                  type="number"
-                  min="0"
-                  value={formData.price}
-                  onChange={onFormChange}
-                  required
-                  placeholder="₹0"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#0F6B3E]"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  MRP
-                </label>
-                <input
-                  name="mrp"
-                  type="number"
-                  min="0"
-                  value={formData.mrp}
-                  onChange={onFormChange}
-                  placeholder="Optional"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#0F6B3E]"
-                />
-              </div>
-            </div>
-
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">
-                Description
+                Short Description
               </label>
               <textarea
                 name="shortDescription"
                 value={formData.shortDescription}
                 onChange={onFormChange}
-                rows="4"
-                placeholder="Tell customers what makes this product great..."
+                rows="2"
+                placeholder="One-liner shown on product cards..."
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#0F6B3E]"
               />
             </div>
 
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">
-                Tags
+                Full Description
               </label>
-              <ProductTagInput
-                tags={tags}
-                onAddTag={onAddTag}
-                onRemoveTag={onRemoveTag}
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={onFormChange}
+                rows="4"
+                placeholder="Tell customers what makes this product great..."
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#0F6B3E]"
               />
             </div>
-
-            <div className="flex items-center gap-6 pt-1">
-              <label className="flex items-center gap-2 text-sm text-gray-700">
-                <input
-                  type="checkbox"
-                  name="active"
-                  checked={formData.active}
-                  onChange={onFormChange}
-                />
-                Active
-              </label>
-
-              <label className="flex items-center gap-2 text-sm text-gray-700">
-                <input
-                  type="checkbox"
-                  name="inStock"
-                  checked={formData.inStock}
-                  onChange={onFormChange}
-                />
-                In stock
-              </label>
-            </div>
           </div>
+        </div>
+
+        <div className="mt-6">
+          <ProductVariantInput variants={variants} onChange={onVariantsChange} />
+        </div>
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              Taglines
+            </label>
+            <ProductTagInput
+              tags={lists.taglines}
+              onAddTag={(value) => onAddListItem("taglines", value)}
+              onRemoveTag={(value) => onRemoveListItem("taglines", value)}
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              Tags
+            </label>
+            <ProductTagInput
+              tags={lists.tags}
+              onAddTag={(value) => onAddListItem("tags", value)}
+              onRemoveTag={(value) => onRemoveListItem("tags", value)}
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              Key Highlights
+            </label>
+            <ProductTagInput
+              tags={lists.keyHighlights}
+              onAddTag={(value) => onAddListItem("keyHighlights", value)}
+              onRemoveTag={(value) => onRemoveListItem("keyHighlights", value)}
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              Ingredients
+            </label>
+            <ProductTagInput
+              tags={lists.ingredients}
+              onAddTag={(value) => onAddListItem("ingredients", value)}
+              onRemoveTag={(value) => onRemoveListItem("ingredients", value)}
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              Usage Suggestions
+            </label>
+            <ProductTagInput
+              tags={lists.usageSuggestions}
+              onAddTag={(value) => onAddListItem("usageSuggestions", value)}
+              onRemoveTag={(value) => onRemoveListItem("usageSuggestions", value)}
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              Storage Instructions
+            </label>
+            <textarea
+              name="storageInstructions"
+              value={formData.storageInstructions}
+              onChange={onFormChange}
+              rows="2"
+              placeholder="Store in a cool and dry place..."
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#0F6B3E]"
+            />
+          </div>
+        </div>
+
+        <div className="mt-4 flex items-center gap-6 pt-1">
+          <label className="flex items-center gap-2 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              name="active"
+              checked={formData.active}
+              onChange={onFormChange}
+            />
+            Active
+          </label>
         </div>
 
         {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}

@@ -1,5 +1,16 @@
 import { FiEdit2, FiToggleLeft, FiTrash2 } from "react-icons/fi";
 
+const formatPriceRange = (variants) => {
+  if (!Array.isArray(variants) || !variants.length) return "—";
+  const prices = variants.map((v) => v.price);
+  const min = Math.min(...prices);
+  const max = Math.max(...prices);
+  return min === max ? `₹${min}` : `₹${min} – ₹${max}`;
+};
+
+const totalStock = (variants) =>
+  Array.isArray(variants) ? variants.reduce((sum, v) => sum + (v.stock || 0), 0) : 0;
+
 const ProductListTable = ({
   products,
   loading,
@@ -28,6 +39,7 @@ const ProductListTable = ({
               <th className="py-3 pr-4">Product</th>
               <th className="py-3 pr-4">Category</th>
               <th className="py-3 pr-4">Price</th>
+              <th className="py-3 pr-4">Stock</th>
               <th className="py-3 pr-4">Status</th>
               <th className="py-3 pr-4 text-right">Actions</th>
             </tr>
@@ -52,7 +64,12 @@ const ProductListTable = ({
                   </div>
                 </td>
                 <td className="py-3 pr-4 text-gray-600">{product.category}</td>
-                <td className="py-3 pr-4 text-gray-600">₹{product.price}</td>
+                <td className="py-3 pr-4 text-gray-600">
+                  {formatPriceRange(product.variants)}
+                </td>
+                <td className="py-3 pr-4 text-gray-600">
+                  {totalStock(product.variants)}
+                </td>
                 <td className="py-3 pr-4">
                   <span
                     className={`rounded-full px-2 py-1 text-xs ${

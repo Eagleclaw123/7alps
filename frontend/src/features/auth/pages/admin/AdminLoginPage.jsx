@@ -37,12 +37,18 @@ const AdminLoginPage = () => {
       const { data: responseData } = await adminLogin(formData);
 
       const adminUser = responseData?.data?.user;
+      const token = responseData?.token;
 
-      if (adminUser) {
+      if (adminUser && token) {
+        localStorage.setItem("adminToken", token);
         localStorage.setItem("admin", JSON.stringify(adminUser));
+        localStorage.setItem(
+          "user",
+          JSON.stringify({ ...adminUser, role: "admin" }),
+        );
       }
 
-      navigate("/admin/dashboard", {
+      navigate("/admin", {
         replace: true,
       });
     } catch (error) {

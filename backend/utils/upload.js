@@ -1,16 +1,9 @@
 const multer = require('multer');
-const path = require('path');
 const AppError = require('./appError');
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../public/images/products'));
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    cb(null, `product-${Date.now()}-${Math.round(Math.random() * 1e6)}${ext}`);
-  },
-});
+// Files are buffered in memory and uploaded to Cloudflare R2 by the controller —
+// nothing is written to local disk.
+const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
   if (file.mimetype.startsWith('image/')) {
