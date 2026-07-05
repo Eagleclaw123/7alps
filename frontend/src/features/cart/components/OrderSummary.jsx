@@ -1,7 +1,10 @@
 import { FiTag, FiTruck, FiShield } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 import Button from "../../../shared/components/ui/Button";
 
 const OrderSummary = ({ subtotal, shipping, total, discount = 0 }) => {
+  const navigate = useNavigate();
+
   return (
     <aside className="self-start h-fit rounded-xl border border-gray-200 bg-white p-6">
       {" "}
@@ -47,7 +50,12 @@ const OrderSummary = ({ subtotal, shipping, total, discount = 0 }) => {
       </div>
       {/* Checkout */}
       <div className="mt-8">
-        <Button variant="primary" size="lg" className="w-full">
+        <Button
+          variant="primary"
+          size="lg"
+          className="w-full"
+          onClick={() => navigate("/checkout")}
+        >
           Proceed to Checkout
         </Button>
       </div>

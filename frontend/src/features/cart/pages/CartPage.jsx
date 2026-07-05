@@ -26,11 +26,13 @@ const CartPage = () => {
   const total = useSelector(selectTotal);
 
   const updateQuantity = (id, type) => {
-    dispatch(updateCartQuantity({ id, type }));
+    const [productId, variantLabel] = id.split("::");
+    dispatch(updateCartQuantity({ productId, variantLabel, type }));
   };
 
   const removeItem = (id) => {
-    dispatch(removeCartItem(id));
+    const [productId, variantLabel] = id.split("::");
+    dispatch(removeCartItem({ productId, variantLabel }));
   };
 
   if (cartItems.length === 0) {

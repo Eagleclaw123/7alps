@@ -1,71 +1,175 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
-import { cartData } from "../../features/cart/data/cartData";
+import {
+  getCart as fetchCartApi,
+  addCartItem,
+  updateCartItemQuantity,
+  removeCartItem,
+  clearServerCart,
+} from "../../shared/services/cart.service";
+import { getProductImageUrl } from "../../features/products/utils/normalizeProduct";
 
 const CART_STORAGE_KEY = "7alps-cart";
 
-const loadCartFromStorage = () => {
-  if (typeof window === "undefined") {
-    return cartData;
-  }
+const isLoggedIn = () => Boolean(localStorage.getItem("customerToken"));
 
+const makeItemId = (productId, variantLabel) => `${productId}::${variantLabel}`;
+
+const normalizeServerCartItems = (items = []) =>
+  items.map((item) => ({
+    id: makeItemId(item.product, item.variantLabel),
+    productId: item.product,
+    variantLabel: item.variantLabel,
+    weight: item.variantLabel,
+    name: item.name,
+    image: getProductImageUrl(item.coverImage),
+    category: item.category,
+    price: item.price,
+    quantity: item.quantity,
+  }));
+
+const loadGuestCart = () => {
+  if (typeof window === "undefined") return [];
   try {
-    const storedCart = window.localStorage.getItem(CART_STORAGE_KEY);
-
-    if (!storedCart) {
-      return cartData;
-    }
-
-    const parsedCart = JSON.parse(storedCart);
-
-    return Array.isArray(parsedCart) ? parsedCart : cartData;
+    const stored = window.localStorage.getItem(CART_STORAGE_KEY);
+    const parsed = stored ? JSON.parse(stored) : [];
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
-    return cartData;
+    return [];
+  }
+};
+
+const persistGuestCart = (items) => {
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
   }
 };
 
 const initialState = {
-  items: loadCartFromStorage(),
+  items: loadGuestCart(),
+  status: "idle",
 };
+
+// Loads the cart: server-backed for a logged-in customer, localStorage otherwise.
+export const fetchCart = createAsyncThunk("cart/fetch", async () => {
+  if (!isLoggedIn()) return loadGuestCart();
+  const { data } = await fetchCartApi();
+  return normalizeServerCartItems(data?.data?.cart?.items);
+});
+
+export const addToCart = createAsyncThunk(
+  "cart/addItem",
+  async (
+    { productId, variantLabel, quantity = 1, name, image, category, price },
+    { getState },
+  ) => {
+    if (isLoggedIn()) {
+      const { data } = await addCartItem(productId, variantLabel, quantity);
+      return normalizeServerCartItems(data?.data?.cart?.items);
+    }
+
+    const items = getState().cart.items.map((item) => ({ ...item }));
+    const id = makeItemId(productId, variantLabel);
+    const existing = items.find((item) => item.id === id);
+    if (existing) {
+      existing.quantity += quantity;
+    } else {
+      items.push({
+        id,
+        productId,
+        variantLabel,
+        weight: variantLabel,
+        name,
+        image,
+        category,
+        price,
+        quantity,
+      });
+    }
+    persistGuestCart(items);
+    return items;
+  },
+);
+
+export const updateQuantity = createAsyncThunk(
+  "cart/updateQuantity",
+  async ({ productId, variantLabel, type }, { getState }) => {
+    if (isLoggedIn()) {
+      const { data } = await updateCartItemQuantity(productId, variantLabel, type);
+      return normalizeServerCartItems(data?.data?.cart?.items);
+    }
+
+    const id = makeItemId(productId, variantLabel);
+    const items = getState().cart.items.map((item) =>
+      item.id === id
+        ? {
+            ...item,
+            quantity:
+              type === "increase" ? item.quantity + 1 : Math.max(1, item.quantity - 1),
+          }
+        : item,
+    );
+    persistGuestCart(items);
+    return items;
+  },
+);
+
+export const removeItem = createAsyncThunk(
+  "cart/removeItem",
+  async ({ productId, variantLabel }, { getState }) => {
+    if (isLoggedIn()) {
+      const { data } = await removeCartItem(productId, variantLabel);
+      return normalizeServerCartItems(data?.data?.cart?.items);
+    }
+
+    const id = makeItemId(productId, variantLabel);
+    const items = getState().cart.items.filter((item) => item.id !== id);
+    persistGuestCart(items);
+    return items;
+  },
+);
+
+export const clearCart = createAsyncThunk("cart/clear", async () => {
+  if (isLoggedIn()) {
+    await clearServerCart();
+  } else {
+    persistGuestCart([]);
+  }
+  return [];
+});
+
+// Called right after a customer logs in: pushes any guest (localStorage) cart
+// items into the server cart, then hydrates state from the merged server cart.
+export const mergeGuestCartOnLogin = createAsyncThunk(
+  "cart/mergeGuestOnLogin",
+  async () => {
+    const guestItems = loadGuestCart();
+
+    for (const item of guestItems) {
+      await addCartItem(item.productId, item.variantLabel, item.quantity);
+    }
+
+    persistGuestCart([]);
+
+    const { data } = await fetchCartApi();
+    return normalizeServerCartItems(data?.data?.cart?.items);
+  },
+);
 
 const cartSlice = createSlice({
   name: "cart",
   initialState,
-  reducers: {
-    addItem: (state, action) => {
-      const newItem = action.payload;
-      const existingItem = state.items.find((item) => item.id === newItem.id);
-
-      if (existingItem) {
-        existingItem.quantity += newItem.quantity || 1;
-      } else {
-        state.items.push({ ...newItem, quantity: newItem.quantity || 1 });
-      }
-    },
-    updateQuantity: (state, action) => {
-      const { id, type } = action.payload;
-      const existingItem = state.items.find((item) => item.id === id);
-
-      if (!existingItem) {
-        return;
-      }
-
-      existingItem.quantity =
-        type === "increase"
-          ? existingItem.quantity + 1
-          : Math.max(1, existingItem.quantity - 1);
-    },
-    removeItem: (state, action) => {
-      state.items = state.items.filter((item) => item.id !== action.payload);
-    },
-    clearCart: (state) => {
-      state.items = [];
-    },
+  reducers: {},
+  extraReducers: (builder) => {
+    builder.addMatcher(
+      (action) => action.type.startsWith("cart/") && action.type.endsWith("/fulfilled"),
+      (state, action) => {
+        state.items = action.payload;
+        state.status = "succeeded";
+      },
+    );
   },
 });
-
-export const { addItem, updateQuantity, removeItem, clearCart } =
-  cartSlice.actions;
 
 export const selectCartItems = (state) => state.cart.items;
 
@@ -73,26 +177,13 @@ export const selectCartCount = (state) =>
   state.cart.items.reduce((count, item) => count + item.quantity, 0);
 
 export const selectSubtotal = (state) =>
-  state.cart.items.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0,
-  );
+  state.cart.items.reduce((total, item) => total + item.price * item.quantity, 0);
 
 export const selectShipping = (state) => {
   const subtotal = selectSubtotal(state);
-  return subtotal > 999 ? 0 : 99;
+  return state.cart.items.length && subtotal <= 999 ? 99 : 0;
 };
 
-export const selectTotal = (state) => {
-  const subtotal = selectSubtotal(state);
-  const shipping = selectShipping(state);
-  return subtotal + shipping;
-};
-
-export const persistCart = (state) => {
-  if (typeof window !== "undefined") {
-    window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(state.items));
-  }
-};
+export const selectTotal = (state) => selectSubtotal(state) + selectShipping(state);
 
 export default cartSlice.reducer;
