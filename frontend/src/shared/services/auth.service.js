@@ -4,10 +4,6 @@ export const adminLogin = (credentials) => {
   return api.post("/auth/login", credentials);
 };
 
-export const customerLogin = (credentials) => {
-  return api.post("/customer/login", credentials);
-};
-
 export const b2bLogin = (credentials) => {
   return api.post("/b2b/login", credentials);
 };

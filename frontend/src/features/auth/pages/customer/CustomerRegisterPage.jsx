@@ -1,13 +1,58 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import AuthButton from "../../components/AuthButton";
 import AuthCard from "../../components/AuthCard";
 import AuthHeader from "../../components/AuthHeader";
 import AuthInput from "../../components/AuthInput";
-import PasswordInput from "../../components/PasswordInput";
 import AuthLayout from "../../components/AuthLayout";
+import { sendCustomerOTP } from "../../../../shared/services/auth.service";
 
 const CustomerRegisterPage = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    mobile: location.state?.mobile || "",
+  });
+
+  const handleChange = ({ target: { name, value } }) => {
+    if (name === "mobile") {
+      setFormData((prev) => ({ ...prev, mobile: value.replace(/\D/g, "").slice(0, 10) }));
+      return;
+    }
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!formData.name.trim()) {
+      alert("Please enter your name.");
+      return;
+    }
+    if (formData.mobile.length !== 10) {
+      alert("Please enter a valid 10-digit mobile number.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await sendCustomerOTP(formData);
+
+      navigate("/customer/verify-otp", {
+        state: { mobile: formData.mobile },
+      });
+    } catch (error) {
+      alert(
+        error.response?.data?.message || "Unable to send OTP. Please try again.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <AuthLayout>
       <AuthCard>
@@ -16,44 +61,33 @@ const CustomerRegisterPage = () => {
           subtitle="Join 7ALP's and start your wellness journey."
         />
 
-        <form className="grid grid-cols-1 gap-5 md:grid-cols-2">
-          <AuthInput label="Full Name" placeholder="John Doe" />
-
+        <form
+          className="grid grid-cols-1 gap-5 md:grid-cols-2"
+          onSubmit={handleSubmit}
+        >
           <AuthInput
-            label="Email Address"
-            type="email"
-            placeholder="john@example.com"
+            name="name"
+            label="Full Name"
+            placeholder="John Doe"
+            value={formData.name}
+            onChange={handleChange}
           />
 
           <AuthInput
-            label="Phone Number"
+            name="mobile"
+            label="Mobile Number"
             type="tel"
-            placeholder="+91 9876543210"
+            placeholder="9876543210"
+            value={formData.mobile}
+            onChange={handleChange}
+            maxLength={10}
           />
-
-          <PasswordInput label="Password" placeholder="Password" />
-
-          <label className="md:col-span-2 flex items-center gap-3 text-sm">
-            <input type="checkbox" className="h-4 w-4 rounded" />I agree to the
-            Terms & Privacy Policy
-          </label>
 
           <div className="md:col-span-2">
-            <AuthButton type="submit">Create Account</AuthButton>
+            <AuthButton type="submit" disabled={loading}>
+              {loading ? "Sending OTP..." : "Create Account"}
+            </AuthButton>
           </div>
-
-          <div className="md:col-span-2 flex items-center gap-4">
-            <hr className="flex-1" />
-            <span className="text-sm text-gray-500">OR</span>
-            <hr className="flex-1" />
-          </div>
-
-          <button
-            type="button"
-            className="md:col-span-2 flex h-12 items-center justify-center rounded-xl border font-medium hover:bg-gray-50"
-          >
-            Continue with Google
-          </button>
 
           <p className="md:col-span-2 text-center text-sm text-gray-600">
             Already have an account?{" "}

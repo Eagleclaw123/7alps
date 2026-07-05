@@ -38,7 +38,7 @@ const CustomerLoginPage = () => {
     try {
       setLoading(true);
 
-      const { data } = await sendCustomerOTP(formData);
+      await sendCustomerOTP(formData);
 
       // Pass mobile number to OTP verification page
       navigate("/customer/verify-otp", {
@@ -47,12 +47,17 @@ const CustomerLoginPage = () => {
         },
       });
     } catch (error) {
-      console.error(error);
+      const message = error.response?.data?.message;
 
-      alert(
-        error.response?.data?.message ||
-          "Unable to send OTP. Please try again.",
-      );
+      if (error.response?.status === 400 && message?.includes("provide your name")) {
+        // No account exists for this number yet — send them to register instead
+        // of dead-ending on an error.
+        navigate("/customer/register", { state: { mobile: formData.mobile } });
+        return;
+      }
+
+      console.error(error);
+      alert(message || "Unable to send OTP. Please try again.");
     } finally {
       setLoading(false);
       setFormData(initialFormData);
