@@ -10,12 +10,24 @@ const signToken = (id) =>
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 
+const CUSTOMER_COOKIE_NAME = 'customerToken';
+
+const customerCookieOptions = () => ({
+  expires: new Date(
+    Date.now() + parseInt(process.env.JWT_COOKIE_EXPIRES_IN, 10) * 24 * 60 * 60 * 1000,
+  ),
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+});
+
 const createSendToken = (customer, statusCode, res, additionalData = {}) => {
   const token = signToken(customer._id);
 
+  res.cookie(CUSTOMER_COOKIE_NAME, token, customerCookieOptions());
+
   res.status(statusCode).json({
     status: 'success',
-    token,
     data: {
       customer,
       ...additionalData,
@@ -113,6 +125,11 @@ exports.getCurrentCustomerStatus = catchAsync(async (req, res, next) => {
 
 // POST /api/v1/customer/logout
 exports.logout = catchAsync(async (req, res, next) => {
+  res.clearCookie(CUSTOMER_COOKIE_NAME, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  });
   res.status(200).json({ status: 'success', message: 'Logged out successfully' });
 });
 
@@ -135,7 +152,9 @@ exports.updateAddresses = catchAsync(async (req, res, next) => {
 // Protect middleware — mirrors authController.protect but for Customer docs
 exports.protectCustomer = catchAsync(async (req, res, next) => {
   let token;
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+  if (req.cookies && req.cookies[CUSTOMER_COOKIE_NAME]) {
+    token = req.cookies[CUSTOMER_COOKIE_NAME];
+  } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     token = req.headers.authorization.split(' ')[1];
   }
 

@@ -4,6 +4,7 @@ const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const path = require('path');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const sanitizeMiddleware = require('./utils/sanitizeMiddleware');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
@@ -41,6 +42,7 @@ app.use('/api', limiter);
 // Body parser
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+app.use(cookieParser());
 
 // Sanitize req.body against XSS and NoSQL injection
 // (express-mongo-sanitize and hpp are not compatible with Express 5 — replaced below)

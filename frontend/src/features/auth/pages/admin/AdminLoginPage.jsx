@@ -37,10 +37,8 @@ const AdminLoginPage = () => {
       const { data: responseData } = await adminLogin(formData);
 
       const adminUser = responseData?.data?.user;
-      const token = responseData?.token;
 
-      if (adminUser && token) {
-        localStorage.setItem("adminToken", token);
+      if (adminUser) {
         localStorage.setItem("admin", JSON.stringify(adminUser));
         localStorage.setItem(
           "user",

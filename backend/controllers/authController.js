@@ -13,6 +13,8 @@ const signToken = (id) => {
   });
 };
 
+const ADMIN_COOKIE_NAME = 'adminToken';
+
 const createSendToken = (user, statusCode, res, additionalData = {}) => {
   const token = signToken(user._id);
 
@@ -21,15 +23,15 @@ const createSendToken = (user, statusCode, res, additionalData = {}) => {
       Date.now() + parseInt(process.env.JWT_COOKIE_EXPIRES_IN, 10) * 24 * 60 * 60 * 1000,
     ),
     httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
   };
-  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
 
-  res.cookie('jwt', token, cookieOptions);
+  res.cookie(ADMIN_COOKIE_NAME, token, cookieOptions);
   user.password = undefined;
 
   res.status(statusCode).json({
     status: 'success',
-    token,
     data: {
       user,
       ...additionalData,
@@ -199,6 +201,11 @@ exports.login = catchAsync(async (req, res, next) => {
 
 // Logout
 exports.logout = catchAsync(async (req, res, next) => {
+  res.clearCookie(ADMIN_COOKIE_NAME, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  });
   res.status(200).json({ status: 'success', message: 'Logged out successfully' });
 });
 
@@ -216,7 +223,9 @@ exports.getCurrentUserStatus = catchAsync(async (req, res, next) => {
 // Protect middleware
 exports.protect = catchAsync(async (req, res, next) => {
   let token;
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+  if (req.cookies && req.cookies[ADMIN_COOKIE_NAME]) {
+    token = req.cookies[ADMIN_COOKIE_NAME];
+  } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     token = req.headers.authorization.split(' ')[1];
   }
 
