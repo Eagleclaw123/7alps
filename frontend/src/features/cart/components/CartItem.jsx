@@ -1,87 +1,74 @@
-import { FiMinus, FiPlus, FiTrash2 } from "react-icons/fi";
+import { Minus, Plus } from "lucide-react";
 
-const CartItem = ({ item, updateQuantity, removeItem }) => {
-  return (
-    <div className="border-b border-gray-100 p-5">
-      <div className="flex flex-col gap-5 sm:flex-row">
-        {/* Product Image */}
-        <div className="flex justify-center sm:block">
-          <img
-            src={item.image}
-            alt={item.name}
-            className="h-28 w-28 rounded-xl border object-cover"
-          />
-        </div>
-
-        {/* Product Details */}
-        <div className="flex flex-1 flex-col">
-          {/* Top */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <h3 className="text-xl font-semibold text-[#202020]">
-                {item.name}
-              </h3>
-
-              <p className="mt-2 text-sm text-gray-500">
-                Weight:{" "}
-                <span className="font-medium text-[#047B22]">
-                  {item.weight}
-                </span>
-              </p>
-
-              <p className="mt-1 text-sm text-gray-500">
-                Category: {item.category}
-              </p>
-            </div>
-
-            <button
-              onClick={() => removeItem(item.id)}
-              className="flex items-center gap-2 self-start rounded-lg px-3 py-2 text-red-500 transition hover:bg-red-50"
-            >
-              <FiTrash2 size={18} />
-
-              <span className="text-sm font-medium">Remove</span>
-            </button>
-          </div>
-
-          {/* Bottom */}
-          <div className="mt-6 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-            {/* Quantity */}
-            <div className="flex w-fit items-center rounded-full border border-gray-200 bg-[#F8FAF8]">
-              <button
-                onClick={() => updateQuantity(item.id, "decrease")}
-                className="rounded-l-full p-3 transition hover:bg-gray-100"
-              >
-                <FiMinus size={18} />
-              </button>
-
-              <span className="min-w-[45px] text-center font-semibold">
-                {item.quantity}
-              </span>
-
-              <button
-                onClick={() => updateQuantity(item.id, "increase")}
-                className="rounded-r-full p-3 transition hover:bg-gray-100"
-              >
-                <FiPlus size={18} />
-              </button>
-            </div>
-
-            {/* Price */}
-            <div className="text-right">
-              <p className="text-sm text-gray-500">
-                ₹{item.price} × {item.quantity}
-              </p>
-
-              <h4 className="text-2xl font-bold text-[#047B22]">
-                ₹{item.price * item.quantity}
-              </h4>
-            </div>
-          </div>
-        </div>
+const CartItem = ({ item, onUpdateQuantity, onRemove }) => (
+  <div className="grid grid-cols-[2.2fr_1fr_0.8fr_1fr_0.8fr] items-center gap-4 border-t border-gray-100 py-4">
+    {/* Product */}
+    <div className="flex gap-3">
+      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-md bg-gray-100">
+        <img
+          src={item.image}
+          alt={item.name}
+          className="h-full w-full object-cover"
+        />
+        <button
+          onClick={() => onRemove(item.id)}
+          className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full border border-gray-300 bg-white text-[9px] text-gray-500 hover:border-red-400 hover:text-red-500"
+          aria-label={`Remove ${item.name}`}
+        >
+          ×
+        </button>
+      </div>
+      <div className="text-xs">
+        <p className="text-[16px] font-semibold uppercase leading-snug text-gray-800">
+          {item.name}
+        </p>
+        <p className="mt-1 text-gray-500">
+          Category:{" "}
+          <span className="font-semibold text-gray-700">{item.category}</span>
+        </p>
+        <p className="text-gray-500">
+          Size: <span className="font-semibold text-gray-700">{item.size}</span>
+        </p>
       </div>
     </div>
-  );
-};
+
+    {/* In Stock */}
+    <p className="flex items-center gap-1 text-[14px] text-gray-500">
+      <span className="h-1.5 w-1.5 rounded-full bg-black" />
+      {item.stock}
+    </p>
+
+    {/* Price */}
+    <span className="text-[14px] font-semibold text-gray-800">
+      &#x20B9; {item.price.toFixed(2)}
+    </span>
+
+    {/* Quantity */}
+    <div className="flex w-fit items-center gap-2 rounded-full border border-gray-200 px-2 py-1">
+      <button
+        onClick={() => onUpdateQuantity(item.id, -1)}
+        className="flex h-6 w-6 items-center justify-center text-gray-500 hover:text-black "
+        aria-label="Decrease quantity"
+      >
+        <Minus size={12} />
+      </button>
+      <span className="w-4 text-center text-[14px] font-semibold">
+        {item.quantity}
+      </span>
+      <button
+        onClick={() => onUpdateQuantity(item.id, 1)}
+        className="flex h-5 w-5 items-center justify-center text-gray-500 hover:text-black"
+        aria-label="Increase quantity"
+      >
+        <Plus size={12} />
+      </button>
+    </div>
+
+    {/* Total */}
+    <span className="text-[14px] font-semibold text-gray-800">
+      &#x20B9; {(item.price * item.quantity).toFixed(2)}
+    </span>
+  </div>
+);
 
 export default CartItem;

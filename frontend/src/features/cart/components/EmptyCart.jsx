@@ -8,7 +8,7 @@ const EmptyCart = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="flex min-h-[100vh] items-center justify-center px-6 mt-20">
+    <section className="flex items-center justify-center px-6">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -21,7 +21,7 @@ const EmptyCart = () => {
         </div>
 
         {/* Title */}
-        <h2 className="mt-8 text-3xl font-semibold text-[#202020]">
+        <h2 className="mt-4 text-3xl font-semibold text-[#202020]">
           Your Cart is Empty
         </h2>
 
@@ -35,7 +35,7 @@ const EmptyCart = () => {
         <Button
           variant="primary"
           size="lg"
-          className="mt-10 inline-flex items-center gap-2"
+          className="mt-5 inline-flex items-center gap-2"
           onClick={() => navigate("/products")}
         >
           Continue Shopping

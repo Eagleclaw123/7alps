@@ -1,95 +1,120 @@
-// import ContactButton from "./ContactButton";
-// import ContactInput from "./ContactInput";
-// import ContactTextArea from "./ContactTextArea";
+import ContactButton from "./ContactButton";
+import ContactInput from "./ContactInput";
+import ContactTextArea from "./ContactTextArea";
+import { FiPhone } from "react-icons/fi";
+import { CiMail } from "react-icons/ci";
+import { motion } from "framer-motion";
 
-// const ContactForm = () => {
-//   const handleSubmit = (e) => {
-//     e.preventDefault();
+const ContactForm = () => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-//     // TODO:
-//     // React Hook Form
-//     // Zod Validation
-//     // API Integration
-//     console.log("Form Submitted");
-//   };
+    // TODO:
+    // React Hook Form
+    // Zod Validation
+    // API Integration
+    console.log("Form Submitted");
+  };
 
-//   return (
-//     <form
-//       onSubmit={handleSubmit}
-//       className="rounded-3xl border border-gray-100 bg-white p-8 sm:p-10"
-//     >
-//       <h3 className="text-3xl font-semibold text-[#1E293B]">
-//         Send us a Message
-//       </h3>
+  const containerVariants = {
+    hidden: {},
+    visible: {
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
 
-//       <p className="mt-3 text-gray-500">
-//         We'd love to hear from you. Fill out the form below and we'll get back
-//         to you as soon as possible.
-//       </p>
+  const itemVariants = {
+    hidden: {
+      opacity: 0,
+      y: 25,
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.7,
+        ease: [0.25, 0.1, 0.25, 1],
+      },
+    },
+  };
+  return (
+    <motion.form
+      className="mt-12"
+      variants={containerVariants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.1 }}
+    >
+      {" "}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <motion.div className="flex flex-col" variants={itemVariants}>
+          <label className="text-md mb-1">Full Name</label>
+          <input
+            type="text"
+            className="border-b border-gray-500 focus:outline-none py-2"
+          />
+        </motion.div>
 
-//       <div className="mt-10 grid gap-6 md:grid-cols-2">
-//         <ContactInput
-//           label="First Name"
-//           name="firstName"
-//           placeholder="John"
-//           required
-//         />
+        <motion.div className="flex flex-col" variants={itemVariants}>
+          <label className="text-md mb-1">Email</label>
+          <input
+            type="email"
+            className="border-b border-gray-500 focus:outline-none py-2"
+          />
+        </motion.div>
 
-//         <ContactInput
-//           label="Last Name"
-//           name="lastName"
-//           placeholder="Doe"
-//           required
-//         />
+        <motion.div className="flex flex-col" variants={itemVariants}>
+          <label className="text-md mb-1">Phone Number</label>
+          <input
+            type="text"
+            className="border-b border-gray-500 focus:outline-none py-2"
+          />
+        </motion.div>
 
-//         <ContactInput
-//           label="Email Address"
-//           type="email"
-//           name="email"
-//           placeholder="john@example.com"
-//           required
-//         />
+        <motion.div className="flex flex-col" variants={itemVariants}>
+          <label className="text-md mb-1">Company Name</label>
+          <input
+            type="text"
+            className="border-b border-gray-500 focus:outline-none py-2"
+          />
+        </motion.div>
 
-//         <ContactInput
-//           label="Phone Number"
-//           type="tel"
-//           name="phone"
-//           placeholder="+91 9876543210"
-//         />
+        <motion.div className="flex flex-col" variants={itemVariants}>
+          <label className="text-md mb-1">Product Interest</label>
+          <input
+            type="text"
+            className="border-b border-gray-500 focus:outline-none py-2"
+          />
+        </motion.div>
 
-//         <div className="md:col-span-2">
-//           <ContactInput
-//             label="Company Name"
-//             name="company"
-//             placeholder="Your Company"
-//           />
-//         </div>
+        <motion.div className="flex flex-col" variants={itemVariants}>
+          <label className="text-md mb-1">Quantity Requirement</label>
+          <input
+            type="text"
+            className="border-b border-gray-500 focus:outline-none py-2"
+          />
+        </motion.div>
 
-//         <div className="md:col-span-2">
-//           <ContactInput
-//             label="Subject"
-//             name="subject"
-//             placeholder="How can we help you?"
-//             required
-//           />
-//         </div>
+        <motion.div
+          className="flex flex-col sm:col-span-2"
+          variants={itemVariants}
+        >
+          <label className="text-md mb-1">Message</label>
+          <input
+            type="text"
+            className="border-b border-gray-500 focus:outline-none py-2"
+          />
+        </motion.div>
+      </div>
+      <div className="mt-12 flex">
+        <button className="bg-[#1C6A00] text-white px-8 py-3 rounded">
+          Submit Quote
+        </button>
+      </div>
+    </motion.form>
+  );
+};
 
-//         <div className="md:col-span-2">
-//           <ContactTextArea
-//             label="Message"
-//             name="message"
-//             rows={6}
-//             placeholder="Tell us more about your requirements..."
-//             required
-//           />
-//         </div>
-
-//         <div className="md:col-span-2">
-//           <ContactButton type="submit">Send Message</ContactButton>
-//         </div>
-//       </div>
-//     </form>
-//   );
-// };
-
-// export default ContactForm;
+export default ContactForm;

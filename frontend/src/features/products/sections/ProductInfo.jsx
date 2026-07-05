@@ -7,9 +7,13 @@ import { addToCart } from "../../../store/slices/cartSlice";
 const ProductInfo = ({ product }) => {
   const dispatch = useDispatch();
   const variants = Array.isArray(product.variants) ? product.variants : [];
+  const weights = Array.isArray(product.weights) ? product.weights : [];
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState(
     variants.find((v) => v.isDefault) || variants[0],
+  );
+  const [selectedWeight, setSelectedWeight] = useState(
+    weights.find((w) => w.isDefault) || weights[0],
   );
   const [isAdded, setIsAdded] = useState(false);
 
@@ -31,6 +35,7 @@ const ProductInfo = ({ product }) => {
         image: product.ProductImage,
         category: product.ProductCategory,
         price: selectedVariant.price,
+        weight: selectedWeight?.weight,
       }),
     );
     setIsAdded(true);
@@ -135,36 +140,70 @@ const ProductInfo = ({ product }) => {
             </div>
           </div>
         ) : null}
-      </div>
 
-      <div className="mt-8 flex items-center gap-5">
-        <button
-          onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-          className="h-12 w-12 rounded-xl border"
-        >
-          -
-        </button>
+        {weights.length ? (
+          <div className="flex flex-wrap items-center gap-4">
+            {weights.map((item) => {
+              const isSelected = selectedWeight?.id === item.id;
 
-        <span className="text-xl">{quantity}</span>
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedWeight(item);
+                    setIsAdded(false);
+                  }}
+                  className={`rounded-full border px-6 py-2 transition-all duration-300 ${
+                    isSelected
+                      ? "border-[#047B22] bg-[#F4FBF6]"
+                      : "border-gray-200 bg-white hover:border-[#047B22] hover:bg-[#F8FAF8]"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span
+                      className={`font-semibold ${
+                        isSelected ? "text-[#047B22]" : "text-[#2C2C2C]"
+                      }`}
+                    >
+                      {item.weight}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
 
-        <button
-          onClick={() => setQuantity((q) => q + 1)}
-          className="h-12 w-12 rounded-xl border"
-        >
-          +
-        </button>
-      </div>
+        <div className="mt-8 flex items-center gap-5">
+          <button
+            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+            className="h-12 w-12 rounded-xl border"
+          >
+            -
+          </button>
 
-      <div className="mt-8 flex gap-4">
-        <button
-          onClick={handleAddToCart}
-          disabled={!selectedVariant || selectedVariant.stock <= 0}
-          className="rounded-xl bg-[#0F6B3E] px-8 py-4 text-white disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isAdded ? "Added to Cart" : "Add to Cart"}
-        </button>
+          <span className="text-xl">{quantity}</span>
 
-        <button className="rounded-xl border px-8 py-4">Buy Now</button>
+          <button
+            onClick={() => setQuantity((q) => q + 1)}
+            className="h-12 w-12 rounded-xl border"
+          >
+            +
+          </button>
+        </div>
+
+        <div className="mt-8 flex gap-4">
+          <button
+            onClick={handleAddToCart}
+            disabled={!selectedVariant || selectedVariant.stock <= 0}
+            className="rounded-xl bg-[#0F6B3E] px-8 py-4 text-white disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isAdded ? "Added to Cart" : "Add to Cart"}
+          </button>
+
+          <button className="rounded-xl border px-8 py-4">Buy Now</button>
+        </div>
       </div>
     </div>
   );

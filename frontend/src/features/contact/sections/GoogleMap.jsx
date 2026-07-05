@@ -2,9 +2,9 @@ import { motion } from "framer-motion";
 
 const GoogleMap = () => {
   return (
-    <section className="">
+    <section>
       <motion.div
-        className="mt-12 max-w-7xl mx-auto mb-10"
+        className="my-12 max-w-7xl mx-auto"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}

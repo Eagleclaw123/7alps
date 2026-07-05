@@ -31,6 +31,7 @@ import CartPage from "../../features/cart/pages/CartPage";
 import CheckoutPage from "../../features/cart/pages/CheckoutPage";
 import CustomerOrders from "../../features/customer/pages/CustomerOrders";
 import ProtectedRoute from "./ProtectedRoute";
+import AdminOrders from "../../features/admin/pages/AdminOrders";
 
 const AppRoutes = () => {
   return (
@@ -70,7 +71,7 @@ const AppRoutes = () => {
       </Route>
 
       <Route
-        path="/b2b/dashboard"
+        path="/b2b/"
         element={
           <ProtectedRoute role="b2b">
             <B2BLayout />
@@ -79,7 +80,7 @@ const AppRoutes = () => {
       ></Route>
 
       <Route
-        path="/admin"
+        path="/admin/"
         element={
           // <ProtectedRoute role="admin">
           <AdminLayout />
@@ -88,6 +89,7 @@ const AppRoutes = () => {
       >
         <Route index element={<AdminDashboard />} />
         <Route path="products" element={<AdminProducts />} />
+        <Route path="orders" element={<AdminOrders />} />
         {/* Add more admin routes here */}
       </Route>
       <Route element={<AuthLayout />}>

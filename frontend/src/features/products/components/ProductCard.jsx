@@ -11,16 +11,40 @@ const ProductCard = ({
   onBuyClick,
   onCartClick,
   onFavoriteClick,
-  buyButtonLabel = "Buy Now",
+  buyButtonLabel = "Add to Cart",
   className = "",
 }) => {
   const navigate = useNavigate();
   const [isAdded, setIsAdded] = useState(false);
+  const [quantity, setQuantity] = useState(0);
 
-  const handleCartClick = (event, productItem) => {
-    event.stopPropagation();
-    onCartClick?.(productItem);
-    setIsAdded(true);
+  const handleAddToCart = (e, product) => {
+    e.stopPropagation();
+
+    setQuantity(1);
+
+    onCartClick?.(product);
+  };
+
+  const increaseQuantity = (e) => {
+    e.stopPropagation();
+
+    setQuantity((prev) => prev + 1);
+
+    onCartClick?.({
+      ...product,
+      quantity: quantity + 1,
+    });
+  };
+
+  const decreaseQuantity = (e) => {
+    e.stopPropagation();
+
+    if (quantity === 1) {
+      setQuantity(0);
+    } else {
+      setQuantity((prev) => prev - 1);
+    }
   };
 
   return (
@@ -36,16 +60,7 @@ const ProductCard = ({
           className="w-full h-72 object-cover"
         />
 
-        <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-100 xl:opacity-0 xl:group-hover:opacity-100 transition-all duration-300">
-          <button
-            className={`w-10 h-10 rounded-lg flex items-center justify-center shadow-md hover:shadow-lg hover:scale-110 transition-all cursor-pointer ${
-              isAdded ? "bg-[#047B22] text-white" : "bg-white text-gray-700"
-            }`}
-            onClick={(e) => handleCartClick(e, product)}
-          >
-            <GrCart size={18} />
-          </button>
-
+        <div className="absolute top-4 right-4 opacity-100 xl:opacity-0 xl:group-hover:opacity-100 transition-all duration-300">
           <button
             className="bg-white w-10 h-10 rounded-lg flex items-center justify-center shadow-md hover:shadow-lg hover:scale-110 transition-all cursor-pointer"
             onClick={(e) => {
@@ -69,14 +84,39 @@ const ProductCard = ({
 
         <div className="flex items-center justify-between gap-4">
           <div className="text-lg font-semibold">₹{product.ProductPrice}</div>
-          <Button
-            variant="primary"
-            size="md"
-            className="w-36"
-            onClick={onBuyClick}
-          >
-            {buyButtonLabel}
-          </Button>
+          {quantity === 0 ? (
+            <Button
+              variant="primary"
+              size="md"
+              className="w-30"
+              onClick={(e) => handleAddToCart(e, product)}
+            >
+              Add to Cart
+            </Button>
+          ) : (
+            <div
+              className="flex items-center overflow-hidden rounded-xl border border-[#047B22]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={decreaseQuantity}
+                className="flex h-10 w-10 items-center justify-center bg-[#047B22] text-xl font-semibold text-white transition hover:bg-[#03641c]"
+              >
+                −
+              </button>
+
+              <span className="flex w-10 items-center justify-center font-semibold">
+                {quantity}
+              </span>
+
+              <button
+                onClick={increaseQuantity}
+                className="flex h-10 w-10 items-center justify-center bg-[#047B22] text-xl font-semibold text-white transition hover:bg-[#03641c]"
+              >
+                +
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </motion.div>

@@ -13,7 +13,7 @@ const MainLayout = () => {
   return (
     <>
       <Header />
-      <main className="min-h-screen">
+      <main>
         <AnimatePresence mode="wait">
           <Outlet key={location.pathname} />
         </AnimatePresence>

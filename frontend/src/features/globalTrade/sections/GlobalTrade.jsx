@@ -30,7 +30,7 @@ const cards = [
 
 const GlobalTrade = () => {
   return (
-    <section className="bg-[#FAF6E8] px-6 py-16 xl:px-0">
+    <section className="px-6 py-16 xl:px-0">
       <div className="mx-auto max-w-7xl">
         {/* Heading */}
         <motion.div

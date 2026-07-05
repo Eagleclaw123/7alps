@@ -3,7 +3,7 @@ import Button from "../../../shared/components/ui/Button";
 
 const NewsletterBanner = () => {
   return (
-    <section className="mt-20 overflow-hidden rounded-3xl bg-gradient-to-r from-[#0F6B3E] via-[#178A50] to-[#1FA362]">
+    <section className="mt-10 overflow-hidden rounded-3xl bg-gradient-to-r from-[#0F6B3E] via-[#178A50] to-[#1FA362]">
       <div className="flex flex-col items-center justify-between gap-10 px-8 py-12 lg:flex-row lg:px-12">
         {/* Left */}
         <div className="max-w-xl text-center lg:text-left">

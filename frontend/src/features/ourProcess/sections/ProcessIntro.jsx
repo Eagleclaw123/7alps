@@ -22,7 +22,7 @@ const ProcessIntro = () => {
   return (
     <section>
       {/* Bottom: two-column text */}
-      <div className="bg-[#FAF6E8] px-6 py-16 xl:px-0">
+      <div className="px-6 py-16 xl:px-0">
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 lg:grid-cols-2 md:gap-16">
           <motion.p
             className="text-[20px] font-medium leading-snug text-black sm:text-[26px] lg:border-r md:border-gray-300 md:pr-16 md:text-[30px]"

@@ -95,7 +95,11 @@ export const updateQuantity = createAsyncThunk(
   "cart/updateQuantity",
   async ({ productId, variantLabel, type }, { getState }) => {
     if (isLoggedIn()) {
-      const { data } = await updateCartItemQuantity(productId, variantLabel, type);
+      const { data } = await updateCartItemQuantity(
+        productId,
+        variantLabel,
+        type,
+      );
       return normalizeServerCartItems(data?.data?.cart?.items);
     }
 
@@ -105,7 +109,9 @@ export const updateQuantity = createAsyncThunk(
         ? {
             ...item,
             quantity:
-              type === "increase" ? item.quantity + 1 : Math.max(1, item.quantity - 1),
+              type === "increase"
+                ? item.quantity + 1
+                : Math.max(1, item.quantity - 1),
           }
         : item,
     );
@@ -159,17 +165,61 @@ export const mergeGuestCartOnLogin = createAsyncThunk(
 const cartSlice = createSlice({
   name: "cart",
   initialState,
-  reducers: {},
-  extraReducers: (builder) => {
-    builder.addMatcher(
-      (action) => action.type.startsWith("cart/") && action.type.endsWith("/fulfilled"),
-      (state, action) => {
-        state.items = action.payload;
-        state.status = "succeeded";
-      },
-    );
+  reducers: {
+    addItem: (state, action) => {
+      const newItem = action.payload;
+
+      const existingItem = state.items.find((item) => item.id === newItem.id);
+
+      if (existingItem) {
+        existingItem.quantity += newItem.quantity || 1;
+      } else {
+        state.items.push({
+          ...newItem,
+          quantity: newItem.quantity || 1,
+        });
+      }
+    },
+
+    increaseQuantity: (state, action) => {
+      const item = state.items.find((item) => item.id === action.payload);
+
+      if (item) {
+        item.quantity += 1;
+      }
+    },
+
+    decreaseQuantity: (state, action) => {
+      const item = state.items.find((item) => item.id === action.payload);
+
+      if (!item) return;
+
+      if (item.quantity > 1) {
+        item.quantity -= 1;
+      } else {
+        state.items = state.items.filter(
+          (cartItem) => cartItem.id !== action.payload,
+        );
+      }
+    },
+
+    removeItem: (state, action) => {
+      state.items = state.items.filter((item) => item.id !== action.payload);
+    },
+
+    clearCart: (state) => {
+      state.items = [];
+    },
   },
 });
+
+export const {
+  addItem,
+  increaseQuantity,
+  decreaseQuantity,
+  removeItem,
+  clearCart,
+} = cartSlice.actions;
 
 export const selectCartItems = (state) => state.cart.items;
 
@@ -177,13 +227,17 @@ export const selectCartCount = (state) =>
   state.cart.items.reduce((count, item) => count + item.quantity, 0);
 
 export const selectSubtotal = (state) =>
-  state.cart.items.reduce((total, item) => total + item.price * item.quantity, 0);
+  state.cart.items.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0,
+  );
 
 export const selectShipping = (state) => {
   const subtotal = selectSubtotal(state);
   return state.cart.items.length && subtotal <= 999 ? 99 : 0;
 };
 
-export const selectTotal = (state) => selectSubtotal(state) + selectShipping(state);
+export const selectTotal = (state) =>
+  selectSubtotal(state) + selectShipping(state);
 
 export default cartSlice.reducer;
