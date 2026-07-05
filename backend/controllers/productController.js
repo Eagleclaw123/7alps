@@ -103,11 +103,8 @@ exports.getPublicProduct = catchAsync(async (req, res, next) => {
 exports.createProduct = catchAsync(async (req, res, next) => {
   const data = applyBodyFields({ ...req.body });
 
-  if (req.files?.coverImage?.[0]) {
-    data.coverImage = await uploadToR2(req.files.coverImage[0]);
-  }
-  if (req.files?.images) {
-    data.images = await Promise.all(req.files.images.map((f) => uploadToR2(f)));
+  if (req.files?.length) {
+    data.images = await Promise.all(req.files.map((f) => uploadToR2(f)));
   }
 
   const product = await Product.create(data);
@@ -149,13 +146,9 @@ exports.updateProduct = catchAsync(async (req, res, next) => {
 
   const data = applyBodyFields({ ...req.body });
 
-  if (req.files?.coverImage?.[0]) {
-    await deleteFromR2(product.coverImage);
-    data.coverImage = await uploadToR2(req.files.coverImage[0]);
-  }
-  if (req.files?.images) {
-    await Promise.all(product.images.map(deleteFromR2));
-    data.images = await Promise.all(req.files.images.map((f) => uploadToR2(f)));
+  if (req.files?.length) {
+    await Promise.all((product.images || []).map(deleteFromR2));
+    data.images = await Promise.all(req.files.map((f) => uploadToR2(f)));
   }
 
   const updated = await Product.findByIdAndUpdate(req.params.id, data, {
@@ -182,8 +175,7 @@ exports.deleteProduct = catchAsync(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
   if (!product) return next(new AppError('No product found with that ID', 404));
 
-  await deleteFromR2(product.coverImage);
-  await Promise.all(product.images.map(deleteFromR2));
+  await Promise.all((product.images || []).map(deleteFromR2));
 
   await Product.findByIdAndDelete(req.params.id);
 

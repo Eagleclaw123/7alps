@@ -45,15 +45,14 @@ const AdminProducts = () => {
   const [variants, setVariants] = useState([emptyVariant()]);
   const [lists, setLists] = useState(initialLists);
 
-  // Unified image list: first image = cover, rest = gallery.
   const [images, setImages] = useState([]); // [{ id, file, preview }]
-  const [existingCoverImage, setExistingCoverImage] = useState("");
+  const [existingImages, setExistingImages] = useState([]);
 
   const [editingProductId, setEditingProductId] = useState(null);
   const [error, setError] = useState("");
   const formTopRef = useRef(null);
 
-  // coverImage/images are already full Cloudflare R2 URLs from the API.
+  // images are already full Cloudflare R2 URLs from the API.
   const getImageUrl = (url) => url || "";
 
   const loadProducts = async () => {
@@ -146,7 +145,7 @@ const AdminProducts = () => {
     setImages([]);
     setVariants([emptyVariant()]);
     setLists(initialLists);
-    setExistingCoverImage("");
+    setExistingImages([]);
     setEditingProductId(null);
     setError("");
   };
@@ -184,7 +183,7 @@ const AdminProducts = () => {
       if (preview.startsWith("blob:")) URL.revokeObjectURL(preview);
     });
     setImages([]);
-    setExistingCoverImage(product.coverImage || "");
+    setExistingImages(Array.isArray(product.images) ? product.images : []);
     setError("");
     formTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
@@ -222,9 +221,7 @@ const AdminProducts = () => {
         if (values.length) formDataToSend.append(key, JSON.stringify(values));
       });
 
-      const [coverImage, ...galleryImages] = images.map((img) => img.file);
-      if (coverImage) formDataToSend.append("coverImage", coverImage);
-      galleryImages.forEach((image) => formDataToSend.append("images", image));
+      images.forEach((img) => formDataToSend.append("images", img.file));
 
       if (editingProductId) {
         const response = await updateProduct(editingProductId, formDataToSend);
@@ -285,7 +282,7 @@ const AdminProducts = () => {
         formData={formData}
         categoryOptions={CATEGORY_OPTIONS}
         images={images}
-        existingCoverImage={existingCoverImage}
+        existingImages={existingImages}
         onFormChange={handleChange}
         onFilesAdded={addFiles}
         onRemoveImage={removeImage}

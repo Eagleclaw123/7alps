@@ -1,4 +1,4 @@
-// coverImage/images are already full Cloudflare R2 URLs coming back from the API.
+// images are already full Cloudflare R2 URLs coming back from the API.
 export const getProductImageUrl = (url) => url || undefined;
 
 const getDefaultVariant = (variants) => {
@@ -12,6 +12,7 @@ export const normalizeProduct = (product) => {
   if (!product) return product;
 
   const defaultVariant = getDefaultVariant(product.variants);
+  const images = Array.isArray(product.images) ? product.images : [];
 
   return {
     ...product,
@@ -21,7 +22,8 @@ export const normalizeProduct = (product) => {
     ProductCategory: product.category,
     ProductRating: product.ratingsAverage || "New",
     ProductPrice: defaultVariant?.price ?? 0,
-    ProductImage: getProductImageUrl(product.coverImage),
+    ProductImages: images,
+    ProductImage: getProductImageUrl(images[0]),
   };
 };
 

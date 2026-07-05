@@ -19,8 +19,5 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB per file
 });
 
-// coverImage (single) + images (up to 5)
-exports.uploadProductImages = upload.fields([
-  { name: 'coverImage', maxCount: 1 },
-  { name: 'images', maxCount: 5 },
-]);
+// images: 1 or many, up to 8 per product
+exports.uploadProductImages = upload.array('images', 8);

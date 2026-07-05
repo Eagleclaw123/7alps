@@ -10,7 +10,7 @@ const ProductForm = forwardRef(
       formData,
       categoryOptions,
       images,
-      existingCoverImage,
+      existingImages,
       onFormChange,
       onFilesAdded,
       onRemoveImage,
@@ -53,7 +53,7 @@ const ProductForm = forwardRef(
               images={images}
               onFilesAdded={onFilesAdded}
               onRemoveImage={onRemoveImage}
-              existingCoverImage={existingCoverImage}
+              existingImages={existingImages}
               editingProductId={editingProductId}
               getImageUrl={getImageUrl}
             />

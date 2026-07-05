@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import AuthButton from "../../components/AuthButton";
 import AuthCard from "../../components/AuthCard";
@@ -14,6 +14,8 @@ const initialFormData = {
 
 const CustomerLoginPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from;
 
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState(initialFormData);
@@ -40,10 +42,11 @@ const CustomerLoginPage = () => {
 
       await sendCustomerOTP(formData);
 
-      // Pass mobile number to OTP verification page
+      // Pass mobile number (and where to return to after login) to the OTP page
       navigate("/customer/verify-otp", {
         state: {
           mobile: formData.mobile,
+          from,
         },
       });
     } catch (error) {
@@ -52,7 +55,9 @@ const CustomerLoginPage = () => {
       if (error.response?.status === 400 && message?.includes("provide your name")) {
         // No account exists for this number yet — send them to register instead
         // of dead-ending on an error.
-        navigate("/customer/register", { state: { mobile: formData.mobile } });
+        navigate("/customer/register", {
+          state: { mobile: formData.mobile, from },
+        });
         return;
       }
 

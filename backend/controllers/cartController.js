@@ -24,7 +24,7 @@ const buildCartResponse = async (cart) => {
     items.push({
       product: product._id,
       name: product.name,
-      coverImage: product.coverImage,
+      image: product.images?.[0],
       category: product.category,
       variantLabel: item.variantLabel,
       price,

@@ -1,14 +1,12 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { CgMenuRight } from "react-icons/cg";
-import { useDispatch } from "react-redux";
 
 import { getPublicProducts } from "../../../shared/services/product.service";
 import { normalizeProducts } from "../utils/normalizeProduct";
 import ProductFilter from "../components/ProductFilter";
 import ProductPagination from "../components/ProductPagination";
 import ProductCard from "../components/ProductCard";
-import { addToCart } from "../../../store/slices/cartSlice";
 
 const containerVariants = {
   hidden: {},
@@ -35,7 +33,6 @@ const cardVariants = {
 };
 
 const Products = () => {
-  const dispatch = useDispatch();
   const productsPerPage = 9;
   const [productsData, setProductsData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -146,24 +143,6 @@ const Products = () => {
     setShowFilters(!showFilters);
   };
 
-  const handleAddToCart = (product) => {
-    const defaultVariant =
-      product.variants?.find((v) => v.isDefault) || product.variants?.[0];
-    if (!defaultVariant) return;
-
-    dispatch(
-      addToCart({
-        productId: product.id,
-        variantLabel: defaultVariant.label,
-        quantity: 1,
-        name: product.ProductName,
-        image: product.ProductImage,
-        category: product.ProductCategory,
-        price: defaultVariant.price,
-      }),
-    );
-  };
-
   return (
     <section className="py-10 px-6 xl:px-0">
       <div className="mx-auto max-w-7xl">
@@ -218,7 +197,6 @@ const Products = () => {
                   key={product.id}
                   product={product}
                   variants={cardVariants}
-                  onCartClick={handleAddToCart}
                 />
               ))
             )}

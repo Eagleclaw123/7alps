@@ -49,12 +49,18 @@ const ProductListTable = ({
               <tr key={product._id} className="text-sm">
                 <td className="py-3 pr-4">
                   <div className="flex items-center gap-3">
-                    {product.coverImage ? (
-                      <img
-                        src={getImageUrl(product.coverImage)}
-                        alt={product.name}
-                        className="h-11 w-11 flex-shrink-0 rounded-lg object-cover"
-                      />
+                    {product.images?.length ? (
+                      <div className="flex flex-shrink-0 -space-x-3">
+                        {product.images.map((url, i) => (
+                          <img
+                            key={url}
+                            src={getImageUrl(url)}
+                            alt={`${product.name} ${i + 1}`}
+                            className="h-11 w-11 rounded-lg border-2 border-white object-cover shadow-sm"
+                            style={{ zIndex: product.images.length - i }}
+                          />
+                        ))}
+                      </div>
                     ) : (
                       <div className="h-11 w-11 flex-shrink-0 rounded-lg bg-gray-100" />
                     )}

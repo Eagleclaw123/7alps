@@ -27,7 +27,7 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => (
           <span className="font-semibold text-gray-700">{item.category}</span>
         </p>
         <p className="text-gray-500">
-          Size: <span className="font-semibold text-gray-700">{item.size}</span>
+          Size: <span className="font-semibold text-gray-700">{item.weight}</span>
         </p>
       </div>
     </div>
@@ -35,7 +35,7 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => (
     {/* In Stock */}
     <p className="flex items-center gap-1 text-[14px] text-gray-500">
       <span className="h-1.5 w-1.5 rounded-full bg-black" />
-      {item.stock}
+      In Stock
     </p>
 
     {/* Price */}

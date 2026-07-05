@@ -3,11 +3,12 @@ import CartFooter from "../components/CartFooter";
 import CartList from "../components/CartList";
 import OrderSummary from "../components/OrderSummary";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 import {
-  increaseQuantity,
-  decreaseQuantity,
-  removeItem,
+  updateQuantity,
+  removeCartItemAsync,
+  parseItemId,
   selectCartItems,
   selectSubtotal,
 } from "../../../store/slices/cartSlice";
@@ -15,15 +16,24 @@ import NewsletterBanner from "../components/NewsletterBanner";
 
 const CartPage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const items = useSelector(selectCartItems);
   const subtotal = useSelector(selectSubtotal);
 
-  const updateQuantity = (id, delta) => {
-    if (delta > 0) {
-      dispatch(increaseQuantity(id));
-    } else {
-      dispatch(decreaseQuantity(id));
-    }
+  const handleUpdateQuantity = (id, delta) => {
+    const { productId, variantLabel } = parseItemId(id);
+    dispatch(
+      updateQuantity({
+        productId,
+        variantLabel,
+        type: delta > 0 ? "increase" : "decrease",
+      }),
+    );
+  };
+
+  const handleRemove = (id) => {
+    const { productId, variantLabel } = parseItemId(id);
+    dispatch(removeCartItemAsync({ productId, variantLabel }));
   };
 
   return (
@@ -40,10 +50,13 @@ const CartPage = () => {
             <OrderSummary itemCount={items.length} />
             <CartList
               items={items}
-              onUpdateQuantity={updateQuantity}
-              onRemove={removeItem}
+              onUpdateQuantity={handleUpdateQuantity}
+              onRemove={handleRemove}
             />
-            <CartFooter subtotal={subtotal} />
+            <CartFooter
+              subtotal={subtotal}
+              onCheckout={() => navigate("/checkout")}
+            />
             <NewsletterBanner />
           </div>
         </div>

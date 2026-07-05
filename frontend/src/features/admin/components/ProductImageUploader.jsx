@@ -5,7 +5,7 @@ const ProductImageUploader = ({
   images,
   onFilesAdded,
   onRemoveImage,
-  existingCoverImage,
+  existingImages,
   editingProductId,
   getImageUrl,
 }) => {
@@ -77,22 +77,27 @@ const ProductImageUploader = ({
         />
       </div>
 
-      {editingProductId && existingCoverImage && !images.length ? (
-        <div className="mt-3 flex items-center gap-3 rounded-lg border border-gray-200 p-2">
-          <img
-            src={getImageUrl(existingCoverImage)}
-            alt="Current cover"
-            className="h-11 w-11 flex-shrink-0 rounded-md object-cover"
-          />
-          <p className="text-sm text-gray-500">
-            Current cover image. Add a new image above to replace it.
+      {editingProductId && existingImages?.length && !images.length ? (
+        <div className="mt-3 space-y-2">
+          <p className="text-xs text-gray-500">
+            Current images. Add new images above to replace all of them.
           </p>
+          <div className="flex flex-wrap gap-2">
+            {existingImages.map((url) => (
+              <img
+                key={url}
+                src={getImageUrl(url)}
+                alt="Current product"
+                className="h-14 w-14 flex-shrink-0 rounded-md border border-gray-200 object-cover"
+              />
+            ))}
+          </div>
         </div>
       ) : null}
 
       {images.length ? (
         <ul className="mt-3 space-y-2">
-          {images.map((img, index) => (
+          {images.map((img) => (
             <li
               key={img.id}
               className="flex items-center gap-3 rounded-lg border border-gray-200 p-2"
@@ -108,7 +113,6 @@ const ProductImageUploader = ({
                 </p>
                 <p className="text-xs text-gray-400">
                   {(img.file.size / 1024).toFixed(0)} KB
-                  {index === 0 ? " • Cover" : ""}
                 </p>
               </div>
               <button

@@ -1,49 +1,74 @@
-import { useState } from "react";
 import { CiHeart } from "react-icons/ci";
-import { GrCart } from "react-icons/gr";
 import { motion } from "framer-motion";
-import Button from "../../../shared/components/ui/Button";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-const ProductCard = ({
-  product,
-  variants,
-  onBuyClick,
-  onCartClick,
-  onFavoriteClick,
-  buyButtonLabel = "Add to Cart",
-  className = "",
-}) => {
+import Button from "../../../shared/components/ui/Button";
+import ImageCarousel from "../../../shared/components/ui/ImageCarousel";
+import {
+  addToCart,
+  updateQuantity,
+  removeCartItemAsync,
+  selectCartItems,
+} from "../../../store/slices/cartSlice";
+
+const ProductCard = ({ product, variants, onFavoriteClick, className = "" }) => {
   const navigate = useNavigate();
-  const [isAdded, setIsAdded] = useState(false);
-  const [quantity, setQuantity] = useState(0);
+  const dispatch = useDispatch();
+  const cartItems = useSelector(selectCartItems);
 
-  const handleAddToCart = (e, product) => {
+  const defaultVariant =
+    product.variants?.find((v) => v.isDefault) || product.variants?.[0];
+
+  const cartItem = defaultVariant
+    ? cartItems.find(
+        (item) =>
+          item.productId === product.id &&
+          item.variantLabel === defaultVariant.label,
+      )
+    : null;
+  const quantity = cartItem?.quantity || 0;
+
+  const handleAddToCart = (e) => {
     e.stopPropagation();
+    if (!defaultVariant) return;
 
-    setQuantity(1);
-
-    onCartClick?.(product);
+    dispatch(
+      addToCart({
+        productId: product.id,
+        variantLabel: defaultVariant.label,
+        quantity: 1,
+        name: product.ProductName,
+        image: product.ProductImage,
+        category: product.ProductCategory,
+        price: defaultVariant.price,
+      }),
+    );
   };
 
-  const increaseQuantity = (e) => {
-    e.stopPropagation();
-
-    setQuantity((prev) => prev + 1);
-
-    onCartClick?.({
-      ...product,
-      quantity: quantity + 1,
-    });
+  const handleIncrease = (e) => {
+    handleAddToCart(e);
   };
 
-  const decreaseQuantity = (e) => {
+  const handleDecrease = (e) => {
     e.stopPropagation();
+    if (!defaultVariant) return;
 
-    if (quantity === 1) {
-      setQuantity(0);
+    if (quantity <= 1) {
+      dispatch(
+        removeCartItemAsync({
+          productId: product.id,
+          variantLabel: defaultVariant.label,
+        }),
+      );
     } else {
-      setQuantity((prev) => prev - 1);
+      dispatch(
+        updateQuantity({
+          productId: product.id,
+          variantLabel: defaultVariant.label,
+          type: "decrease",
+        }),
+      );
     }
   };
 
@@ -53,11 +78,11 @@ const ProductCard = ({
       onClick={() => navigate(`/products/${product.id}`)}
       variants={variants}
     >
-      <div className="relative group">
-        <img
-          src={product.ProductImage}
+      <div className="relative group h-72">
+        <ImageCarousel
+          images={product.ProductImages}
           alt={product.ProductName}
-          className="w-full h-72 object-cover"
+          imageClassName="w-full h-72 object-cover"
         />
 
         <div className="absolute top-4 right-4 opacity-100 xl:opacity-0 xl:group-hover:opacity-100 transition-all duration-300">
@@ -89,7 +114,7 @@ const ProductCard = ({
               variant="primary"
               size="md"
               className="w-30"
-              onClick={(e) => handleAddToCart(e, product)}
+              onClick={handleAddToCart}
             >
               Add to Cart
             </Button>
@@ -99,7 +124,7 @@ const ProductCard = ({
               onClick={(e) => e.stopPropagation()}
             >
               <button
-                onClick={decreaseQuantity}
+                onClick={handleDecrease}
                 className="flex h-10 w-10 items-center justify-center bg-[#047B22] text-xl font-semibold text-white transition hover:bg-[#03641c]"
               >
                 −
@@ -110,7 +135,7 @@ const ProductCard = ({
               </span>
 
               <button
-                onClick={increaseQuantity}
+                onClick={handleIncrease}
                 className="flex h-10 w-10 items-center justify-center bg-[#047B22] text-xl font-semibold text-white transition hover:bg-[#03641c]"
               >
                 +

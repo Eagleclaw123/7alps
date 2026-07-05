@@ -11,9 +11,22 @@ import { getProductImageUrl } from "../../features/products/utils/normalizeProdu
 
 const CART_STORAGE_KEY = "7alps-cart";
 
-const isLoggedIn = () => Boolean(localStorage.getItem("customerToken"));
+const isLoggedIn = () => {
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    return Boolean(user && user.role === "customer");
+  } catch {
+    return false;
+  }
+};
 
-const makeItemId = (productId, variantLabel) => `${productId}::${variantLabel}`;
+export const makeItemId = (productId, variantLabel) =>
+  `${productId}::${variantLabel}`;
+
+export const parseItemId = (id) => {
+  const [productId, variantLabel] = id.split("::");
+  return { productId, variantLabel };
+};
 
 const normalizeServerCartItems = (items = []) =>
   items.map((item) => ({
@@ -22,7 +35,7 @@ const normalizeServerCartItems = (items = []) =>
     variantLabel: item.variantLabel,
     weight: item.variantLabel,
     name: item.name,
-    image: getProductImageUrl(item.coverImage),
+    image: getProductImageUrl(item.image),
     category: item.category,
     price: item.price,
     quantity: item.quantity,
@@ -210,6 +223,26 @@ const cartSlice = createSlice({
     clearCart: (state) => {
       state.items = [];
     },
+  },
+  extraReducers: (builder) => {
+    const setItems = (state, action) => {
+      state.items = action.payload;
+      state.status = "succeeded";
+    };
+
+    builder
+      .addCase(fetchCart.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(fetchCart.fulfilled, setItems)
+      .addCase(fetchCart.rejected, (state) => {
+        state.status = "failed";
+      })
+      .addCase(addToCart.fulfilled, setItems)
+      .addCase(updateQuantity.fulfilled, setItems)
+      .addCase(removeCartItemAsync.fulfilled, setItems)
+      .addCase(clearCartAsync.fulfilled, setItems)
+      .addCase(mergeGuestCartOnLogin.fulfilled, setItems);
   },
 });
 
