@@ -138,7 +138,10 @@ const ProductForm = forwardRef(
         </div>
 
         <div className="mt-6">
-          <ProductVariantInput variants={variants} onChange={onVariantsChange} />
+          <ProductVariantInput
+            variants={variants}
+            onChange={onVariantsChange}
+          />
         </div>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -193,7 +196,9 @@ const ProductForm = forwardRef(
             <ProductTagInput
               tags={lists.usageSuggestions}
               onAddTag={(value) => onAddListItem("usageSuggestions", value)}
-              onRemoveTag={(value) => onRemoveListItem("usageSuggestions", value)}
+              onRemoveTag={(value) =>
+                onRemoveListItem("usageSuggestions", value)
+              }
             />
           </div>
 
@@ -205,7 +210,7 @@ const ProductForm = forwardRef(
               name="storageInstructions"
               value={formData.storageInstructions}
               onChange={onFormChange}
-              rows="2"
+              rows="4"
               placeholder="Store in a cool and dry place..."
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#0F6B3E]"
             />

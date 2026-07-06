@@ -5,11 +5,12 @@
   "main": "app.js",
   "type": "commonjs",
   "scripts": {
-    "start": "NODE_ENV=production node server.js",
-    "start:prod": "NODE_ENV=production node server.js",
-    "dev": "NODE_ENV=development nodemon server.js",
+    "start": "cross-env NODE_ENV=production node server.js",
+    "start:prod": "cross-env NODE_ENV=production node server.js",
+    "dev": "cross-env NODE_ENV=development nodemon server.js",
     "start:pm2": "pm2 start server.js --name server --env production",
     "debug": "ndb server.js",
+    "seed": "node dev-data/seedProducts.js",
     "format": "prettier --write ."
   },
   "author": "Gundu Manideep",
@@ -46,7 +47,8 @@
     "xss-clean": "^0.1.4"
   },
   "devDependencies": {
-    "prettier": "^3.3.3"
+    "prettier": "^3.3.3",
+    "cross-env": "^7.0.3"
   },
   "engines": {
     "node": ">=16.0.0"

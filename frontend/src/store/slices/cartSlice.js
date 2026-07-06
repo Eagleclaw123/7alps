@@ -21,11 +21,12 @@ const normalizeServerCartItems = (items = []) =>
     productId: item.product,
     variantLabel: item.variantLabel,
     weight: item.variantLabel,
-    name: item.name,
-    image: getProductImageUrl(item.coverImage),
-    category: item.category,
-    price: item.price,
-    quantity: item.quantity,
+    name: item.name || "Product",
+    image: getProductImageUrl(item.coverImage) || item.image,
+    category: item.category || "General",
+    price: Number(item.price || 0),
+    quantity: Number(item.quantity || 1),
+    inStock: item.inStock ?? true,
   }));
 
 const loadGuestCart = () => {
@@ -73,17 +74,22 @@ export const addToCart = createAsyncThunk(
     const existing = items.find((item) => item.id === id);
     if (existing) {
       existing.quantity += quantity;
+      if (name) existing.name = name;
+      if (image) existing.image = image;
+      if (category) existing.category = category;
+      if (price !== undefined) existing.price = Number(price);
     } else {
       items.push({
         id,
         productId,
         variantLabel,
         weight: variantLabel,
-        name,
+        name: name || "Product",
         image,
-        category,
-        price,
+        category: category || "General",
+        price: Number(price || 0),
         quantity,
+        inStock: true,
       });
     }
     persistGuestCart(items);
@@ -104,7 +110,7 @@ export const updateQuantity = createAsyncThunk(
     }
 
     const id = makeItemId(productId, variantLabel);
-    const items = getState().cart.items.map((item) =>
+    let items = getState().cart.items.map((item) =>
       item.id === id
         ? {
             ...item,
@@ -211,6 +217,45 @@ const cartSlice = createSlice({
       state.items = [];
     },
   },
+  extraReducers: (builder) => {
+    builder
+      // fetchCart
+      .addCase(fetchCart.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(fetchCart.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.items = action.payload;
+      })
+      .addCase(fetchCart.rejected, (state) => {
+        state.status = "failed";
+      })
+
+      // addToCart
+      .addCase(addToCart.fulfilled, (state, action) => {
+        state.items = action.payload;
+      })
+
+      // updateQuantity
+      .addCase(updateQuantity.fulfilled, (state, action) => {
+        state.items = action.payload;
+      })
+
+      // removeCartItemAsync
+      .addCase(removeCartItemAsync.fulfilled, (state, action) => {
+        state.items = action.payload;
+      })
+
+      // clearCartAsync
+      .addCase(clearCartAsync.fulfilled, (state) => {
+        state.items = [];
+      })
+
+      // mergeGuestCartOnLogin
+      .addCase(mergeGuestCartOnLogin.fulfilled, (state, action) => {
+        state.items = action.payload;
+      });
+  },
 });
 
 export const {
@@ -228,7 +273,8 @@ export const selectCartCount = (state) =>
 
 export const selectSubtotal = (state) =>
   state.cart.items.reduce(
-    (total, item) => total + item.price * item.quantity,
+    (total, item) =>
+      total + Number(item.price || 0) * Number(item.quantity || 1),
     0,
   );
 

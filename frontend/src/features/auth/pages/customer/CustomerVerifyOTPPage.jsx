@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
 
 import AuthLayout from "../../components/AuthLayout";
 import AuthCard from "../../components/AuthCard";
@@ -51,17 +52,28 @@ const CustomerVerifyOTPPage = () => {
 
     try {
       setLoading(true);
+
       const { data } = await verifyCustomerOTP({ mobile, otp });
 
-      localStorage.setItem("customerToken", data.token);
+      // Store JWT in cookie
+      Cookies.set("customerToken", data.token, {
+        expires: 7,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "Strict",
+      });
+
+      // Store only user details in localStorage
       localStorage.setItem(
         "user",
-        JSON.stringify({ ...data.data.customer, role: "customer" }),
+        JSON.stringify({
+          ...data.data.customer,
+          role: "customer",
+        }),
       );
 
       await dispatch(mergeGuestCartOnLogin());
 
-      navigate("/customer/dashboard", { replace: true });
+      navigate("/", { replace: true });
     } catch (error) {
       alert(error.response?.data?.message || "Invalid OTP. Please try again.");
     } finally {

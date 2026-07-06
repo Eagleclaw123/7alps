@@ -156,10 +156,6 @@ const Products = () => {
         productId: product.id,
         variantLabel: defaultVariant.label,
         quantity: 1,
-        name: product.ProductName,
-        image: product.ProductImage,
-        category: product.ProductCategory,
-        price: defaultVariant.price,
       }),
     );
   };

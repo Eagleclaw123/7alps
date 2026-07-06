@@ -48,10 +48,12 @@ const CustomerOrders = () => {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <p className="text-sm text-gray-500">
-                    Order #{order._id.slice(-8).toUpperCase()}
+                    Order #{(order._id || "").slice(-8).toUpperCase()}
                   </p>
                   <p className="text-sm text-gray-400">
-                    {new Date(order.placedAt).toLocaleString()}
+                    {new Date(
+                      order.placedAt || order.createdAt,
+                    ).toLocaleString()}
                   </p>
                 </div>
                 <span
@@ -72,14 +74,14 @@ const CustomerOrders = () => {
                     <span>
                       {item.name} ({item.variantLabel}) × {item.quantity}
                     </span>
-                    <span>₹{item.subtotal}</span>
+                    <span>₹{Number(item.subtotal || 0).toLocaleString()}</span>
                   </div>
                 ))}
               </div>
 
               <div className="mt-3 flex justify-end border-t border-gray-100 pt-3">
                 <span className="text-lg font-semibold text-[#047B22]">
-                  Total: ₹{order.totalAmount}
+                  Total: ₹{Number(order.totalAmount || 0).toLocaleString()}
                 </span>
               </div>
             </div>

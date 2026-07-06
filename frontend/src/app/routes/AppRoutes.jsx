@@ -73,11 +73,13 @@ const AppRoutes = () => {
       <Route
         path="/b2b/"
         element={
-          <ProtectedRoute role="b2b">
-            <B2BLayout />
-          </ProtectedRoute>
+          // <ProtectedRoute role="b2b">
+          <B2BLayout />
+          // </ProtectedRoute>
         }
-      ></Route>
+      >
+        <Route index element={<B2BDashboard />} />
+      </Route>
 
       <Route
         path="/admin/"

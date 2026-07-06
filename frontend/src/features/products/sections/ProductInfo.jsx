@@ -31,11 +31,6 @@ const ProductInfo = ({ product }) => {
         productId: product.id,
         variantLabel: selectedVariant.label,
         quantity,
-        name: product.ProductName,
-        image: product.ProductImage,
-        category: product.ProductCategory,
-        price: selectedVariant.price,
-        weight: selectedWeight?.weight,
       }),
     );
     setIsAdded(true);
