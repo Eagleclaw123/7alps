@@ -42,7 +42,7 @@ const CustomerRegisterPage = () => {
       await sendCustomerOTP(formData);
 
       navigate("/customer/verify-otp", {
-        state: { mobile: formData.mobile },
+        state: { mobile: formData.mobile, from: location.state?.from },
       });
     } catch (error) {
       alert(

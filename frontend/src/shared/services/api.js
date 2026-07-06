@@ -8,15 +8,6 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const isCustomerRoute = config.url?.startsWith("/customer");
-  const token = isCustomerRoute
-    ? localStorage.getItem("customerToken")
-    : localStorage.getItem("adminToken");
-
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-
   if (config.data instanceof FormData) {
     delete config.headers["Content-Type"];
   } else {

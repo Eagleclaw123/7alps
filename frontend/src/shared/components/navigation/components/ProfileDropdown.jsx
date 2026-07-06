@@ -1,8 +1,14 @@
 import { useRef, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { FiUser } from "react-icons/fi";
 import Cookies from "js-cookie";
 import { logout } from "../../../services/auth.service";
+
+import {
+  selectCustomer,
+  logoutCustomerThunk,
+} from "../../../../store/slices/authSlice";
 
 const ProfileDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,6 +19,8 @@ const ProfileDropdown = () => {
 
   const ref = useRef(null);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const customer = useSelector(selectCustomer);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -26,30 +34,21 @@ const ProfileDropdown = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleProfileClick = () => {
-    if (!user) {
-      navigate("/customer/login");
-      return;
-    }
-
-    setIsOpen((prev) => !prev);
-  };
+  if (!customer) {
+    return (
+      <Link
+        to="/customer/login"
+        className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full transition-all duration-300 hover:bg-white hover:text-gray-800"
+      >
+        <FiUser size={20} />
+      </Link>
+    );
+  }
 
   const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error(error);
-    } finally {
-      Cookies.remove("token");
-      localStorage.removeItem("user");
-
-      setIsOpen(false);
-
-      navigate("/customer/login", {
-        replace: true,
-      });
-    }
+    setIsOpen(false);
+    await dispatch(logoutCustomerThunk());
+    navigate("/");
   };
 
   return (

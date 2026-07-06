@@ -1,10 +1,12 @@
+import ImageCarousel from "../../../shared/components/ui/ImageCarousel";
+
 const ProductGallery = ({ product }) => {
   return (
     <div className="overflow-hidden rounded-2xl bg-[#F8FAF8]">
-      <img
-        src={product.ProductImage}
+      <ImageCarousel
+        images={product.ProductImages}
         alt={product.ProductName}
-        className="h-[550px] w-full object-cover"
+        imageClassName="h-[550px] w-full object-cover"
       />
     </div>
   );

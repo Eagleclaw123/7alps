@@ -1,7 +1,8 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 
 const ProtectedRoute = ({ children, role }) => {
   const user = JSON.parse(localStorage.getItem("user"));
+  const location = useLocation();
 
   if (!user) {
     switch (role) {
@@ -12,7 +13,9 @@ const ProtectedRoute = ({ children, role }) => {
         return <Navigate to="/b2b/login" replace />;
 
       case "customer":
-        return <Navigate to="/customer/login" replace />;
+        return (
+          <Navigate to="/customer/login" state={{ from: location }} replace />
+        );
 
       default:
         return <Navigate to="/" replace />;

@@ -13,12 +13,14 @@ import {
   verifyCustomerOTP,
 } from "../../../../shared/services/auth.service";
 import { mergeGuestCartOnLogin } from "../../../../store/slices/cartSlice";
+import { setCustomer } from "../../../../store/slices/authSlice";
 
 const CustomerVerifyOTPPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const mobile = location.state?.mobile;
+  const from = location.state?.from;
 
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
@@ -70,10 +72,12 @@ const CustomerVerifyOTPPage = () => {
           role: "customer",
         }),
       );
+      dispatch(setCustomer(data.data.customer));
 
       await dispatch(mergeGuestCartOnLogin());
 
-      navigate("/", { replace: true });
+      const destination = from ? `${from.pathname}${from.search || ""}` : "/";
+      navigate(destination, { replace: true });
     } catch (error) {
       alert(error.response?.data?.message || "Invalid OTP. Please try again.");
     } finally {

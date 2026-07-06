@@ -74,9 +74,6 @@ const productSchema = new mongoose.Schema(
         message: 'At least one variant is required',
       },
     },
-    coverImage: {
-      type: String,
-    },
     images: [String],
     active: {
       type: Boolean,

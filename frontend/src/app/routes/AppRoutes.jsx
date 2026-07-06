@@ -19,17 +19,15 @@ import CustomerVerifyOTPPage from "../../features/auth/pages/customer/CustomerVe
 import AdminResetPasswordPage from "../../features/auth/pages/admin/AdminResetPasswordPage";
 import B2BResetPasswordPage from "../../features/auth/pages/b2b/B2BResetPasswordPage";
 import ProductDetailsPage from "../../features/products/pages/ProductDetailsPage";
-import CustomerLayout from "../layouts/CustomerLayout";
 import AdminLayout from "../layouts/AdminLayout";
 import B2BLayout from "../layouts/B2BLayout";
 import PageNotFound from "../../features/notFound/PageNotFound";
 import B2BDashboard from "../../features/b2b/pages/B2BDashboard";
-import CustomerDashboard from "../../features/customer/pages/CustomerDashboard";
 import AdminDashboard from "../../features/admin/pages/AdminDashboard";
 import AdminProducts from "../../features/admin/pages/AdminProducts";
 import CartPage from "../../features/cart/pages/CartPage";
 import CheckoutPage from "../../features/cart/pages/CheckoutPage";
-import CustomerOrders from "../../features/customer/pages/CustomerOrders";
+import OrdersPage from "../../features/orders/pages/OrdersPage";
 import ProtectedRoute from "./ProtectedRoute";
 import AdminOrders from "../../features/admin/pages/AdminOrders";
 
@@ -55,19 +53,14 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
-      </Route>
-
-      <Route
-        path="/customer"
-        element={
-          <ProtectedRoute role="customer">
-            <CustomerLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<CustomerDashboard />} />
-        <Route path="dashboard" element={<CustomerDashboard />} />
-        <Route path="orders" element={<CustomerOrders />} />
+        <Route
+          path="/customer/orders"
+          element={
+            <ProtectedRoute role="customer">
+              <OrdersPage />
+            </ProtectedRoute>
+          }
+        />
       </Route>
 
       <Route

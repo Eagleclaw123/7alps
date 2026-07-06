@@ -273,8 +273,10 @@ Returns all **active** products. Optional query params:
           { "label": "100g", "price": 249, "mrp": 299, "stock": 20, "isDefault": true },
           { "label": "250g", "price": 499, "mrp": 599, "stock": 10, "isDefault": false }
         ],
-        "coverImage": "https://pub-xxxxxxxx.r2.dev/products/1234567890-abc123.png",
-        "images": ["https://pub-xxxxxxxx.r2.dev/products/1234567891-def456.png"],
+        "images": [
+          "https://pub-xxxxxxxx.r2.dev/products/1234567890-abc123.png",
+          "https://pub-xxxxxxxx.r2.dev/products/1234567891-def456.png"
+        ],
         "active": true,
         "orderCount": 12,
         "inStock": true,
@@ -288,8 +290,9 @@ Returns all **active** products. Optional query params:
 }
 ```
 
-> **Images:** `coverImage`/`images` are full public URLs on Cloudflare R2 (uploaded there directly
-> on create/update, deleted from R2 on replace/delete) — use them as-is, no URL building needed.  
+> **Images:** `images` is an array of full public URLs on Cloudflare R2 (uploaded there directly
+> on create/update, deleted from R2 on replace/delete) — use them as-is, no URL building needed.
+> The first entry is treated as the primary/thumbnail image; a product can have 1 or many.
 > `inStock`, `minPrice`, `maxPrice` are computed virtuals (not stored).
 
 ---
@@ -335,8 +338,7 @@ Create a new product. Send as `multipart/form-data`.
 | `storageInstructions`  | string |          | Storage guidance                                                           |
 | `tags`                 | JSON array or comma-separated string |  | Search/filter tags                                 |
 | `active`               | boolean |          | Default `true`                                                            |
-| `coverImage`           | file   |          | Main image (max 5 MB) — uploaded to Cloudflare R2                          |
-| `images`               | file[] |          | Gallery images, up to 5 (max 5 MB each) — uploaded to Cloudflare R2        |
+| `images`               | file[] |          | 1 or more images, up to 8 (max 5 MB each) — uploaded to Cloudflare R2      |
 
 **Response `201`:** `{ "status": "success", "data": { "product": {...} } }`
 
@@ -351,8 +353,8 @@ Get a single product by ID (admin view — works even if inactive).
 #### PATCH `/products/:id`
 
 Update a product. Send as `multipart/form-data`. Only send fields you want to change.
-Uploading new `coverImage` / `images` uploads the new files to R2 and deletes the old
-ones from R2.
+Uploading new `images` replaces the entire array — the new files are uploaded to R2 and
+the old ones are deleted from R2.
 
 **Fields:** Same as POST.
 
@@ -447,7 +449,7 @@ never out of sync with catalog changes.
         {
           "product": "...",
           "name": "...",
-          "coverImage": "...",
+          "image": "...",
           "category": "...",
           "variantLabel": "100g",
           "price": 249,
