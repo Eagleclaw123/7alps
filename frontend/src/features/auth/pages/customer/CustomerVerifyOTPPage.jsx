@@ -57,13 +57,6 @@ const CustomerVerifyOTPPage = () => {
 
       const { data } = await verifyCustomerOTP({ mobile, otp });
 
-      // Store JWT in cookie
-      Cookies.set("customerToken", data.token, {
-        expires: 7,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "Strict",
-      });
-
       // Store only user details in localStorage
       localStorage.setItem(
         "user",

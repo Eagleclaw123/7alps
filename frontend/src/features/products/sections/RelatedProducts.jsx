@@ -43,7 +43,7 @@ const RelatedProducts = ({ currentProduct }) => {
   if (!relatedProducts.length) return null;
 
   return (
-    <section className="pb-16 px-6 xl:px-0">
+    <section className="py-16 px-6 xl:px-0">
       <div className="mx-auto max-w-7xl">
         <h2 className="mb-10 text-4xl font-semibold">Related Products</h2>
 

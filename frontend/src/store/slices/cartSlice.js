@@ -60,6 +60,7 @@ const persistGuestCart = (items) => {
 
 const initialState = {
   items: loadGuestCart(),
+  buyNowItem: null,
   status: "idle",
 };
 
@@ -228,6 +229,13 @@ const cartSlice = createSlice({
     clearCart: (state) => {
       state.items = [];
     },
+    setBuyNowItem: (state, action) => {
+      state.buyNowItem = action.payload;
+    },
+
+    clearBuyNowItem: (state) => {
+      state.buyNowItem = null;
+    },
   },
   extraReducers: (builder) => {
     const setItems = (state, action) => {
@@ -257,12 +265,16 @@ export const {
   decreaseQuantity,
   removeItem,
   clearCart,
+  setBuyNowItem,
+  clearBuyNowItem,
 } = cartSlice.actions;
 
 export const selectCartItems = (state) => state.cart.items;
 
 export const selectCartCount = (state) =>
   state.cart.items.reduce((count, item) => count + item.quantity, 0);
+
+export const selectBuyNowItem = (state) => state.cart.buyNowItem;
 
 export const selectSubtotal = (state) =>
   state.cart.items.reduce(

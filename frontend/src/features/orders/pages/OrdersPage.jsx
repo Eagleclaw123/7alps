@@ -22,11 +22,13 @@ const OrdersPage = () => {
   }, []);
 
   return (
-    <div className="py-8 mt-16 px-6 xl:px-0">
-      <div className="mx-auto max-w-5xl space-y-6">
+    <div className="py-20 mt-16 px-6 xl:px-0">
+      <div className="mx-auto max-w-7xl space-y-6">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900">My Orders</h2>
-          <p className="mt-2 text-gray-500">Track and review your past orders.</p>
+          <h2 className="text-3xl font-semibold text-gray-900">My Orders</h2>
+          <p className="mt-2 text-gray-500">
+            Track and review your past orders.
+          </p>
         </div>
 
         {location.state?.justPlaced ? (

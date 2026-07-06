@@ -38,13 +38,13 @@ const AdminLoginPage = () => {
 
       const adminUser = responseData?.data?.user;
 
-      if (adminUser) {
-        localStorage.setItem("admin", JSON.stringify(adminUser));
-        localStorage.setItem(
-          "user",
-          JSON.stringify({ ...adminUser, role: "admin" }),
-        );
-      }
+      // if (adminUser) {
+      //   localStorage.setItem("admin", JSON.stringify(adminUser));
+      //   localStorage.setItem(
+      //     "user",
+      //     JSON.stringify({ ...adminUser, role: "admin" }),
+      //   );
+      // }
 
       navigate("/admin", {
         replace: true,

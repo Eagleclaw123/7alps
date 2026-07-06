@@ -12,7 +12,12 @@ import {
   selectCartItems,
 } from "../../../store/slices/cartSlice";
 
-const ProductCard = ({ product, variants, onFavoriteClick, className = "" }) => {
+const ProductCard = ({
+  product,
+  variants,
+  onFavoriteClick,
+  className = "",
+}) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const cartItems = useSelector(selectCartItems);
@@ -79,10 +84,14 @@ const ProductCard = ({ product, variants, onFavoriteClick, className = "" }) => 
       variants={variants}
     >
       <div className="relative group h-72">
-        <ImageCarousel
-          images={product.ProductImages}
+        <img
+          src={
+            Array.isArray(product.ProductImages)
+              ? product.ProductImages[0]
+              : product.ProductImage
+          }
           alt={product.ProductName}
-          imageClassName="w-full h-72 object-cover"
+          className="w-full h-72 object-cover"
         />
 
         <div className="absolute top-4 right-4 opacity-100 xl:opacity-0 xl:group-hover:opacity-100 transition-all duration-300">

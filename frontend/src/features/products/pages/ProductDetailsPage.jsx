@@ -5,11 +5,11 @@ import { normalizeProduct } from "../utils/normalizeProduct";
 
 import ProductGallery from "../sections/ProductGallery";
 import ProductInfo from "../sections/ProductInfo";
-import ProductBenefits from "../sections/ProductBenefits";
 import ProductIngredients from "../sections/ProductIngredients";
 import ProductReviews from "../sections/ProductReviews";
 import RelatedProducts from "../sections/RelatedProducts";
 import AnimatedPage from "../../../shared/components/ui/AnimatedPage";
+import ProductHighlights from "../sections/ProductHighlights";
 
 const ProductDetailsPage = () => {
   const { id } = useParams();
@@ -55,7 +55,7 @@ const ProductDetailsPage = () => {
         </div>
       </section>
 
-      <ProductBenefits product={product} />
+      <ProductHighlights product={product} />
       <ProductIngredients product={product} />
       <ProductReviews product={product} />
       <RelatedProducts currentProduct={product} />

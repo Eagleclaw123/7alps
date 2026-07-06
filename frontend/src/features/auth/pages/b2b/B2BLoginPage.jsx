@@ -42,7 +42,7 @@ const B2BLoginPage = () => {
       const { data } = await b2bLogin(formData);
 
       // Store only non-sensitive business information
-      localStorage.setItem("b2b", JSON.stringify(data.business));
+      // localStorage.setItem("b2b", JSON.stringify(data.business));
 
       navigate("/b2b/dashboard", {
         replace: true,

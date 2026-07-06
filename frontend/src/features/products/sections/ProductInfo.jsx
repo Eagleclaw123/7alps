@@ -2,19 +2,18 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { IoIosStar, IoIosStarHalf, IoIosStarOutline } from "react-icons/io";
 
-import { addToCart } from "../../../store/slices/cartSlice";
+import { addToCart, setBuyNowItem } from "../../../store/slices/cartSlice";
+import { useNavigate } from "react-router-dom";
 
 const ProductInfo = ({ product }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const variants = Array.isArray(product.variants) ? product.variants : [];
-  const weights = Array.isArray(product.weights) ? product.weights : [];
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState(
     variants.find((v) => v.isDefault) || variants[0],
   );
-  const [selectedWeight, setSelectedWeight] = useState(
-    weights.find((w) => w.isDefault) || weights[0],
-  );
+
   const [isAdded, setIsAdded] = useState(false);
 
   const rating = Number(5);
@@ -34,6 +33,35 @@ const ProductInfo = ({ product }) => {
       }),
     );
     setIsAdded(true);
+  };
+
+  const handleBuyNow = () => {
+    dispatch(
+      setBuyNowItem({
+        productId: product.id,
+        variantLabel: selectedVariant.label,
+        quantity,
+        price: selectedVariant.price,
+        image: product.ProductImage,
+        name: product.ProductName,
+        category: product.ProductCategory,
+      }),
+    );
+
+    navigate("/checkout");
+  };
+
+  const formatWeight = (grams) => {
+    const value = Number(grams);
+    if (Number.isNaN(value)) return grams;
+
+    if (value >= 1000) {
+      const kg = value / 1000;
+      // show up to 2 decimals, but trim trailing zeros (1.5kg, not 1.50kg)
+      return `${parseFloat(kg.toFixed(2))}KG`;
+    }
+
+    return `${value} G`;
   };
 
   return (
@@ -94,7 +122,7 @@ const ProductInfo = ({ product }) => {
             </div>
 
             {/* Variant Options */}
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            <div className="flex flex-wrap gap-3">
               {variants.map((variant) => {
                 const isSelected = selectedVariant?.label === variant.label;
 
@@ -106,67 +134,29 @@ const ProductInfo = ({ product }) => {
                       setSelectedVariant(variant);
                       setIsAdded(false);
                     }}
-                    className={`rounded-xl border px-5 py-4 transition-all duration-300 ${
+                    className={`relative w-fit rounded-full border-2 px-4 py-2 transition-all duration-200 ${
                       isSelected
                         ? "border-[#047B22] bg-[#F4FBF6]"
-                        : "border-gray-200 bg-white hover:border-[#047B22] hover:bg-[#F8FAF8]"
+                        : "border-gray-200 bg-white hover:border-[#047B22]/50 hover:bg-[#F8FAF8]"
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <span
-                        className={`font-semibold ${
-                          isSelected ? "text-[#047B22]" : "text-[#2C2C2C]"
-                        }`}
-                      >
-                        {variant.label}
-                      </span>
-
-                      <span
-                        className={`text-sm ${
-                          isSelected ? "text-[#047B22]" : "text-gray-500"
-                        }`}
-                      >
-                        ₹{variant.price}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        ) : null}
-
-        {weights.length ? (
-          <div className="flex flex-wrap items-center gap-4">
-            {weights.map((item) => {
-              const isSelected = selectedWeight?.id === item.id;
-
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => {
-                    setSelectedWeight(item);
-                    setIsAdded(false);
-                  }}
-                  className={`rounded-full border px-6 py-2 transition-all duration-300 ${
-                    isSelected
-                      ? "border-[#047B22] bg-[#F4FBF6]"
-                      : "border-gray-200 bg-white hover:border-[#047B22] hover:bg-[#F8FAF8]"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
                     <span
                       className={`font-semibold ${
                         isSelected ? "text-[#047B22]" : "text-[#2C2C2C]"
                       }`}
                     >
-                      {item.weight}
+                      {formatWeight(variant.label)}
                     </span>
-                  </div>
-                </button>
-              );
-            })}
+
+                    {isSelected ? (
+                      <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#047B22] text-[10px] font-bold text-white">
+                        ✓
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         ) : null}
 
@@ -196,8 +186,13 @@ const ProductInfo = ({ product }) => {
           >
             {isAdded ? "Added to Cart" : "Add to Cart"}
           </button>
-
-          <button className="rounded-xl border px-8 py-4">Buy Now</button>
+          <button
+            onClick={handleBuyNow}
+            disabled={!selectedVariant || selectedVariant.stock <= 0}
+            className="rounded-xl border px-8 py-4 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Buy Now
+          </button>{" "}
         </div>
       </div>
     </div>

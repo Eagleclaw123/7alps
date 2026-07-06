@@ -61,23 +61,7 @@ const MobileSidebar = ({ isOpen, onClose, isActive }) => (
             className="flex items-center gap-3 rounded-xl border p-4 transition hover:border-[#0F6B3E] hover:bg-[#F8FAF7]"
           >
             <FiUser className="text-xl text-[#0F6B3E]" />
-            Customer Login
-          </Link>
-
-          <Link
-            to="/b2b/login"
-            className="flex items-center gap-3 rounded-xl border p-4 transition hover:border-[#0F6B3E] hover:bg-[#F8FAF7]"
-          >
-            <FiBriefcase className="text-xl text-[#0F6B3E]" />
-            B2B Login
-          </Link>
-
-          <Link
-            to="/admin/login"
-            className="flex items-center gap-3 rounded-xl border p-4 transition hover:border-[#0F6B3E] hover:bg-[#F8FAF7]"
-          >
-            <FiShield className="text-xl text-[#0F6B3E]" />
-            Admin Login
+            Login
           </Link>
         </div>
       </div>

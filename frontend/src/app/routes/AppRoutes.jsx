@@ -27,9 +27,10 @@ import AdminDashboard from "../../features/admin/pages/AdminDashboard";
 import AdminProducts from "../../features/admin/pages/AdminProducts";
 import CartPage from "../../features/cart/pages/CartPage";
 import CheckoutPage from "../../features/cart/pages/CheckoutPage";
-import OrdersPage from "../../features/orders/pages/OrdersPage";
 import ProtectedRoute from "./ProtectedRoute";
 import AdminOrders from "../../features/admin/pages/AdminOrders";
+import CustomerOrders from "../../features/customer/pages/CustomerOrders";
+import CustomerProfile from "../../features/customer/pages/CustomerProfile";
 
 const AppRoutes = () => {
   return (
@@ -53,11 +54,21 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/customer/orders"
           element={
             <ProtectedRoute role="customer">
-              <OrdersPage />
+              <CustomerOrders />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/customer/profile"
+          element={
+            <ProtectedRoute role="customer">
+              <CustomerProfile />
             </ProtectedRoute>
           }
         />

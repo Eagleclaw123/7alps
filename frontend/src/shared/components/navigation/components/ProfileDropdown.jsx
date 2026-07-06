@@ -12,15 +12,14 @@ import {
 
 const ProfileDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
-
-  const user = JSON.parse(localStorage.getItem("user"));
+  const customer = useSelector(selectCustomer);
+  const user = customer;
 
   const initial = user?.name?.charAt(0).toUpperCase();
 
   const ref = useRef(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const customer = useSelector(selectCustomer);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -47,17 +46,23 @@ const ProfileDropdown = () => {
 
   const handleLogout = async () => {
     setIsOpen(false);
-    await dispatch(logoutCustomerThunk());
-    navigate("/");
-  };
 
+    try {
+      await dispatch(logoutCustomerThunk()).unwrap();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      localStorage.removeItem("user");
+      navigate("/", { replace: true });
+    }
+  };
   return (
     <div ref={ref} className="relative">
       <button
-        onClick={handleProfileClick}
+        onClick={() => setIsOpen((prev) => !prev)}
         className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full transition-all duration-300 hover:bg-white hover:text-gray-800"
       >
-        {user ? (
+        {customer ? (
           <span className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold border">
             {initial}
           </span>
@@ -66,7 +71,7 @@ const ProfileDropdown = () => {
         )}
       </button>
 
-      {user && isOpen && (
+      {customer && isOpen && (
         <div className="absolute right-0 top-14 w-52 overflow-hidden rounded-xl bg-white text-gray-800 shadow-xl">
           <Link
             to="/customer/profile"

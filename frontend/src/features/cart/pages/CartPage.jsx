@@ -11,6 +11,7 @@ import {
   parseItemId,
   selectCartItems,
   selectSubtotal,
+  selectCartCount,
   updateQuantity as updateQuantityThunk,
 } from "../../../store/slices/cartSlice";
 import NewsletterBanner from "../components/NewsletterBanner";
@@ -33,13 +34,9 @@ const CartPage = () => {
     );
   };
 
-  const removeItemFromCart = (item) => {
-    dispatch(
-      removeCartItemAsync({
-        productId: item.productId,
-        variantLabel: item.variantLabel,
-      }),
-    );
+  const removeItemFromCart = (id) => {
+    const { productId, variantLabel } = parseItemId(id);
+    dispatch(removeCartItemAsync({ productId, variantLabel }));
   };
 
   return (
@@ -48,7 +45,7 @@ const CartPage = () => {
         <CartBanner />
 
         <div className="py-6">
-          <h1 className="mb-6 text-3xl font-bold text-gray-900">
+          <h1 className="mb-6 text-3xl font-semibold text-gray-900">
             Shopping Cart
           </h1>
 
@@ -57,7 +54,7 @@ const CartPage = () => {
             <CartList
               items={items}
               onUpdateQuantity={handleUpdateQuantity}
-              onRemove={handleRemove}
+              onRemove={removeItemFromCart}
             />
             <CartFooter
               subtotal={subtotal}

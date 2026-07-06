@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { fetchCart, selectCartCount } from "../../../../store/slices/cartSlice";
+import { fetchCart, selectCartItems } from "../../../../store/slices/cartSlice";
 import { fetchCustomerStatus } from "../../../../store/slices/authSlice";
 import DesktopNav from "../components/DesktopNav";
 import MobileSidebar from "../components/MobileSidebar";
@@ -11,7 +11,7 @@ import { useIsActive } from "../components/useIsActive";
 const Header = () => {
   const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(false);
-  const cartCount = useSelector(selectCartCount);
+  const cartCount = useSelector(selectCartItems);
   const isActive = useIsActive();
 
   useEffect(() => {
@@ -21,7 +21,7 @@ const Header = () => {
 
   return (
     <header className="fixed top-5 left-0 w-full z-50 px-4">
-      <DesktopNav isActive={isActive} cartCount={cartCount} />
+      <DesktopNav isActive={isActive} cartCount={cartCount.length} />
       <MobileToggle isOpen={isOpen} onToggle={() => setIsOpen(!isOpen)} />
       <MobileSidebar
         isOpen={isOpen}
