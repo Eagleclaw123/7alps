@@ -3,6 +3,7 @@ import { Minus, Plus } from "lucide-react";
 const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
   const price = Number(item.price || 0);
   const quantity = Number(item.quantity || 1);
+  console.log("item:", item);
 
   return (
     <div className="grid grid-cols-[2.2fr_1fr_0.8fr_1fr_0.8fr] items-center gap-4 border-t border-gray-100 py-4">

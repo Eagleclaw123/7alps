@@ -1,6 +1,6 @@
 const AuthLayout = ({ children }) => {
   return (
-    <section className="min-h-screen">
+    <section>
       <div className="mx-auto grid min-h-screen max-w-8xl lg:grid-cols-2 gap-10">
         {/* Left Side */}
         <div className="relative hidden overflow-hidden bg-[#0F6B3E] lg:flex">

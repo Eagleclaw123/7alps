@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+
 import Cookies from "js-cookie";
 
 import AuthLayout from "../../components/AuthLayout";
@@ -49,6 +50,7 @@ const CustomerVerifyOTPPage = () => {
 
     if (otp.length !== 6) {
       alert("Please enter the complete OTP.");
+
       return;
     }
 

@@ -6,7 +6,7 @@ export const orderData = [
     items: 3,
     payment: "Credit Card",
     status: "Delivered",
-    invoice: "INV-10234.pdf",
+    mobile: "8106801326",
   },
   {
     id: "ORD-10235",
@@ -15,7 +15,7 @@ export const orderData = [
     items: 1,
     payment: "PayPal",
     status: "Processing",
-    invoice: "INV-10235.pdf",
+    mobile: "8106801326",
   },
   {
     id: "ORD-10236",
@@ -24,7 +24,7 @@ export const orderData = [
     items: 5,
     payment: "UPI",
     status: "Shipped",
-    invoice: "INV-10236.pdf",
+    mobile: "8106801326",
   },
   {
     id: "ORD-10237",
@@ -33,7 +33,7 @@ export const orderData = [
     items: 1,
     payment: "Debit Card",
     status: "Cancelled",
-    invoice: "INV-10237.pdf",
+    mobile: "8106801326",
   },
   {
     id: "ORD-10238",
@@ -42,7 +42,7 @@ export const orderData = [
     items: 2,
     payment: "Cash on Delivery",
     status: "Pending",
-    invoice: "INV-10238.pdf",
+    mobile: "8106801326",
   },
   {
     id: "ORD-10239",
@@ -51,7 +51,7 @@ export const orderData = [
     items: 4,
     payment: "Credit Card",
     status: "Delivered",
-    invoice: "INV-10239.pdf",
+    mobile: "8106801326",
   },
   {
     id: "ORD-10240",
@@ -60,6 +60,6 @@ export const orderData = [
     items: 1,
     payment: "Net Banking",
     status: "Refunded",
-    invoice: "INV-10240.pdf",
+    mobile: "8106801326",
   },
 ];

@@ -31,6 +31,13 @@ import ProtectedRoute from "./ProtectedRoute";
 import AdminOrders from "../../features/admin/pages/AdminOrders";
 import CustomerOrders from "../../features/customer/pages/CustomerOrders";
 import CustomerProfile from "../../features/customer/pages/CustomerProfile";
+import AdminCustomers from "../../features/admin/pages/AdminCustomers";
+import AdminCategories from "../../features/admin/pages/AdminCategories";
+import AdminReviews from "../../features/admin/pages/AdminReviews";
+import BulkOrders from "../../features/b2b/pages/BulkOrders";
+import RequestQuote from "../../features/b2b/pages/RequestQuote";
+import OrderHistory from "../../features/b2b/pages/OrderHistory";
+import Catalog from "../../features/b2b/pages/Catalog";
 
 const AppRoutes = () => {
   return (
@@ -83,6 +90,10 @@ const AppRoutes = () => {
         }
       >
         <Route index element={<B2BDashboard />} />
+        <Route path="bulk-orders" element={<BulkOrders />} />
+        <Route path="request-quote" element={<RequestQuote />} />
+        <Route path="orders" element={<OrderHistory />} />
+        <Route path="catalog" element={<Catalog />} />
       </Route>
 
       <Route
@@ -96,6 +107,9 @@ const AppRoutes = () => {
         <Route index element={<AdminDashboard />} />
         <Route path="products" element={<AdminProducts />} />
         <Route path="orders" element={<AdminOrders />} />
+        <Route path="customers" element={<AdminCustomers />} />
+        <Route path="categories" element={<AdminCategories />} />
+        <Route path="reviews" element={<AdminReviews />} />
         {/* Add more admin routes here */}
       </Route>
       <Route element={<AuthLayout />}>

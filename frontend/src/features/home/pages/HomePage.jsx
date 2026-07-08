@@ -3,7 +3,6 @@ import { SEO, homeSEO } from "../../../shared/seo";
 
 import Banner from "../sections/Banner";
 import Categories from "../sections/Categories";
-import Contact from "../sections/Contact";
 import FAQs from "../sections/FAQs";
 import FeatureMarquee from "../sections/FeatureMarquee";
 import GlobalTrade from "../sections/GlobalTrade";
@@ -29,8 +28,6 @@ const HomePage = () => {
         <Banner />
         <Testimonials />
         <FAQs />
-
-        <Contact />
       </AnimatedPage>
     </>
   );

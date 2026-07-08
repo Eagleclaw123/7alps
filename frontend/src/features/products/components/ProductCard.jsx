@@ -25,6 +25,12 @@ const ProductCard = ({
   const defaultVariant =
     product.variants?.find((v) => v.isDefault) || product.variants?.[0];
 
+  // Stock is tracked per-variant on the backend, so we check the
+  // currently selected (default) variant's stock rather than a
+  // top-level flag.
+  const availableStock = defaultVariant?.stock ?? 0;
+  const isOutOfStock = !defaultVariant || availableStock <= 0;
+
   const cartItem = defaultVariant
     ? cartItems.find(
         (item) =>
@@ -36,7 +42,7 @@ const ProductCard = ({
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
-    if (!defaultVariant) return;
+    if (!defaultVariant || isOutOfStock) return;
 
     dispatch(
       addToCart({
@@ -52,6 +58,10 @@ const ProductCard = ({
   };
 
   const handleIncrease = (e) => {
+    e.stopPropagation();
+    if (!defaultVariant) return;
+    // Don't allow increasing past available stock
+    if (quantity >= availableStock) return;
     handleAddToCart(e);
   };
 
@@ -106,8 +116,18 @@ const ProductCard = ({
           </button>
         </div>
 
-        <div className="absolute bottom-4 right-4 bg-white px-3 py-1 rounded-full shadow-md text-sm font-medium">
+        {/* {isOutOfStock && (
+          <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded-full shadow-md text-xs font-medium">
+            Out of Stock
+          </div>
+        )} */}
+
+        {/* <div className="absolute bottom-4 right-4 bg-white px-3 py-1 rounded-full shadow-md text-sm font-medium">
           ⭐ {product.ProductRating}
+        </div> */}
+
+        <div className="absolute bottom-4 right-4 bg-white px-3 py-1 rounded-full shadow-md text-sm font-medium">
+          ⭐ 4.5
         </div>
       </div>
 
@@ -119,14 +139,18 @@ const ProductCard = ({
         <div className="flex items-center justify-between gap-4">
           <div className="text-lg font-semibold">₹{product.ProductPrice}</div>
           {quantity === 0 ? (
-            <Button
-              variant="primary"
-              size="md"
-              className="w-30"
-              onClick={handleAddToCart}
-            >
-              Add to Cart
-            </Button>
+            isOutOfStock ? (
+              <p className="text-red-600">Out of Stock</p>
+            ) : (
+              <Button
+                variant="primary"
+                size="md"
+                className="w-30"
+                onClick={handleAddToCart}
+              >
+                Add to Cart
+              </Button>
+            )
           ) : (
             <div
               className="flex items-center overflow-hidden rounded-xl border border-[#047B22]"
@@ -145,7 +169,8 @@ const ProductCard = ({
 
               <button
                 onClick={handleIncrease}
-                className="flex h-10 w-10 items-center justify-center bg-[#047B22] text-xl font-semibold text-white transition hover:bg-[#03641c]"
+                disabled={quantity >= availableStock}
+                className="flex h-10 w-10 items-center justify-center bg-[#047B22] text-xl font-semibold text-white transition hover:bg-[#03641c] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 +
               </button>

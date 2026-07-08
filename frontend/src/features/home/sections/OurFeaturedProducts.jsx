@@ -36,13 +36,30 @@ const cardVariants = {
 const OurFeaturedProducts = () => {
   const [activeTab, setActiveTab] = useState("All");
   const [productsData, setProductsData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
 
-    getPublicProducts().then(({ data }) => {
-      if (!cancelled) setProductsData(normalizeProducts(data?.data?.products));
-    });
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+
+        const { data } = await getPublicProducts();
+
+        if (!cancelled) {
+          setProductsData(normalizeProducts(data?.data?.products));
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchProducts();
 
     return () => {
       cancelled = true;
@@ -106,23 +123,27 @@ const OurFeaturedProducts = () => {
           </button>
         </div>
 
-        <motion.div
-          key={activeTab}
-          className="products-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          {filteredProducts.slice(0, 6).map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              variants={cardVariants}
-              showActions={false}
-              className="h-full"
-            />
-          ))}
-        </motion.div>
+        {loading ? (
+          <p className="py-10 text-center text-gray-500">Loading products...</p>
+        ) : (
+          <motion.div
+            key={activeTab}
+            className="products-grid grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            {filteredProducts.slice(0, 6).map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                variants={cardVariants}
+                showActions={false}
+                className="h-full"
+              />
+            ))}
+          </motion.div>
+        )}
 
         <motion.div
           className="text-center"

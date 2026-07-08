@@ -26,7 +26,7 @@ const contactDetails = [
 const ContactInfoCard = () => {
   return (
     <div className="group rounded-3xl pt-10">
-      <div className="flex items-center gap-2 text-[#0F6B3E] font-semibold text-lg">
+      <div className="flex items-center gap-2 text-[#0F6B3E] font-semibold text-sm mb-2 border border-[#0F6B3E] w-fit px-3 py-1 rounded-full">
         <FiPhone />
         <p>Contact Us</p>
       </div>

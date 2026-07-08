@@ -48,7 +48,7 @@ const ProductDetailsPage = () => {
 
   return (
     <>
-      <section className="py-20 mt-20 px-6">
+      <section className="py-20 mt-10 px-6">
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-2">
           <ProductGallery product={product} />
           <ProductInfo product={product} />

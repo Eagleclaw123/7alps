@@ -12,6 +12,19 @@ const initialFormData = {
   mobile: "",
 };
 
+const validateMobile = (mobile) => {
+  if (!mobile) {
+    return "Mobile number is required.";
+  }
+  if (mobile.length !== 10) {
+    return "Mobile number must be exactly 10 digits.";
+  }
+  if (!/^[6-9]\d{9}$/.test(mobile)) {
+    return "Enter a valid Indian mobile number.";
+  }
+  return "";
+};
+
 const CustomerLoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -19,6 +32,8 @@ const CustomerLoginPage = () => {
 
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState(initialFormData);
+  const [error, setError] = useState("");
+  const [touched, setTouched] = useState(false);
 
   const handleChange = ({ target: { name, value } }) => {
     // Allow only numbers
@@ -27,15 +42,29 @@ const CustomerLoginPage = () => {
     setFormData({
       mobile,
     });
+
+    if (touched) {
+      setError(validateMobile(mobile));
+    }
+  };
+
+  const handleBlur = () => {
+    setTouched(true);
+    setError(validateMobile(formData.mobile));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (formData.mobile.length !== 10) {
-      alert("Please enter a valid 10-digit mobile number.");
+    const validationError = validateMobile(formData.mobile);
+    setTouched(true);
+
+    if (validationError) {
+      setError(validationError);
       return;
     }
+
+    setError("");
 
     try {
       setLoading(true);
@@ -49,10 +78,13 @@ const CustomerLoginPage = () => {
           from,
         },
       });
-    } catch (error) {
-      const message = error.response?.data?.message;
+    } catch (err) {
+      const message = err.response?.data?.message;
 
-      if (error.response?.status === 400 && message?.includes("provide your name")) {
+      if (
+        err.response?.status === 400 &&
+        message?.includes("provide your name")
+      ) {
         // No account exists for this number yet — send them to register instead
         // of dead-ending on an error.
         navigate("/customer/register", {
@@ -61,11 +93,12 @@ const CustomerLoginPage = () => {
         return;
       }
 
-      console.error(error);
-      alert(message || "Unable to send OTP. Please try again.");
+      console.error(err);
+      setError(message || "Unable to send OTP. Please try again.");
     } finally {
       setLoading(false);
       setFormData(initialFormData);
+      setTouched(false);
     }
   };
 
@@ -85,18 +118,27 @@ const CustomerLoginPage = () => {
           subtitle="Login using your registered mobile number."
         />
 
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          <AuthInput
-            name="mobile"
-            label="Mobile Number"
-            type="tel"
-            placeholder="Enter your mobile number"
-            value={formData.mobile}
-            onChange={handleChange}
-            maxLength={10}
-          />
+        <form className="space-y-6" onSubmit={handleSubmit} noValidate>
+          <div>
+            <AuthInput
+              name="mobile"
+              label="Mobile Number"
+              type="tel"
+              placeholder="Enter your mobile number"
+              value={formData.mobile}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              maxLength={10}
+            />
+            {error ? (
+              <p className="mt-1.5 text-sm text-red-600">{error}</p>
+            ) : null}
+          </div>
 
-          <AuthButton type="submit" disabled={loading}>
+          <AuthButton
+            type="submit"
+            disabled={loading || formData.mobile.length !== 10}
+          >
             {loading ? "Sending OTP..." : "Send OTP"}
           </AuthButton>
 

@@ -9,6 +9,7 @@ import {
   selectShipping,
   selectSubtotal,
   selectTotal,
+  clearBuyNowItem,
 } from "../../../store/slices/cartSlice";
 import { createOrder } from "../../../shared/services/order.service";
 
@@ -20,6 +21,44 @@ const initialAddress = {
   city: "",
   state: "",
   pincode: "",
+};
+
+const validators = {
+  name: (value) => {
+    if (!value.trim()) return "Full name is required";
+    if (!/^[A-Za-z\s.'-]{3,50}$/.test(value.trim()))
+      return "Enter a valid name (letters only, 3-50 characters)";
+    return "";
+  },
+  phone: (value) => {
+    if (!value.trim()) return "Phone number is required";
+    if (!/^[6-9]\d{9}$/.test(value.trim()))
+      return "Enter a valid 10-digit mobile number";
+    return "";
+  },
+  line1: (value) => {
+    if (!value.trim()) return "Address line 1 is required";
+    if (value.trim().length < 5) return "Address seems too short";
+    return "";
+  },
+  line2: () => "",
+  city: (value) => {
+    if (!value.trim()) return "City is required";
+    if (!/^[A-Za-z\s.'-]{2,50}$/.test(value.trim()))
+      return "Enter a valid city name";
+    return "";
+  },
+  state: (value) => {
+    if (!value.trim()) return "State is required";
+    if (!/^[A-Za-z\s.'-]{2,50}$/.test(value.trim()))
+      return "Enter a valid state name";
+    return "";
+  },
+  pincode: (value) => {
+    if (!value.trim()) return "Pincode is required";
+    if (!/^\d{6}$/.test(value.trim())) return "Enter a valid 6-digit pincode";
+    return "";
+  },
 };
 
 const CheckoutPage = () => {
@@ -37,21 +76,55 @@ const CheckoutPage = () => {
   const shipping = subtotal > 999 ? 0 : subtotal > 0 ? 99 : 0;
 
   const total = subtotal + shipping;
-  // const subtotal = useSelector(selectSubtotal);
-  // const shipping = useSelector(selectShipping);
-  // const total = useSelector(selectTotal);
 
   const [address, setAddress] = useState(initialAddress);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [touched, setTouched] = useState({});
 
   const handleChange = ({ target: { name, value } }) => {
     setAddress((prev) => ({ ...prev, [name]: value }));
+
+    if (touched[name]) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        [name]: validators[name] ? validators[name](value) : "",
+      }));
+    }
+  };
+
+  const handleBlur = ({ target: { name, value } }) => {
+    setTouched((prev) => ({ ...prev, [name]: true }));
+    setFieldErrors((prev) => ({
+      ...prev,
+      [name]: validators[name] ? validators[name](value) : "",
+    }));
+  };
+
+  const validateAll = () => {
+    const nextErrors = {};
+    Object.keys(validators).forEach((field) => {
+      nextErrors[field] = validators[field](address[field] || "");
+    });
+    setFieldErrors(nextErrors);
+    setTouched(
+      Object.keys(validators).reduce((acc, field) => {
+        acc[field] = true;
+        return acc;
+      }, {}),
+    );
+    return Object.values(nextErrors).every((msg) => !msg);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    if (!validateAll()) {
+      setError("Please fix the errors below before placing your order.");
+      return;
+    }
 
     try {
       setSubmitting(true);
@@ -83,8 +156,8 @@ const CheckoutPage = () => {
   if (items.length === 0) return null;
 
   return (
-    <section className="py-10 mt-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-0">
+    <section className="py-10 mt-20 px-6 xl:px-0">
+      <div className="mx-auto max-w-7xl">
         <div className="mb-8 flex items-center gap-3">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight text-[#202020]">
@@ -100,6 +173,7 @@ const CheckoutPage = () => {
           <form
             id="checkout-form"
             onSubmit={handleSubmit}
+            noValidate
             className="space-y-5 rounded-2xl border border-gray-100 bg-white p-6"
           >
             <div className="flex items-center justify-between border-b border-gray-100 pb-4">
@@ -120,10 +194,18 @@ const CheckoutPage = () => {
                   name="name"
                   value={address.name}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   placeholder="e.g. Priya Sharma"
                   required
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:border-[#0F6B3E] focus:ring-2 focus:ring-[#0F6B3E]/10"
+                  className={`w-full rounded-lg border px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:ring-2 ${
+                    fieldErrors.name
+                      ? "border-red-400 focus:border-red-400 focus:ring-red-100"
+                      : "border-gray-300 focus:border-[#0F6B3E] focus:ring-[#0F6B3E]/10"
+                  }`}
                 />
+                {fieldErrors.name ? (
+                  <p className="text-xs text-red-600">{fieldErrors.name}</p>
+                ) : null}
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-gray-500">
@@ -133,10 +215,20 @@ const CheckoutPage = () => {
                   name="phone"
                   value={address.phone}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   placeholder="10-digit mobile number"
                   required
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:border-[#0F6B3E] focus:ring-2 focus:ring-[#0F6B3E]/10"
+                  inputMode="numeric"
+                  maxLength={10}
+                  className={`w-full rounded-lg border px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:ring-2 ${
+                    fieldErrors.phone
+                      ? "border-red-400 focus:border-red-400 focus:ring-red-100"
+                      : "border-gray-300 focus:border-[#0F6B3E] focus:ring-[#0F6B3E]/10"
+                  }`}
                 />
+                {fieldErrors.phone ? (
+                  <p className="text-xs text-red-600">{fieldErrors.phone}</p>
+                ) : null}
               </div>
             </div>
 
@@ -148,10 +240,18 @@ const CheckoutPage = () => {
                 name="line1"
                 value={address.line1}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 placeholder="House no., street, area"
                 required
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:border-[#0F6B3E] focus:ring-2 focus:ring-[#0F6B3E]/10"
+                className={`w-full rounded-lg border px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:ring-2 ${
+                  fieldErrors.line1
+                    ? "border-red-400 focus:border-red-400 focus:ring-red-100"
+                    : "border-gray-300 focus:border-[#0F6B3E] focus:ring-[#0F6B3E]/10"
+                }`}
               />
+              {fieldErrors.line1 ? (
+                <p className="text-xs text-red-600">{fieldErrors.line1}</p>
+              ) : null}
             </div>
 
             <div className="space-y-1.5">
@@ -162,6 +262,7 @@ const CheckoutPage = () => {
                 name="line2"
                 value={address.line2}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 placeholder="Landmark, apartment, etc."
                 className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:border-[#0F6B3E] focus:ring-2 focus:ring-[#0F6B3E]/10"
               />
@@ -176,10 +277,18 @@ const CheckoutPage = () => {
                   name="city"
                   value={address.city}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   placeholder="City"
                   required
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:border-[#0F6B3E] focus:ring-2 focus:ring-[#0F6B3E]/10"
+                  className={`w-full rounded-lg border px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:ring-2 ${
+                    fieldErrors.city
+                      ? "border-red-400 focus:border-red-400 focus:ring-red-100"
+                      : "border-gray-300 focus:border-[#0F6B3E] focus:ring-[#0F6B3E]/10"
+                  }`}
                 />
+                {fieldErrors.city ? (
+                  <p className="text-xs text-red-600">{fieldErrors.city}</p>
+                ) : null}
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-gray-500">
@@ -189,10 +298,18 @@ const CheckoutPage = () => {
                   name="state"
                   value={address.state}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   placeholder="State"
                   required
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:border-[#0F6B3E] focus:ring-2 focus:ring-[#0F6B3E]/10"
+                  className={`w-full rounded-lg border px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:ring-2 ${
+                    fieldErrors.state
+                      ? "border-red-400 focus:border-red-400 focus:ring-red-100"
+                      : "border-gray-300 focus:border-[#0F6B3E] focus:ring-[#0F6B3E]/10"
+                  }`}
                 />
+                {fieldErrors.state ? (
+                  <p className="text-xs text-red-600">{fieldErrors.state}</p>
+                ) : null}
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-gray-500">
@@ -202,10 +319,20 @@ const CheckoutPage = () => {
                   name="pincode"
                   value={address.pincode}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   placeholder="6-digit pincode"
                   required
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:border-[#0F6B3E] focus:ring-2 focus:ring-[#0F6B3E]/10"
+                  inputMode="numeric"
+                  maxLength={6}
+                  className={`w-full rounded-lg border px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:ring-2 ${
+                    fieldErrors.pincode
+                      ? "border-red-400 focus:border-red-400 focus:ring-red-100"
+                      : "border-gray-300 focus:border-[#0F6B3E] focus:ring-[#0F6B3E]/10"
+                  }`}
                 />
+                {fieldErrors.pincode ? (
+                  <p className="text-xs text-red-600">{fieldErrors.pincode}</p>
+                ) : null}
               </div>
             </div>
 

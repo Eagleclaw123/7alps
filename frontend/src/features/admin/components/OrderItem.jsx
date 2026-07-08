@@ -38,9 +38,7 @@ const OrderItem = ({ item }) => {
       <span className="text-sm text-gray-700">{item.items}</span>
 
       {/* Payment */}
-      <span
-        className={`w-fit rounded-full px-3 py-1 text-sm font-semibold ${payment}`}
-      >
+      <span className={`w-fit rounded-full text-sm font-semibold ${payment}`}>
         {item.payment}
       </span>
 
@@ -52,13 +50,15 @@ const OrderItem = ({ item }) => {
         {item.status}
       </span>
 
+      <span className="text-sm font-medium text-gray-800">{item.mobile}</span>
+
       {/* Invoice */}
-      <button
+      {/* <button
         className="flex h-8 w-8 items-center justify-center rounded-md text-blue-500 hover:bg-blue-50"
         aria-label={`View invoice for ${item.id}`}
       >
         <FileText size={16} />
-      </button>
+      </button> */}
     </div>
   );
 };

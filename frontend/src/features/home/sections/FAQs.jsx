@@ -33,7 +33,7 @@ const FAQs = () => {
   };
 
   return (
-    <section className="text-black px-6 xl:px-0 mt-16">
+    <section className="text-black px-6 xl:px-0 my-16">
       <motion.div
         variants={container}
         initial="hidden"

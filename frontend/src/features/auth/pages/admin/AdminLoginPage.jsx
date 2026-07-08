@@ -14,22 +14,65 @@ const initialFormData = {
   password: "",
 };
 
+const validators = {
+  email: (value) => {
+    if (!value.trim()) return "Email is required.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()))
+      return "Enter a valid email address.";
+    return "";
+  },
+  password: (value) => {
+    if (!value) return "Password is required.";
+    if (value.length < 6) return "Password must be at least 6 characters.";
+    return "";
+  },
+};
+
 const AdminLoginPage = () => {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
-
   const [formData, setFormData] = useState(initialFormData);
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [touched, setTouched] = useState({});
+  const [formError, setFormError] = useState("");
 
   const handleChange = ({ target: { name, value } }) => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
+
+    if (touched[name]) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        [name]: validators[name](value),
+      }));
+    }
+  };
+
+  const handleBlur = ({ target: { name, value } }) => {
+    setTouched((prev) => ({ ...prev, [name]: true }));
+    setFieldErrors((prev) => ({ ...prev, [name]: validators[name](value) }));
+  };
+
+  const validateAll = () => {
+    const nextErrors = {
+      email: validators.email(formData.email),
+      password: validators.password(formData.password),
+    };
+    setFieldErrors(nextErrors);
+    setTouched({ email: true, password: true });
+    return Object.values(nextErrors).every((msg) => !msg);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormError("");
+
+    if (!validateAll()) {
+      return;
+    }
 
     try {
       setLoading(true);
@@ -38,26 +81,23 @@ const AdminLoginPage = () => {
 
       const adminUser = responseData?.data?.user;
 
-      // if (adminUser) {
-      //   localStorage.setItem("admin", JSON.stringify(adminUser));
-      //   localStorage.setItem(
-      //     "user",
-      //     JSON.stringify({ ...adminUser, role: "admin" }),
-      //   );
-      // }
-
       navigate("/admin", {
         replace: true,
       });
     } catch (error) {
-      alert(
+      setFormError(
         error.response?.data?.message || "Unable to login. Please try again.",
       );
     } finally {
       setLoading(false);
       setFormData(initialFormData);
+      setTouched({});
     }
   };
+
+  const isValid =
+    !validators.email(formData.email) &&
+    !validators.password(formData.password);
 
   return (
     <AuthLayout>
@@ -75,23 +115,37 @@ const AdminLoginPage = () => {
           subtitle="Authorized personnel only."
         />
 
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          <AuthInput
-            name="email"
-            label="Email Address"
-            type="email"
-            placeholder="Enter your email"
-            value={formData.email}
-            onChange={handleChange}
-          />
+        <form className="space-y-6" onSubmit={handleSubmit} noValidate>
+          <div>
+            <AuthInput
+              name="email"
+              label="Email Address"
+              type="email"
+              placeholder="Enter your email"
+              value={formData.email}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            {fieldErrors.email ? (
+              <p className="mt-1.5 text-sm text-red-600">{fieldErrors.email}</p>
+            ) : null}
+          </div>
 
-          <PasswordInput
-            name="password"
-            label="Password"
-            placeholder="Enter your password"
-            value={formData.password}
-            onChange={handleChange}
-          />
+          <div>
+            <PasswordInput
+              name="password"
+              label="Password"
+              placeholder="Enter your password"
+              value={formData.password}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            {fieldErrors.password ? (
+              <p className="mt-1.5 text-sm text-red-600">
+                {fieldErrors.password}
+              </p>
+            ) : null}
+          </div>
 
           <div className="flex justify-end text-sm">
             <Link
@@ -102,7 +156,11 @@ const AdminLoginPage = () => {
             </Link>
           </div>
 
-          <AuthButton type="submit" disabled={loading}>
+          {formError ? (
+            <p className="text-sm text-red-600">{formError}</p>
+          ) : null}
+
+          <AuthButton type="submit" disabled={loading || !isValid}>
             {loading ? "Signing In..." : "Login"}
           </AuthButton>
 

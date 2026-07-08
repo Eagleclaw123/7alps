@@ -69,13 +69,13 @@ const CustomerProfile = () => {
   }
 
   return (
-    <section className="mx-auto max-w-7xl space-y-8 px-4 py-2 sm:px-6 lg:px-8 my-30">
+    <section className="mx-auto max-w-7xl space-y-8 py-10 px-6 xl:px-0 mt-20">
       <div className="flex flex-wrap items-end justify-between gap-4 border-b border-[#E8E4DB] pb-6">
         <div>
           <p className="text-xs font-medium uppercase tracking-[0.2em] text-[#9C8F73]">
             Account
           </p>
-          <h2 className="mt-1 text-4xl tracking-tight text-[#1A1A18]">
+          <h2 className="mt-1 text-3xl tracking-tight text-[#1A1A18] font-semibold">
             My Profile
           </h2>
           <p className="mt-2 text-sm text-[#6B6A63]">

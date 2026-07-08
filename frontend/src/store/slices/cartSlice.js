@@ -39,6 +39,7 @@ const normalizeServerCartItems = (items = []) =>
     category: item.category,
     price: item.price,
     quantity: item.quantity,
+    inStock: item.inStock,
   }));
 
 const loadGuestCart = () => {

@@ -6,6 +6,7 @@ import { addToCart, setBuyNowItem } from "../../../store/slices/cartSlice";
 import { useNavigate } from "react-router-dom";
 
 const ProductInfo = ({ product }) => {
+  console.log("Product details:", product);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const variants = Array.isArray(product.variants) ? product.variants : [];
@@ -87,7 +88,8 @@ const ProductInfo = ({ product }) => {
             </div>
 
             <span className="font-medium text-[#2C2C2C]">
-              {product.ProductRating}
+              {/* {product.ProductRating} */}
+              4.5
             </span>
           </div>
 
@@ -105,9 +107,28 @@ const ProductInfo = ({ product }) => {
             </span>
           </div>
         </div>
-        <p className="text-3xl font-semibold text-[#0F6B3E]">
-          ₹{selectedVariant?.price ?? product.ProductPrice}
-        </p>
+        <div className="flex items-end gap-3">
+          <span className="text-3xl font-semibold text-[#0F6B3E]">
+            ₹{selectedVariant?.price ?? product.ProductPrice}
+          </span>
+
+          {selectedVariant?.mrp > selectedVariant?.price && (
+            <>
+              <span className="text-xl text-gray-400 line-through">
+                ₹{selectedVariant.mrp}
+              </span>
+
+              <span className="rounded-full bg-[#E9F8EE] px-2 py-1 text-xs font-semibold text-[#047B22]">
+                {Math.round(
+                  ((selectedVariant.mrp - selectedVariant.price) /
+                    selectedVariant.mrp) *
+                    100,
+                )}
+                % OFF
+              </span>
+            </>
+          )}
+        </div>
         <p className="text-gray-600">
           {product.description || product.ProductDescription}
         </p>
