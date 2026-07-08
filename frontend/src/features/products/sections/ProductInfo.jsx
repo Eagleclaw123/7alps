@@ -2,11 +2,10 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { IoIosStar, IoIosStarHalf, IoIosStarOutline } from "react-icons/io";
 
-import { addToCart, setBuyNowItem } from "../../../store/slices/cartSlice";
+import { addToCart } from "../../../store/slices/cartSlice";
 import { useNavigate } from "react-router-dom";
 
 const ProductInfo = ({ product }) => {
-  console.log("Product details:", product);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const variants = Array.isArray(product.variants) ? product.variants : [];
@@ -36,16 +35,14 @@ const ProductInfo = ({ product }) => {
     setIsAdded(true);
   };
 
-  const handleBuyNow = () => {
-    dispatch(
-      setBuyNowItem({
+  const handleBuyNow = async () => {
+    if (!selectedVariant) return;
+
+    await dispatch(
+      addToCart({
         productId: product.id,
         variantLabel: selectedVariant.label,
         quantity,
-        price: selectedVariant.price,
-        image: product.ProductImage,
-        name: product.ProductName,
-        category: product.ProductCategory,
       }),
     );
 
@@ -88,8 +85,7 @@ const ProductInfo = ({ product }) => {
             </div>
 
             <span className="font-medium text-[#2C2C2C]">
-              {/* {product.ProductRating} */}
-              4.5
+              {product.ProductRating}
             </span>
           </div>
 

@@ -4,12 +4,10 @@ import { useNavigate } from "react-router-dom";
 
 import {
   fetchCart,
-  selectBuyNowItem,
   selectCartItems,
   selectShipping,
   selectSubtotal,
   selectTotal,
-  clearBuyNowItem,
 } from "../../../store/slices/cartSlice";
 import { createOrder } from "../../../shared/services/order.service";
 
@@ -65,18 +63,9 @@ const CheckoutPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const cartItems = useSelector(selectCartItems);
-  const buyNowItem = useSelector(selectBuyNowItem);
-
-  const items = buyNowItem ? [buyNowItem] : cartItems;
-
-  const subtotal = buyNowItem
-    ? buyNowItem.price * buyNowItem.quantity
-    : useSelector(selectSubtotal);
-
-  const shipping = subtotal > 999 ? 0 : subtotal > 0 ? 99 : 0;
-
-  const total = subtotal + shipping;
-
+  const subtotal = useSelector(selectSubtotal);
+  const shipping = useSelector(selectShipping);
+  const total = useSelector(selectTotal);
   const [address, setAddress] = useState(initialAddress);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -129,11 +118,7 @@ const CheckoutPage = () => {
     try {
       setSubmitting(true);
       await createOrder(address);
-      if (buyNowItem) {
-        dispatch(clearBuyNowItem());
-      } else {
-        await dispatch(fetchCart());
-      }
+
       navigate("/customer/orders", { state: { justPlaced: true } });
     } catch (err) {
       setError(
@@ -146,14 +131,10 @@ const CheckoutPage = () => {
   };
 
   useEffect(() => {
-    if (items.length === 0) {
-      navigate("/cart", {
-        replace: true,
-      });
-    }
-  }, [items, navigate]);
+    if (cartItems.length === 0) navigate("/cart", { replace: true });
+  }, [cartItems.length, navigate]);
 
-  if (items.length === 0) return null;
+  if (cartItems.length === 0) return null;
 
   return (
     <section className="py-10 mt-20 px-6 xl:px-0">
@@ -356,7 +337,7 @@ const CheckoutPage = () => {
             </h2>
 
             <div className="max-h-64 space-y-3 overflow-y-auto pr-1 text-sm">
-              {items.map((item) => (
+              {cartItems.map((item) => (
                 <div
                   key={item.id}
                   className="flex justify-between gap-3 text-gray-600"
