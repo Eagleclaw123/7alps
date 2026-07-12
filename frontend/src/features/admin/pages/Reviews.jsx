@@ -116,7 +116,7 @@ const Stars = ({ rating }) => (
   </div>
 );
 
-const AdminReviews = () => {
+const Reviews = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [filterOpen, setFilterOpen] = useState(false);
@@ -299,4 +299,4 @@ const AdminReviews = () => {
   );
 };
 
-export default AdminReviews;
+export default Reviews;

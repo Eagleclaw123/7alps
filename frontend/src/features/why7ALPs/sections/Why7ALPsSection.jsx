@@ -2,16 +2,31 @@ import { benefitsLeft, benefitsRight } from "../data/benefitsData";
 
 const Why7ALPsSection = () => {
   return (
-    <section className="py-14 md:py-20 lg:py-24 bg-white">
-      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
+    <section className="relative overflow-hidden bg-[#FAF6EF] py-16 md:py-24 lg:py-28">
+      {/* Signature organic divider, top */}
+      <svg
+        className="absolute left-0 top-0 h-6 w-full text-[#EFE6D8]"
+        viewBox="0 0 1200 24"
+        preserveAspectRatio="none"
+        fill="none"
+      >
+        <path
+          d="M0 12 Q 150 24 300 12 T 600 12 T 900 12 T 1200 12"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        />
+      </svg>
+
+      <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         {/* Heading */}
-
-        <div className="text-center mb-12 md:mb-16 lg:mb-20">
-          <h2 className="text-3xl sm:text-4xl lg:text-[44px] font-semibold text-[#2C2C2C]">
-            Why 7 ALP's
+        <div className="mb-14 text-center md:mb-20 lg:mb-24">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-[#B9714A]">
+            The 7ALP&apos;s difference
+          </p>
+          <h2 className="font-serif text-3xl text-[#3F4A2E] sm:text-4xl lg:text-[46px]">
+            Why 7 ALP&apos;s
           </h2>
-
-          <p className="mt-4 text-sm sm:text-base text-gray-500 max-w-2xl mx-auto leading-7">
+          <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-[#6B7259] sm:text-base">
             Lorem ipsum dolor, sit amet consectetur adipisicing elit.
             Consequuntur error nostrum dolorum ullam inventore aut nesciunt
             molestiae consequatur.
@@ -19,25 +34,21 @@ const Why7ALPsSection = () => {
         </div>
 
         {/* Content */}
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 items-center gap-12 lg:gap-10">
+        <div className="grid grid-cols-1 items-center gap-14 lg:grid-cols-3 lg:gap-8">
           {/* Left */}
-
-          <div className="space-y-10 md:space-y-14 lg:space-y-20 order-2 lg:order-1">
+          <div className="order-2 space-y-12 md:space-y-16 lg:order-1 lg:space-y-24">
             {benefitsLeft.map((item) => (
               <div
                 key={item.id}
-                className="text-right md:text-center lg:text-right space-y-2"
+                className="space-y-2 text-right md:text-center lg:text-right"
               >
-                <span className="inline-block text-4xl sm:text-5xl font-bold text-gray-100 select-none">
+                <span className="inline-block font-serif text-4xl text-[#E4DAC6] sm:text-5xl select-none">
                   {item.id}
                 </span>
-
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-900">
+                <h3 className="text-lg font-semibold text-[#3F4A2E] sm:text-xl">
                   {item.title}
                 </h3>
-
-                <p className="text-gray-500 leading-7 text-sm sm:text-base">
+                <p className="text-sm leading-7 text-[#6B7259] sm:text-base">
                   {item.description}
                 </p>
               </div>
@@ -45,32 +56,32 @@ const Why7ALPsSection = () => {
           </div>
 
           {/* Center */}
-
-          <div className="flex justify-center order-2 md:order-1 lg:order-2">
-            <img
-              src="https://res.cloudinary.com/dasvdkncm/image/upload/v1782614642/front-view-natural-cannabis-oil-bottle-assortment-removebg-preview_ezygcs.png"
-              alt="Product"
-              className="w-52 sm:w-64 md:w-72 lg:w-80 xl:w-96 object-contain"
-            />
+          <div className="order-2 flex justify-center md:order-1 lg:order-2">
+            <div className="relative flex items-center justify-center">
+              {/* Soft radial glow behind product */}
+              <div className="absolute inset-0 -z-10 rounded-full bg-[radial-gradient(circle,_#EFE6D8_0%,_transparent_70%)] blur-2xl" />
+              <img
+                src="https://res.cloudinary.com/dasvdkncm/image/upload/v1782614642/front-view-natural-cannabis-oil-bottle-assortment-removebg-preview_ezygcs.png"
+                alt="Product"
+                className="w-52 object-contain drop-shadow-xl sm:w-64 md:w-72 lg:w-80 xl:w-96"
+              />
+            </div>
           </div>
 
           {/* Right */}
-
-          <div className="space-y-10 md:space-y-14 lg:space-y-20 order-3">
+          <div className="order-3 space-y-12 md:space-y-16 lg:space-y-24">
             {benefitsRight.map((item) => (
               <div
                 key={item.id}
-                className="text-left md:text-center lg:text-left space-y-2"
+                className="space-y-2 text-left md:text-center lg:text-left"
               >
-                <span className="inline-block text-4xl sm:text-5xl font-bold text-gray-100 select-none">
+                <span className="inline-block font-serif text-4xl text-[#E4DAC6] sm:text-5xl select-none">
                   {item.id}
                 </span>
-
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-900">
+                <h3 className="text-lg font-semibold text-[#3F4A2E] sm:text-xl">
                   {item.title}
                 </h3>
-
-                <p className="text-gray-500 leading-7 text-sm sm:text-base">
+                <p className="text-sm leading-7 text-[#6B7259] sm:text-base">
                   {item.description}
                 </p>
               </div>
@@ -78,6 +89,20 @@ const Why7ALPsSection = () => {
           </div>
         </div>
       </div>
+
+      {/* Signature organic divider, bottom */}
+      <svg
+        className="absolute bottom-0 left-0 h-6 w-full text-[#EFE6D8]"
+        viewBox="0 0 1200 24"
+        preserveAspectRatio="none"
+        fill="none"
+      >
+        <path
+          d="M0 12 Q 150 0 300 12 T 600 12 T 900 12 T 1200 12"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        />
+      </svg>
     </section>
   );
 };

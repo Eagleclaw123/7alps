@@ -41,7 +41,7 @@ const MobileSidebar = ({ isOpen, onClose, isActive }) => (
               </button>
             </Link>
           ))}
-          <hr className="text-gray-300" />
+          {/* <hr className="text-gray-300" />
 
           <Link
             to="/cart"
@@ -62,7 +62,7 @@ const MobileSidebar = ({ isOpen, onClose, isActive }) => (
           >
             <FiUser className="text-xl text-[#0F6B3E]" />
             Login
-          </Link>
+          </Link> */}
         </div>
       </div>
 

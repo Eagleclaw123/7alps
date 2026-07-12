@@ -37,16 +37,16 @@ const ProductHeroSection = () => {
 
   return (
     <HeroSection
-      backgroundImage="https://res.cloudinary.com/dasvdkncm/image/upload/v1782127683/Rectangle_3463720_1_sizclo.png"
+      backgroundImage="https://res.cloudinary.com/dasvdkncm/image/upload/v1783564641/powdered-matcha-plate-created-using-generative-ai-technology_qpkrit.jpg"
       badgeText="Wellness Collections"
-      badgeColor="#047B22"
+      badgeColor="#fff"
       heading="Premium"
       headingHighlight="Herbal Ingredients for Natural Wellness"
       description="Premium herbal ingredients and wellness solutions sourced directly from farmers and delivered to consumers, businesses, and global partners."
       buttons={buttons}
       highlights={highlights}
       containerHeight="h-[100vh] md:h-[60vh] xl:h-screen"
-      textColor="text-[#FFFED4]"
+      textColor="text-white"
     />
   );
 };

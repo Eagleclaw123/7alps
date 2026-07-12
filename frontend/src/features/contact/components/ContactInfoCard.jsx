@@ -35,7 +35,7 @@ const ContactInfoCard = () => {
         Get In Touch With Our Team
       </h3>
 
-      <p className="mt-2 text-sm sm:text-base md:text-lg font-medium text-gray-600 leading-relaxed max-w-md md:max-w-lg xl:max-w-xl">
+      <p className="mt-2 text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed max-w-md md:max-w-lg xl:max-w-xl">
         Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsum
         cupiditate eaque ad eveniet deserunt.
       </p>

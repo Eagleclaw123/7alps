@@ -1,9 +1,9 @@
 import AnimatedPage from "../../../shared/components/ui/AnimatedPage";
-import Banner from "../../home/sections/Banner";
 import Products from "../sections/Products";
 import CategorySection from "../sections/CategorySection";
 import ProductHeroSection from "../sections/ProductHeroSection";
 import { productsSEO, SEO } from "../../../shared/seo";
+import ProductBanner from "../sections/ProductBanner";
 
 const ProductsPage = () => {
   return (
@@ -14,7 +14,7 @@ const ProductsPage = () => {
         <ProductHeroSection />
         <CategorySection />
         <Products />
-        <Banner />
+        <ProductBanner />
       </AnimatedPage>
     </>
   );

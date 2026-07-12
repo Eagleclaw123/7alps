@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { FiEdit2, FiTrash2 } from "react-icons/fi";
 import {
   createProduct,
   deleteProduct,
@@ -6,10 +7,18 @@ import {
   toggleProductStatus,
   updateProduct,
 } from "../../../shared/services/product.service";
+import DataTable from "../../../shared/dashboard/components/DataTable";
+import Badge from "../../../shared/dashboard/components/Badge";
 import ProductForm from "../components/ProductForm";
-import ProductListTable from "../components/ProductListTable";
 
 const CATEGORY_OPTIONS = ["Hair Care", "Skin Care", "Health & Wellness"];
+
+const PAGE_SIZE = 10;
+
+const STATUS_STYLES = {
+  Active: "bg-[#EAF3DE] text-[#3B6D11]",
+  Inactive: "bg-gray-100 text-gray-500",
+};
 
 const emptyVariant = () => ({
   label: "",
@@ -37,7 +46,7 @@ const initialLists = {
   usageSuggestions: [],
 };
 
-const AdminProducts = () => {
+const Products = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -134,7 +143,10 @@ const AdminProducts = () => {
     Array.isArray(value)
       ? value
       : typeof value === "string" && value
-        ? value.split(",").map((t) => t.trim()).filter(Boolean)
+        ? value
+            .split(",")
+            .map((t) => t.trim())
+            .filter(Boolean)
         : [];
 
   const resetForm = () => {
@@ -234,7 +246,9 @@ const AdminProducts = () => {
       } else {
         const response = await createProduct(formDataToSend);
         const createdProduct = response?.data?.data?.product;
-        if (createdProduct) setProducts((prev) => [createdProduct, ...prev]);
+        if (createdProduct) {
+          setProducts((prev) => [createdProduct, ...prev]);
+        }
       }
 
       resetForm();
@@ -274,6 +288,78 @@ const AdminProducts = () => {
     }
   };
 
+  const columns = [
+    {
+      key: "product",
+      header: "Product",
+      render: (p) => (
+        <div className="flex items-center gap-3">
+          <img
+            src={getImageUrl(p.images?.[0])}
+            alt={p.name}
+            className="h-10 w-10 flex-shrink-0 rounded-lg bg-gray-100 object-cover"
+          />
+          <span className="font-medium text-[#202020]">{p.name}</span>
+        </div>
+      ),
+    },
+    { key: "category", header: "Category" },
+    {
+      key: "price",
+      header: "Price",
+      render: (p) => {
+        const variant = p.variants?.find((v) => v.isDefault) || p.variants?.[0];
+        return variant ? `₹${variant.price}` : "—";
+      },
+    },
+    {
+      key: "stock",
+      header: "Stock",
+      render: (p) => {
+        const total = (p.variants || []).reduce(
+          (sum, v) => sum + (Number(v.stock) || 0),
+          0,
+        );
+        return `${total} units`;
+      },
+    },
+    {
+      key: "status",
+      header: "Status",
+      render: (p) => (
+        <button onClick={() => handleToggleStatus(p._id)}>
+          <Badge
+            value={p.active ? "Active" : "Inactive"}
+            styles={STATUS_STYLES}
+          />
+        </button>
+      ),
+    },
+    {
+      key: "actions",
+      header: "",
+      className: "w-20 text-right",
+      render: (p) => (
+        <div className="flex items-center justify-end gap-1">
+          <button
+            onClick={() => handleEditClick(p)}
+            className="rounded-lg p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
+            aria-label="Edit product"
+          >
+            <FiEdit2 size={16} />
+          </button>
+          <button
+            onClick={() => handleDelete(p._id)}
+            className="rounded-lg p-1.5 text-gray-400 transition hover:bg-red-50 hover:text-red-500"
+            aria-label="Delete product"
+          >
+            <FiTrash2 size={16} />
+          </button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <section className="space-y-6">
       <ProductForm
@@ -298,16 +384,30 @@ const AdminProducts = () => {
         getImageUrl={getImageUrl}
       />
 
-      <ProductListTable
-        products={products}
-        loading={loading}
-        onEdit={handleEditClick}
-        onToggleStatus={handleToggleStatus}
-        onDelete={handleDelete}
-        getImageUrl={getImageUrl}
-      />
+      <div className="rounded-2xl border border-gray-100 bg-white p-4 sm:p-6">
+        {loading ? (
+          <p className="py-10 text-center text-gray-500">Loading products...</p>
+        ) : (
+          <DataTable
+            data={products}
+            columns={columns}
+            rowKey={(p) => p._id}
+            searchKeys={["name", "category", "subCategory"]}
+            searchPlaceholder="Search products"
+            filters={[
+              {
+                field: "category",
+                label: "Category",
+                options: ["All", ...CATEGORY_OPTIONS],
+              },
+            ]}
+            pageSize={PAGE_SIZE}
+            emptyMessage="No products match this filter."
+          />
+        )}
+      </div>
     </section>
   );
 };
 
-export default AdminProducts;
+export default Products;

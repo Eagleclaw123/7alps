@@ -23,6 +23,7 @@ const Why7ALPsHero = () => {
       values={values}
       containerHeight="h-[100vh] md:h-[60vh] xl:h-screen"
       textColor="text-white"
+      overlayColor="bg-black/20"
     />
   );
 };

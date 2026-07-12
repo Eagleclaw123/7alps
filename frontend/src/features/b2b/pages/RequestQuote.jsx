@@ -1,14 +1,15 @@
-import { useMemo, useState } from "react";
-import { CiSearch } from "react-icons/ci";
+import { useState } from "react";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import {
-  FiChevronDown,
   FiPlus,
   FiFileText,
   FiClock,
   FiCheckCircle,
   FiX,
 } from "react-icons/fi";
+import Badge from "../../../shared/dashboard/components/Badge";
+import StatCard from "../../../shared/dashboard/components/StatCard";
+import DataTable from "../../../shared/dashboard/components/DataTable";
 
 const QUOTES = [
   {
@@ -66,42 +67,49 @@ const STATUS_STYLES = {
   Expired: "bg-gray-100 text-gray-500",
 };
 
-const StatusBadge = ({ status }) => (
-  <span
-    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${STATUS_STYLES[status]}`}
-  >
-    {status}
-  </span>
-);
+const PAGE_SIZE = 5;
 
-const StatCard = ({ icon, label, value }) => (
-  <div className="rounded-2xl border border-gray-100 bg-white p-5">
-    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#EAF3DE] text-[#047B22]">
-      {icon}
-    </div>
-    <p className="mt-4 text-sm text-gray-500">{label}</p>
-    <p className="mt-1 text-2xl font-semibold text-[#202020]">{value}</p>
-  </div>
-);
+const columns = [
+  { key: "id", header: "Quote ID" },
+  { key: "products", header: "Products" },
+  {
+    key: "quantity",
+    header: "Quantity",
+    render: (q) => `${q.quantity.toLocaleString()} units`,
+  },
+  { key: "requestedDate", header: "Requested" },
+  {
+    key: "quotedPrice",
+    header: "Quoted price",
+    render: (q) => (q.quotedPrice ? `₹${q.quotedPrice.toLocaleString()}` : "—"),
+  },
+  {
+    key: "validUntil",
+    header: "Valid until",
+    render: (q) => q.validUntil || "—",
+  },
+  {
+    key: "status",
+    header: "Status",
+    render: (q) => <Badge value={q.status} styles={STATUS_STYLES} />,
+  },
+  {
+    key: "actions",
+    header: "Action",
+    className: "w-10 text-right",
+    render: () => (
+      <button className="rounded-lg p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600">
+        <HiOutlineDotsVertical size={18} />
+      </button>
+    ),
+  },
+];
 
 const RequestQuote = () => {
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All");
-  const [filterOpen, setFilterOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [products, setProducts] = useState("");
   const [quantity, setQuantity] = useState("");
   const [notes, setNotes] = useState("");
-
-  const filtered = useMemo(() => {
-    return QUOTES.filter((q) => {
-      const matchesSearch =
-        q.id.toLowerCase().includes(search.toLowerCase()) ||
-        q.products.toLowerCase().includes(search.toLowerCase());
-      const matchesStatus = statusFilter === "All" || q.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    });
-  }, [search, statusFilter]);
 
   const pendingCount = QUOTES.filter((q) => q.status === "Pending").length;
   const quotedCount = QUOTES.filter((q) => q.status === "Quoted").length;
@@ -245,122 +253,29 @@ const RequestQuote = () => {
 
       {/* Table card */}
       <div className="rounded-2xl border border-gray-100 bg-white p-4 sm:p-6">
-        {/* Search + Filter row */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative w-full sm:max-w-sm">
-            <CiSearch
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              size={18}
-            />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search quote ID or product"
-              className="w-full rounded-lg border border-gray-200 py-2 pl-9 pr-3 text-sm text-[#202020] outline-none transition focus:border-[#047B22] focus:ring-2 focus:ring-[#047B22]/10"
-            />
-          </div>
-
-          <div className="relative w-full sm:w-auto">
-            <button
-              onClick={() => setFilterOpen((v) => !v)}
-              className="flex w-full items-center justify-between gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50 sm:w-auto sm:justify-start"
-            >
-              Status
-              {statusFilter !== "All" && (
-                <span className="rounded-full bg-[#EAF3DE] px-2 py-0.5 text-xs font-medium text-[#3B6D11]">
-                  {statusFilter}
-                </span>
-              )}
-              <FiChevronDown size={16} />
-            </button>
-
-            {filterOpen && (
-              <div className="absolute right-0 z-10 mt-2 w-44 overflow-hidden rounded-lg border border-gray-100 bg-white py-1 shadow-lg">
-                {[
-                  "All",
-                  "Pending",
-                  "Quoted",
-                  "Approved",
-                  "Rejected",
-                  "Expired",
-                ].map((opt) => (
-                  <button
-                    key={opt}
-                    onClick={() => {
-                      setStatusFilter(opt);
-                      setFilterOpen(false);
-                    }}
-                    className={`flex w-full items-center px-4 py-2 text-left text-sm transition hover:bg-gray-50 ${
-                      statusFilter === opt
-                        ? "font-medium text-[#047B22]"
-                        : "text-gray-600"
-                    }`}
-                  >
-                    {opt}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Table */}
-        <div className="mt-5 overflow-x-auto">
-          <table className="w-full min-w-[760px] border-collapse text-sm">
-            <thead>
-              <tr className="border-b border-gray-100 text-left text-gray-400">
-                <th className="py-3 pr-4 font-medium">Quote ID</th>
-                <th className="py-3 pr-4 font-medium">Products</th>
-                <th className="py-3 pr-4 font-medium">Quantity</th>
-                <th className="py-3 pr-4 font-medium">Requested</th>
-                <th className="py-3 pr-4 font-medium">Quoted price</th>
-                <th className="py-3 pr-4 font-medium">Valid until</th>
-                <th className="py-3 pr-4 font-medium">Status</th>
-                <th className="w-10 py-3 text-right font-medium">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((q) => (
-                <tr
-                  key={q.id}
-                  className="border-b border-gray-50 transition hover:bg-gray-50/60"
-                >
-                  <td className="py-3 pr-4 font-medium text-[#202020]">
-                    {q.id}
-                  </td>
-                  <td className="py-3 pr-4 text-gray-600">{q.products}</td>
-                  <td className="py-3 pr-4 text-gray-600">
-                    {q.quantity.toLocaleString()} units
-                  </td>
-                  <td className="py-3 pr-4 text-gray-600">{q.requestedDate}</td>
-                  <td className="py-3 pr-4 text-gray-600">
-                    {q.quotedPrice ? `₹${q.quotedPrice.toLocaleString()}` : "—"}
-                  </td>
-                  <td className="py-3 pr-4 text-gray-600">
-                    {q.validUntil || "—"}
-                  </td>
-                  <td className="py-3 pr-4">
-                    <StatusBadge status={q.status} />
-                  </td>
-                  <td className="py-3 text-right">
-                    <button className="rounded-lg p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600">
-                      <HiOutlineDotsVertical size={18} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={8} className="py-10 text-center text-gray-400">
-                    No quote requests match this filter.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          data={QUOTES}
+          columns={columns}
+          rowKey={(q) => q.id}
+          searchKeys={["id", "products"]}
+          searchPlaceholder="Search quote ID or product"
+          filters={[
+            {
+              field: "status",
+              label: "Status",
+              options: [
+                "All",
+                "Pending",
+                "Quoted",
+                "Approved",
+                "Rejected",
+                "Expired",
+              ],
+            },
+          ]}
+          pageSize={PAGE_SIZE}
+          emptyMessage="No quote requests match this filter."
+        />
       </div>
     </div>
   );

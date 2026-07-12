@@ -22,7 +22,11 @@ const Header = () => {
   return (
     <header className="fixed top-5 left-0 w-full z-50 px-4">
       <DesktopNav isActive={isActive} cartCount={cartCount.length} />
-      <MobileToggle isOpen={isOpen} onToggle={() => setIsOpen(!isOpen)} />
+      <MobileToggle
+        isOpen={isOpen}
+        onToggle={() => setIsOpen(!isOpen)}
+        cartCount={cartCount.length}
+      />
       <MobileSidebar
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}

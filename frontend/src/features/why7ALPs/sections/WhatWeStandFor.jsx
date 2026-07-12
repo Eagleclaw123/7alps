@@ -26,48 +26,54 @@ const values = [
 
 const WhatWeStandFor = () => {
   return (
-    <section className="py-16 px-6 xl:px-0">
+    <section className="px-6 py-20 xl:px-0">
       <div className="mx-auto max-w-7xl">
         <motion.div
-          className="space-y-4"
+          className="mb-14 space-y-4 md:mb-20"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
           <div className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-[#047B22]" />
-            <p className="font-ibm-mono text-[14px] font-semibold text-[#047B22] sm:text-[16px] md:text-[18px]">
+            <div className="h-1.5 w-1.5 rounded-full bg-[#B9714A]" />
+            <p className="font-ibm-mono text-[13px] font-semibold uppercase tracking-[0.2em] text-[#B9714A] sm:text-sm">
               What we stand for
             </p>
           </div>
 
-          <h2 className="text-[28px] font-medium leading-tight sm:text-[32px] md:text-[40px] xl:text-[44px]">
+          <h2 className="font-semibold text-[28px] leading-tight text-[#3F4A2E] sm:text-[32px] md:text-[40px] xl:text-[44px]">
             Three things we
-            <br className="hidden sm:block" /> won't compromise
+            <br className="hidden sm:block" /> won&apos;t compromise
           </h2>
         </motion.div>
 
-        <div className="mt-10 grid grid-cols-1 gap-6 sm:mt-12 md:grid-cols-3">
+        <div className="divide-y divide-[#E3D9C7] border-y border-[#E3D9C7]">
           {values.map((value, i) => (
             <motion.div
               key={value.number}
-              className="rounded-xl border border-gray-200 bg-white p-6 sm:p-7 min-h-[280px] flex flex-col justify-between"
-              initial={{ opacity: 0, y: 20 }}
+              className="grid grid-cols-1 gap-4 py-10 md:grid-cols-[140px_1fr] md:gap-10 md:py-12"
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: i * 0.1 }}
             >
-              <p className="font-ibm-mono text-md font-semibold text-[#047B22]">
-                {value.number} — {value.label}
-              </p>
+              {/* Number + label */}
+              <div className="flex items-baseline gap-3 md:flex-col md:items-start md:gap-2">
+                <span className="font-serif text-5xl leading-none text-[#E4DAC6] md:text-6xl">
+                  {value.number}
+                </span>
+                <p className="font-ibm-mono text-xs font-semibold uppercase tracking-[0.15em] text-[#B9714A]">
+                  {value.label}
+                </p>
+              </div>
 
-              <div>
-                <h3 className="mt-4 text-xl font-semibold text-black sm:text-2xl">
+              {/* Title + description */}
+              <div className="max-w-2xl">
+                <h3 className="text-xl font-semibold text-[#3F4A2E] sm:text-2xl">
                   {value.title}
                 </h3>
-
-                <p className="mt-4 text-sm leading-6 text-gray-600 sm:text-[15px]">
+                <p className="mt-3 text-sm leading-7 text-[#6B7259] sm:text-[15px]">
                   {value.description}
                 </p>
               </div>

@@ -5,13 +5,11 @@ import {
   FiPackage,
   FiDollarSign,
 } from "react-icons/fi";
-
 import StatCard from "../../../shared/dashboard/components/StatCard";
 
-const AdminDashboard = () => {
+const Dashboard = () => {
   const [productsCount, setProductsCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [galleryPreviews, setGalleryPreviews] = useState([]);
 
   useEffect(() => {
     const loadCounts = async () => {
@@ -37,32 +35,31 @@ const AdminDashboard = () => {
     <section className="space-y-8">
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          title="Total Customers"
+          icon={<FiUsers size={20} />}
+          label="Total Customers"
           value="1,248"
-          growth="+12%"
-          icon={FiUsers}
+          delta="12%"
         />
         <StatCard
-          title="Total Orders"
+          icon={<FiShoppingCart size={20} />}
+          label="Total Orders"
           value="356"
-          growth="+9%"
-          icon={FiShoppingCart}
+          delta="9%"
         />
         <StatCard
-          title="Products"
+          icon={<FiPackage size={20} />}
+          label="Products"
           value={loading ? "..." : String(productsCount)}
-          growth="count"
-          icon={FiPackage}
         />
         <StatCard
-          title="Revenue"
+          icon={<FiDollarSign size={20} />}
+          label="Revenue"
           value="₹4.8L"
-          growth="+16%"
-          icon={FiDollarSign}
+          delta="16%"
         />
       </div>
     </section>
   );
 };
 
-export default AdminDashboard;
+export default Dashboard;

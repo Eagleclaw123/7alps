@@ -5,7 +5,9 @@ const CartIcon = ({ isActive, count }) => (
   <Link
     to="/cart"
     className={`relative flex h-11 w-11 items-center justify-center rounded-full transition-all duration-300 ${
-      isActive ? "bg-white text-gray-800" : "hover:bg-white hover:text-gray-800"
+      isActive
+        ? "bg-white text-gray-800"
+        : "text-white hover:bg-white hover:text-gray-800"
     }`}
   >
     <BsCart size={22} />

@@ -19,10 +19,10 @@ const ProductHighlights = ({ product }) => {
   return (
     <section className="px-6 xl:px-0 bg-[#F8FAF8] py-16">
       <div className="max-w-7xl mx-auto">
-        <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[#3B6D11]">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#6B8F3E]">
           Overview
         </p>
-        <h2 className="mb-5 text-xl font-semibold text-[#1F2937]">
+        <h2 className="mb-10 font-serif text-3xl text-[#22301A]">
           Key highlights
         </h2>
 

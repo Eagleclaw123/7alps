@@ -23,21 +23,21 @@ import AdminLayout from "../layouts/AdminLayout";
 import B2BLayout from "../layouts/B2BLayout";
 import PageNotFound from "../../features/notFound/PageNotFound";
 import B2BDashboard from "../../features/b2b/pages/B2BDashboard";
-import AdminDashboard from "../../features/admin/pages/AdminDashboard";
-import AdminProducts from "../../features/admin/pages/AdminProducts";
 import CartPage from "../../features/cart/pages/CartPage";
 import CheckoutPage from "../../features/cart/pages/CheckoutPage";
 import ProtectedRoute from "./ProtectedRoute";
-import AdminOrders from "../../features/admin/pages/AdminOrders";
 import CustomerOrders from "../../features/customer/pages/CustomerOrders";
 import CustomerProfile from "../../features/customer/pages/CustomerProfile";
-import AdminCustomers from "../../features/admin/pages/AdminCustomers";
-import AdminCategories from "../../features/admin/pages/AdminCategories";
-import AdminReviews from "../../features/admin/pages/AdminReviews";
 import BulkOrders from "../../features/b2b/pages/BulkOrders";
 import RequestQuote from "../../features/b2b/pages/RequestQuote";
 import OrderHistory from "../../features/b2b/pages/OrderHistory";
 import Catalog from "../../features/b2b/pages/Catalog";
+import Dashboard from "../../features/admin/pages/Dashboard";
+import Products from "../../features/admin/pages/Products";
+import Orders from "../../features/admin/pages/Orders";
+import Customers from "../../features/admin/pages/Customers";
+import Categories from "../../features/admin/pages/Categories";
+import Reviews from "../../features/admin/pages/Reviews";
 
 const AppRoutes = () => {
   return (
@@ -104,12 +104,12 @@ const AppRoutes = () => {
           // </ProtectedRoute>
         }
       >
-        <Route index element={<AdminDashboard />} />
-        <Route path="products" element={<AdminProducts />} />
-        <Route path="orders" element={<AdminOrders />} />
-        <Route path="customers" element={<AdminCustomers />} />
-        <Route path="categories" element={<AdminCategories />} />
-        <Route path="reviews" element={<AdminReviews />} />
+        <Route index element={<Dashboard />} />
+        <Route path="products" element={<Products />} />
+        <Route path="orders" element={<Orders />} />
+        <Route path="customers" element={<Customers />} />
+        <Route path="categories" element={<Categories />} />
+        <Route path="reviews" element={<Reviews />} />
         {/* Add more admin routes here */}
       </Route>
       <Route element={<AuthLayout />}>

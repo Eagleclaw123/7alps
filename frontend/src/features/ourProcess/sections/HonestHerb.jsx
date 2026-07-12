@@ -33,7 +33,7 @@ const HonestHerb = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <h2 className="text-[28px] font-semibold leading-tight sm:text-[32px] md:text-[40px] xl:text-[44px]">
+          <h2 className="font-semibold text-[26px] leading-tight sm:text-[30px] md:text-[38px] xl:text-[42px]">
             The most honest way to sell a herb
           </h2>
 

@@ -120,12 +120,12 @@ const PowderTimeline = () => {
         >
           <div className="flex items-center justify-center gap-2">
             <div className="h-2 w-2 rounded-full bg-[#047B22]" />
-            <p className="text-[14px] sm:text-[16px] md:text-[18px] text-[#047B22] font-ibm-mono font-semibold">
+            <p className="font-ibm-mono text-[13px] font-semibold uppercase tracking-[0.2em] text-[#047B22] sm:text-sm">
               The eight steps
             </p>
           </div>
 
-          <h2 className="text-[24px] sm:text-[28px] md:text-[36px] xl:text-[40px] leading-tight font-semibold">
+          <h2 className="font-semibold text-[26px] leading-tight sm:text-[30px] md:text-[38px] xl:text-[42px]">
             From a field of herbs to a fine, true powder
           </h2>
 

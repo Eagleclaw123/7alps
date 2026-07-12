@@ -14,11 +14,11 @@ const ProductReviews = ({ product }) => {
         <div className="mx-auto max-w-7xl">
           <div className="mb-5 flex items-baseline justify-between">
             <div>
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[#3B6D11]">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#6B8F3E]">
                 From buyers
               </p>
 
-              <h2 className="text-xl font-semibold text-[#1F2937]">
+              <h2 className="mb-10 font-serif text-3xl text-[#22301A]">
                 Customer Reviews
               </h2>
             </div>

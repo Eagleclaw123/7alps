@@ -5,8 +5,8 @@ import { CgMenuRight } from "react-icons/cg";
 import { getPublicProducts } from "../../../shared/services/product.service";
 import { normalizeProducts } from "../utils/normalizeProduct";
 import ProductFilter from "../components/ProductFilter";
-import ProductPagination from "../components/ProductPagination";
 import ProductCard from "../components/ProductCard";
+import Pagination from "../../../shared/components/ui/Pagination";
 
 const containerVariants = {
   hidden: {},
@@ -217,7 +217,7 @@ const Products = () => {
           </motion.div>
         </div>
 
-        <ProductPagination
+        <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={setCurrentPage}

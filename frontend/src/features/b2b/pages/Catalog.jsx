@@ -1,6 +1,5 @@
-import { useMemo, useState } from "react";
-import { CiSearch } from "react-icons/ci";
-import { FiChevronDown, FiDownload, FiPlus, FiPackage } from "react-icons/fi";
+import { FiDownload, FiPlus, FiPackage } from "react-icons/fi";
+import CardGrid from "../../../shared/dashboard/components/CardGrid";
 
 const CATEGORIES = ["All", "Hair Care", "Skin Care", "Health & Wellness"];
 
@@ -91,19 +90,50 @@ const PRODUCTS = [
   },
 ];
 
+const PAGE_SIZE = 6;
+
+const ProductCard = (p) => (
+  <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white transition hover:border-gray-200 hover:shadow-sm">
+    <div className="relative h-40 w-full overflow-hidden bg-gray-100">
+      <img src={p.image} alt={p.name} className="h-full w-full object-cover" />
+      {!p.inStock && (
+        <span className="absolute left-3 top-3 rounded-full bg-gray-900/80 px-2.5 py-1 text-xs font-medium text-white">
+          Out of stock
+        </span>
+      )}
+    </div>
+
+    <div className="p-4">
+      <p className="text-xs text-gray-400">{p.category}</p>
+      <h3 className="mt-0.5 font-medium text-[#202020]">{p.name}</h3>
+      <p className="mt-0.5 text-xs text-gray-500">{p.unit}</p>
+
+      <div className="mt-3 space-y-1.5 border-t border-gray-50 pt-3">
+        {p.tiers.map((tier, i) => (
+          <div key={i} className="flex items-center justify-between text-sm">
+            <span className="flex items-center gap-1.5 text-gray-500">
+              <FiPackage size={13} />
+              {tier.moq}+ units
+            </span>
+            <span className="font-medium text-[#202020]">
+              ₹{tier.price}/unit
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <button
+        disabled={!p.inStock}
+        className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-[#047B22] py-2 text-sm font-medium text-white transition hover:bg-[#03641c] disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
+      >
+        <FiPlus size={16} />
+        Add to bulk order
+      </button>
+    </div>
+  </div>
+);
+
 const Catalog = () => {
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("All");
-  const [categoryOpen, setCategoryOpen] = useState(false);
-
-  const filtered = useMemo(() => {
-    return PRODUCTS.filter((p) => {
-      const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase());
-      const matchesCategory = category === "All" || p.category === category;
-      return matchesSearch && matchesCategory;
-    });
-  }, [search, category]);
-
   return (
     <div className="space-y-6">
       {/* Page header */}
@@ -123,113 +153,18 @@ const Catalog = () => {
         </button>
       </div>
 
-      {/* Search + category filter */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative w-full sm:max-w-sm">
-          <CiSearch
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-            size={18}
-          />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search products"
-            className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm text-[#202020] outline-none transition focus:border-[#047B22] focus:ring-2 focus:ring-[#047B22]/10"
-          />
-        </div>
-
-        <div className="relative w-full sm:w-auto">
-          <button
-            onClick={() => setCategoryOpen((v) => !v)}
-            className="flex w-full items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50 sm:w-auto sm:justify-start"
-          >
-            {category === "All" ? "Category" : category}
-            <FiChevronDown size={16} />
-          </button>
-
-          {categoryOpen && (
-            <div className="absolute right-0 z-10 mt-2 w-48 overflow-hidden rounded-lg border border-gray-100 bg-white py-1 shadow-lg">
-              {CATEGORIES.map((opt) => (
-                <button
-                  key={opt}
-                  onClick={() => {
-                    setCategory(opt);
-                    setCategoryOpen(false);
-                  }}
-                  className={`flex w-full items-center px-4 py-2 text-left text-sm transition hover:bg-gray-50 ${
-                    category === opt
-                      ? "font-medium text-[#047B22]"
-                      : "text-gray-600"
-                  }`}
-                >
-                  {opt}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Product grid */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {filtered.map((p) => (
-          <div
-            key={p.id}
-            className="overflow-hidden rounded-2xl border border-gray-100 bg-white transition hover:border-gray-200 hover:shadow-sm"
-          >
-            <div className="relative h-40 w-full overflow-hidden bg-gray-100">
-              <img
-                src={p.image}
-                alt={p.name}
-                className="h-full w-full object-cover"
-              />
-              {!p.inStock && (
-                <span className="absolute left-3 top-3 rounded-full bg-gray-900/80 px-2.5 py-1 text-xs font-medium text-white">
-                  Out of stock
-                </span>
-              )}
-            </div>
-
-            <div className="p-4">
-              <p className="text-xs text-gray-400">{p.category}</p>
-              <h3 className="mt-0.5 font-medium text-[#202020]">{p.name}</h3>
-              <p className="mt-0.5 text-xs text-gray-500">{p.unit}</p>
-
-              <div className="mt-3 space-y-1.5 border-t border-gray-50 pt-3">
-                {p.tiers.map((tier, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between text-sm"
-                  >
-                    <span className="flex items-center gap-1.5 text-gray-500">
-                      <FiPackage size={13} />
-                      {tier.moq}+ units
-                    </span>
-                    <span className="font-medium text-[#202020]">
-                      ₹{tier.price}/unit
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              <button
-                disabled={!p.inStock}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-[#047B22] py-2 text-sm font-medium text-white transition hover:bg-[#03641c] disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
-              >
-                <FiPlus size={16} />
-                Add to bulk order
-              </button>
-            </div>
-          </div>
-        ))}
-
-        {filtered.length === 0 && (
-          <div className="col-span-full py-14 text-center text-gray-400">
-            No products match this search.
-          </div>
-        )}
-      </div>
+      <CardGrid
+        data={PRODUCTS}
+        renderCard={ProductCard}
+        itemKey={(p) => p.id}
+        searchKeys={["name"]}
+        searchPlaceholder="Search products"
+        filters={[
+          { field: "category", label: "Category", options: CATEGORIES },
+        ]}
+        pageSize={PAGE_SIZE}
+        emptyMessage="No products match this search."
+      />
     </div>
   );
 };

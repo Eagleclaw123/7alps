@@ -1,47 +1,26 @@
-import { motion } from "framer-motion";
-import { FiArrowUpRight } from "react-icons/fi";
-
-const StatCard = ({ title, value, icon: Icon, growth, color = "#0F6B3E" }) => {
-  return (
-    <motion.div
-      whileHover={{
-        y: -5,
-      }}
-      transition={{
-        duration: 0.25,
-      }}
-      className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm"
-    >
-      <div className="flex items-center justify-between">
-        <div
-          className="flex h-14 w-14 items-center justify-center rounded-xl"
-          style={{
-            backgroundColor: `${color}15`,
-          }}
-        >
-          <Icon
-            size={26}
-            style={{
-              color,
-            }}
-          />
-        </div>
-
-        {growth && (
-          <div className="flex items-center gap-1 rounded-full bg-green-50 px-3 py-1 text-sm font-medium text-green-600">
-            <FiArrowUpRight size={15} />
-            {growth}
-          </div>
-        )}
+/**
+ * Stat/metric card used across admin dashboard pages.
+ *
+ * @param {React.ReactNode} icon
+ * @param {string} label
+ * @param {string|number} value
+ * @param {string} [delta] - Optional "+8%"-style change indicator.
+ */
+const StatCard = ({ icon, label, value, delta }) => (
+  <div className="rounded-2xl border border-gray-100 bg-white p-5">
+    <div className="flex items-center justify-between">
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#EAF3DE] text-[#047B22]">
+        {icon}
       </div>
-
-      <div className="mt-8">
-        <h3 className="text-sm font-medium text-gray-500">{title}</h3>
-
-        <h2 className="mt-2 text-4xl font-bold text-[#202020]">{value}</h2>
-      </div>
-    </motion.div>
-  );
-};
+      {delta && (
+        <span className="flex items-center gap-1 rounded-full bg-[#EAF3DE] px-2.5 py-1 text-xs font-medium text-[#3B6D11]">
+          ↗ {delta}
+        </span>
+      )}
+    </div>
+    <p className="mt-4 text-sm text-gray-500">{label}</p>
+    <p className="mt-1 text-2xl font-semibold text-[#202020]">{value}</p>
+  </div>
+);
 
 export default StatCard;

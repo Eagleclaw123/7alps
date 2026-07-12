@@ -8,11 +8,10 @@ import {
   CreditCard,
   MapPin,
   BadgeIndianRupee,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 import { getMyOrders } from "../../../shared/services/order.service";
 import AnimatedPage from "../../../shared/components/ui/AnimatedPage";
+import Pagination from "../../products/components/ProductPagination";
 
 const TABS = [
   "All Orders",
@@ -265,35 +264,11 @@ const CustomerOrders = () => {
 
           {/* Pagination */}
           {!loading && filteredOrders.length > 0 ? (
-            <div className="mt-8 flex items-center justify-center gap-2">
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 disabled:opacity-40"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
-                <button
-                  key={n}
-                  onClick={() => setPage(n)}
-                  className={`flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium ${
-                    page === n
-                      ? "bg-[#047B22] text-white"
-                      : "border border-gray-200 bg-white text-gray-600"
-                  }`}
-                >
-                  {n}
-                </button>
-              ))}
-              <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 disabled:opacity-40"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
-            </div>
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
           ) : null}
         </div>
       </div>

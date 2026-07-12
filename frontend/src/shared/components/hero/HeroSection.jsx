@@ -26,7 +26,7 @@ const HeroSection = ({
   values = [],
   additionalContent,
   containerHeight = "h-[90vh] md:h-[70vh] xl:h-screen",
-  overlayColor = "bg-black/10",
+  overlayColor = "bg-black/50",
   textColor = "text-white",
   headingSize = "text-[26px] md:text-4xl xl:text-[46px]",
   contentMaxWidth = "max-w-2xl",
@@ -113,11 +113,11 @@ const HeroSection = ({
 
             {/* Highlights */}
             {highlights.length > 0 && (
-              <div className="mt-8 flex flex-wrap gap-14 text-gray-300">
+              <div className="mt-8 flex flex-wrap gap-14 text-white">
                 {highlights.map(({ icon: Icon, title, subtitle }, index) => (
                   <div
                     key={title}
-                    className={`flex flex-col items-center gap-3 text-center text-gray-800 ${
+                    className={`flex flex-col items-center gap-3 text-center text-white ${
                       index !== highlights.length - 1
                         ? "border-black/20 pr-6"
                         : ""

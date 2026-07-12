@@ -10,14 +10,15 @@ const OurProcessHeroSection = () => {
 
   return (
     <HeroSection
-      backgroundImage="https://res.cloudinary.com/dasvdkncm/image/upload/v1782789076/50cafcfe95abcde89db9484a2e73fe8a3340650f_gcj3ez.png"
+      backgroundImage="https://res.cloudinary.com/dasvdkncm/image/upload/v1783656984/wide-variety-spices-herbs-ai-generated-image_1_hggrp9.jpg"
       badgeText="Our process · root to powder"
-      badgeColor="#047B22"
+      badgeColor="#fff"
       heading="We don't mix powders."
       headingHighlight="We make them."
       description="Bring 7ALP's traceable, small-batch formulas to your shelves. Honest wholesale margins, a low first-order minimum, and the same root-to-bottle story your customers can trust."
       buttons={buttons}
-      textColor="text-[#FFFED4]"
+      textColor="text-white"
+      overlayColor="bg-black/20"
     />
   );
 };

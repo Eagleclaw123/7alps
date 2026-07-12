@@ -1,9 +1,8 @@
+// ProfileDropdown.jsx
 import { useRef, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { FiUser } from "react-icons/fi";
-import Cookies from "js-cookie";
-import { logout } from "../../../services/auth.service";
 
 import {
   selectCustomer,
@@ -37,7 +36,7 @@ const ProfileDropdown = () => {
     return (
       <Link
         to="/customer/login"
-        className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full transition-all duration-300 hover:bg-white hover:text-gray-800"
+        className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-[#FAF6EF] transition-all duration-300 hover:bg-[#FAF6EF] hover:text-[#3F4A2E]"
       >
         <FiUser size={20} />
       </Link>
@@ -56,14 +55,15 @@ const ProfileDropdown = () => {
       navigate("/", { replace: true });
     }
   };
+
   return (
     <div ref={ref} className="relative">
       <button
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full transition-all duration-300 hover:bg-white hover:text-gray-800"
+        className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-[#FAF6EF] transition-all duration-300 hover:bg-[#FAF6EF] hover:text-[#3F4A2E]"
       >
         {customer ? (
-          <span className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold border">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full border border-current text-sm font-bold">
             {initial}
           </span>
         ) : (
@@ -72,10 +72,10 @@ const ProfileDropdown = () => {
       </button>
 
       {customer && isOpen && (
-        <div className="absolute right-0 top-14 w-52 overflow-hidden rounded-xl bg-white text-gray-800 shadow-xl">
+        <div className="absolute right-0 top-14 z-50 w-52 overflow-hidden rounded-xl border border-[#E3D9C7] bg-white text-[#3F4A2E] shadow-xl">
           <Link
             to="/customer/profile"
-            className="block px-5 py-3 transition hover:bg-gray-100"
+            className="block px-5 py-3 transition hover:bg-[#FAF6EF]"
             onClick={() => setIsOpen(false)}
           >
             My Profile
@@ -83,7 +83,7 @@ const ProfileDropdown = () => {
 
           <Link
             to="/customer/orders"
-            className="block px-5 py-3 transition hover:bg-gray-100"
+            className="block px-5 py-3 transition hover:bg-[#FAF6EF]"
             onClick={() => setIsOpen(false)}
           >
             Orders
@@ -91,7 +91,7 @@ const ProfileDropdown = () => {
 
           <button
             onClick={handleLogout}
-            className="block w-full cursor-pointer px-5 py-3 text-left text-red-600 transition hover:bg-red-50"
+            className="block w-full cursor-pointer px-5 py-3 text-left text-[#C0503A] transition hover:bg-[#C0503A]/10"
           >
             Logout
           </button>

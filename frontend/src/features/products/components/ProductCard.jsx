@@ -138,6 +138,7 @@ const ProductCard = ({
 
         <div className="flex items-center justify-between gap-4">
           <div className="text-lg font-semibold">₹{product.ProductPrice}</div>
+
           {quantity === 0 ? (
             isOutOfStock ? (
               <p className="text-red-600">Out of Stock</p>

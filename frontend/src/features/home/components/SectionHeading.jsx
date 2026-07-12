@@ -15,9 +15,8 @@ const SectionHeading = ({
       {eyebrow ? (
         <div className="flex items-center gap-2 justify-start">
           <div className="h-2 w-2 rounded-full bg-[#047B22]" />
-          <p
-            className={`text-[18px] text-[#047B22] font-ibm-mono font-semibold ${eyebrowClassName}`.trim()}
-          >
+
+          <p className="font-ibm-mono text-[13px] font-semibold uppercase tracking-[0.2em] text-[#047B22] sm:text-sm">
             {eyebrow}
           </p>
         </div>

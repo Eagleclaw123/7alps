@@ -70,7 +70,7 @@ const WhyChoose7Alps = () => {
               playsInline
             >
               <source
-                src="https://res.cloudinary.com/dasvdkncm/video/upload/v1782708450/11220216-hd_720_1280_30fps_uox8th.mp4"
+                src="https://res.cloudinary.com/dasvdkncm/video/upload/v1783646118/5480218-uhd_3840_2160_25fps_lul7ir.mp4"
                 type="video/mp4"
               />
               Your browser does not support the video tag.

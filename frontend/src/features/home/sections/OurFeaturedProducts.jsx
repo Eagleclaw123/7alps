@@ -6,6 +6,7 @@ import ProductCard from "../../products/components/ProductCard";
 import { getPublicProducts } from "../../../shared/services/product.service";
 import { normalizeProducts } from "../../products/utils/normalizeProduct";
 import SectionHeading from "../components/SectionHeading";
+import { useNavigate } from "react-router-dom";
 
 const tabs = ["All", "Hair Care", "Skin Care", "Health & Wellness"];
 
@@ -37,6 +38,7 @@ const OurFeaturedProducts = () => {
   const [activeTab, setActiveTab] = useState("All");
   const [productsData, setProductsData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     let cancelled = false;
@@ -152,7 +154,10 @@ const OurFeaturedProducts = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.3 }}
         >
-          <button className="px-6 py-2 rounded-lg border mt-10">
+          <button
+            className="px-6 py-2 rounded-lg border mt-10"
+            onClick={() => navigate("/products")}
+          >
             View all catalog
             <GoArrowRight className="inline ml-1.5" />
           </button>

@@ -46,7 +46,7 @@ const ProcessIntro = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: i * 0.1 }}
               >
-                <p className="font-ibm-mono text-sm font-semibold text-[#047B22] sm:text-base">
+                <p className="font-ibm-mono text-[13px] font-semibold uppercase tracking-[0.2em] text-[#047B22] sm:text-sm">
                   {point.title}
                 </p>
                 <p className="mt-2 text-[14px] leading-6 text-gray-700 sm:text-[16px]">

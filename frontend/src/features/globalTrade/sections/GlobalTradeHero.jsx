@@ -17,6 +17,7 @@ const GlobalTradeHero = () => {
       description="From our facility in Udaipur, 7ALP ships single-origin Ayurvedic powders to retailers, distributors and importers across five regions — with the documentation, traceability and cold-chain care that international trade demands."
       buttons={buttons}
       textColor="text-[#FFFED4]"
+      overlayColor="bg-black/20"
     />
   );
 };

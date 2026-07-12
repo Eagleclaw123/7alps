@@ -36,45 +36,46 @@ const rows = [
 
 const Comparison = () => {
   return (
-    <section className="relative py-16 px-6 mt-5 xl:px-0 bg-[url('https://res.cloudinary.com/dasvdkncm/image/upload/v1782808666/f910f2fa731e472213b10164fc8561d3a17cb4c0_cszg6g.png')] bg-cover bg-center bg-no-repeat">
-      <div className="absolute inset-0 bg-black/50" />
+    <section className="relative mt-5 bg-[url('https://res.cloudinary.com/dasvdkncm/image/upload/v1782808666/f910f2fa731e472213b10164fc8561d3a17cb4c0_cszg6g.png')] bg-cover bg-center bg-no-repeat px-6 py-20 xl:px-0">
+      <div className="absolute inset-0 bg-gradient-to-b from-[#1F2A1A]/85 via-[#1F2A1A]/75 to-[#1F2A1A]/85" />
 
-      <div className="relative  max-w-7xl mx-auto">
+      <div className="relative mx-auto max-w-7xl">
         <motion.div
-          className="max-w-xl space-y-4 mx-auto text-center"
+          className="mx-auto max-w-xl space-y-4 text-center"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <div className="flex items-center justify-center gap-2 text-white">
-            <div className="h-2 w-2 rounded-full bg-white" />
-            <p className="text-[14px] sm:text-[16px] md:text-[18px] font-ibm-mono font-semibold text-white">
+          <div className="flex items-center justify-center gap-2">
+            <div className="h-1.5 w-1.5 rounded-full bg-[#C98E63]" />
+            <p className="font-ibm-mono text-[13px] font-semibold uppercase tracking-[0.2em] text-[#C98E63] sm:text-sm">
               An honest comparison
             </p>
           </div>
 
-          <h2 className="text-[24px] sm:text-[28px] md:text-[36px] xl:text-[40px] leading-tight font-semibold text-white">
+          <h2 className="font-semibold text-[24px] leading-tight text-[#FAF6EF] sm:text-[28px] md:text-[36px] xl:text-[40px]">
             7ALP vs the average powder on the shelf
           </h2>
 
-          <p className="text-[14px] leading-6 sm:leading-7  sm:text-[15px] md:text-[18px] xl:text-[20px] text-white">
-            Same category, very different practices. Here's where the gap
+          <p className="text-[14px] leading-6 text-[#EFE6D8]/80 sm:text-[15px] sm:leading-7 md:text-[18px]">
+            Same category, very different practices. Here&apos;s where the gap
             actually is.
           </p>
         </motion.div>
-        <div className="mt-8 overflow-hidden rounded-xl sm:mt-10">
+
+        <div className="mt-10 overflow-hidden rounded-xl border border-[#EFE6D8]/15 sm:mt-12">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[600px] border-collapse text-left">
               <thead>
-                <tr className="bg-[#0E2C16]">
-                  <th className="px-4 py-6 text-sm font-semibold text-white sm:px-6 sm:text-base">
+                <tr className="bg-[#1F2A1A]">
+                  <th className="px-4 py-6 font-ibm-mono text-xs font-semibold uppercase tracking-wider text-[#EFE6D8]/70 sm:px-6 sm:text-sm">
                     What to check
                   </th>
-                  <th className="px-4 py-6 text-sm font-semibold text-white sm:px-6 sm:text-base">
+                  <th className="px-4 py-6 font-ibm-mono text-xs font-semibold uppercase tracking-wider text-[#EFE6D8] sm:px-6 sm:text-sm">
                     We 7ALP
                   </th>
-                  <th className="px-4 py-6 text-sm font-semibold text-white sm:px-6 sm:text-base">
+                  <th className="px-4 py-6 font-ibm-mono text-xs font-semibold uppercase tracking-wider text-[#EFE6D8]/70 sm:px-6 sm:text-sm">
                     Conventional powders
                   </th>
                 </tr>
@@ -83,20 +84,20 @@ const Comparison = () => {
                 {rows.map((row, i) => (
                   <tr
                     key={row.label}
-                    className={i % 2 === 0 ? "bg-[#EFF3EC]" : "bg-white"}
+                    className={i % 2 === 0 ? "bg-[#FAF6EF]" : "bg-white"}
                   >
-                    <td className="px-4 py-8 text-sm font-medium text-black sm:px-6 sm:text-[15px]">
+                    <td className="px-4 py-7 text-sm font-medium text-[#3F4A2E] sm:px-6 sm:text-[15px]">
                       {row.label}
                     </td>
-                    <td className="px-4 py-8 text-sm text-gray-800 sm:px-6 sm:text-[15px] bg-[#8DA782]/20">
+                    <td className="bg-[#EFE6D8]/60 px-4 py-7 text-sm text-[#3F4A2E] sm:px-6 sm:text-[15px]">
                       <div className="flex items-start gap-2">
-                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#2E9E44]" />
+                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#5B7A3A]" />
                         <span>{row.us}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-8 text-sm text-gray-800 sm:px-6 sm:text-[15px]">
+                    <td className="px-4 py-7 text-sm text-[#6B7259] sm:px-6 sm:text-[15px]">
                       <div className="flex items-start gap-2">
-                        <X className="mt-0.5 h-4 w-4 shrink-0 text-[#D03B3B]" />
+                        <X className="mt-0.5 h-4 w-4 shrink-0 text-[#B9714A]" />
                         <span>{row.them}</span>
                       </div>
                     </td>

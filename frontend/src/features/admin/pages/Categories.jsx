@@ -60,7 +60,7 @@ const CATEGORIES = [
   },
 ];
 
-const AdminCategories = () => {
+const Categories = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [filterOpen, setFilterOpen] = useState(false);
@@ -245,4 +245,4 @@ const AdminCategories = () => {
   );
 };
 
-export default AdminCategories;
+export default Categories;
