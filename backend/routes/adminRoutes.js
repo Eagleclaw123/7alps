@@ -2,6 +2,9 @@ const express = require('express');
 const authController = require('../controllers/authController');
 const adminController = require('../controllers/adminController');
 const orderController = require('../controllers/orderController');
+const b2bController = require('../controllers/b2bController');
+const quoteController = require('../controllers/quoteController');
+const reviewController = require('../controllers/reviewController');
 
 const router = express.Router();
 
@@ -13,6 +16,24 @@ router.get('/dashboard/stats', adminController.getDashboardStats);
 router.get('/orders', orderController.getAllOrders);
 router.get('/orders/:id', orderController.getOrder);
 router.patch('/orders/:id/status', orderController.updateOrderStatus);
+
+router.get('/quotes', quoteController.getAllQuotes);
+router.get('/quotes/:id', quoteController.getQuote);
+router.patch('/quotes/:id/approve', quoteController.approveQuote);
+router.patch('/quotes/:id/reject', quoteController.rejectQuote);
+
+router.route('/b2b').get(b2bController.getAllB2BMembers).post(b2bController.createB2BMember);
+router
+  .route('/b2b/:id')
+  .get(b2bController.getB2BMember)
+  .patch(b2bController.updateB2BMember)
+  .delete(b2bController.deleteB2BMember);
+
+router.get('/reviews', reviewController.getAllReviews);
+router.patch('/reviews/:id/status', reviewController.updateReviewStatus);
+router.delete('/reviews/:id', reviewController.deleteReview);
+
+router.get('/customers', adminController.getAllCustomers);
 
 router.get('/', adminController.getAllAdmins);
 router.get('/:id', adminController.getAdmin);

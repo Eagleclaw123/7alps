@@ -31,10 +31,26 @@ const shippingAddressSchema = new mongoose.Schema(
 
 const orderSchema = new mongoose.Schema(
   {
+    source: {
+      type: String,
+      enum: ['Customer', 'B2B'],
+      default: 'Customer',
+    },
     customer: {
       type: mongoose.Schema.ObjectId,
       ref: 'Customer',
-      required: true,
+    },
+    b2bMember: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'B2BMember',
+    },
+    quote: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Quote',
+    },
+    buyerBusinessName: {
+      type: String,
+      trim: true,
     },
     items: {
       type: [orderItemSchema],
@@ -62,9 +78,12 @@ const orderSchema = new mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      enum: ['COD'],
+      enum: ['COD', 'Razorpay'],
       default: 'COD',
     },
+    razorpayOrderId: String,
+    razorpayPaymentId: String,
+    razorpaySignature: String,
     placedAt: {
       type: Date,
       default: Date.now,
@@ -72,6 +91,12 @@ const orderSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+orderSchema.pre('validate', function () {
+  if (!this.customer && !this.b2bMember) {
+    throw new Error('Order must belong to either a customer or a B2B member');
+  }
+});
 
 const Order = mongoose.model('Order', orderSchema, 'Orders');
 

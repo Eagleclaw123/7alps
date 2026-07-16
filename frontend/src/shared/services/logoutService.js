@@ -1,8 +1,17 @@
-import { logout } from "./auth.service";
+import { logout as adminLogout } from "./auth.service";
+import { b2bLogout } from "./b2b.service";
+import { logoutCustomer } from "./customer.service";
+
+const LOGOUT_BY_ROLE = {
+  admin: adminLogout,
+  b2b: b2bLogout,
+  customer: logoutCustomer,
+};
 
 export const handleLogout = async (role, navigate) => {
   try {
-    await logout();
+    const logoutRequest = LOGOUT_BY_ROLE[role];
+    if (logoutRequest) await logoutRequest();
 
     localStorage.removeItem("user");
 

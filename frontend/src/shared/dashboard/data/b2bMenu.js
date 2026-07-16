@@ -1,12 +1,8 @@
 import {
   FiHome,
-  FiPackage,
   FiFileText,
   FiShoppingBag,
   FiDownload,
-  FiBriefcase,
-  FiHeadphones,
-  FiSettings,
   FiLogOut,
 } from "react-icons/fi";
 
@@ -19,9 +15,9 @@ const b2bMenu = [
   },
   {
     id: 2,
-    title: "Bulk Orders",
-    icon: FiPackage,
-    path: "/b2b/bulk-orders",
+    title: "Catalog",
+    icon: FiDownload,
+    path: "/b2b/catalog",
   },
   {
     id: 3,
@@ -31,30 +27,12 @@ const b2bMenu = [
   },
   {
     id: 4,
-    title: "Order History",
+    title: "Orders",
     icon: FiShoppingBag,
     path: "/b2b/orders",
   },
   {
     id: 5,
-    title: "Catalog",
-    icon: FiDownload,
-    path: "/b2b/catalog",
-  },
-  {
-    id: 6,
-    title: "Business Profile",
-    icon: FiBriefcase,
-    path: "/b2b/profile",
-  },
-  {
-    id: 7,
-    title: "Settings",
-    icon: FiSettings,
-    path: "/b2b/settings",
-  },
-  {
-    id: 8,
     title: "Logout",
     icon: FiLogOut,
     path: "/logout",

@@ -6,6 +6,7 @@ import {
   FiUsers,
   FiMessageSquare,
   FiBarChart2,
+  FiBriefcase,
   FiSettings,
   FiLogOut,
 } from "react-icons/fi";
@@ -49,12 +50,18 @@ const adminMenu = [
   },
   {
     id: 7,
+    title: "B2B Team",
+    icon: FiBriefcase,
+    path: "/admin/b2b",
+  },
+  {
+    id: 8,
     title: "Settings",
     icon: FiSettings,
     path: "/admin/settings",
   },
   {
-    id: 8,
+    id: 9,
     title: "Logout",
     icon: FiLogOut,
     path: "/logout",

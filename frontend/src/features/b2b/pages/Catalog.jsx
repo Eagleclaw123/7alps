@@ -1,170 +1,198 @@
-import { FiDownload, FiPlus, FiPackage } from "react-icons/fi";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { FiPlus, FiPackage } from "react-icons/fi";
 import CardGrid from "../../../shared/dashboard/components/CardGrid";
+import { getPublicProducts } from "../../../shared/services/product.service";
+import { getProductImageUrl } from "../../products/utils/normalizeProduct";
+import {
+  addDraftItem,
+  selectDraftCount,
+} from "../../../store/slices/b2bQuoteSlice";
 
-const CATEGORIES = ["All", "Hair Care", "Skin Care", "Health & Wellness"];
+const MIN_BULK_QUANTITY = 10;
 
-const PRODUCTS = [
-  {
-    id: 1,
-    name: "Beetroot Powder",
-    category: "Health & Wellness",
-    image:
-      "https://images.unsplash.com/photo-1615485500704-8e990f9900f7?w=300&h=300&fit=crop",
-    unit: "100g pack",
-    tiers: [
-      { moq: 50, price: 220 },
-      { moq: 200, price: 195 },
-      { moq: 500, price: 175 },
-    ],
-    inStock: true,
-  },
-  {
-    id: 2,
-    name: "Ginger Powder",
-    category: "Health & Wellness",
-    image:
-      "https://images.unsplash.com/photo-1615485500833-72c2e4d1d5b6?w=300&h=300&fit=crop",
-    unit: "100g pack",
-    tiers: [
-      { moq: 50, price: 180 },
-      { moq: 200, price: 160 },
-      { moq: 500, price: 145 },
-    ],
-    inStock: true,
-  },
-  {
-    id: 3,
-    name: "Sandalwood Face Pack",
-    category: "Skin Care",
-    image:
-      "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&h=300&fit=crop",
-    unit: "250g jar",
-    tiers: [
-      { moq: 30, price: 340 },
-      { moq: 100, price: 310 },
-      { moq: 300, price: 280 },
-    ],
-    inStock: true,
-  },
-  {
-    id: 4,
-    name: "Brahmi Powder",
-    category: "Hair Care",
-    image:
-      "https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=300&h=300&fit=crop",
-    unit: "100g pack",
-    tiers: [
-      { moq: 50, price: 260 },
-      { moq: 200, price: 235 },
-      { moq: 500, price: 210 },
-    ],
-    inStock: false,
-  },
-  {
-    id: 5,
-    name: "Amla Powder",
-    category: "Hair Care",
-    image:
-      "https://images.unsplash.com/photo-1615485291234-5e00c9e9c8f4?w=300&h=300&fit=crop",
-    unit: "100g pack",
-    tiers: [
-      { moq: 50, price: 190 },
-      { moq: 200, price: 170 },
-      { moq: 500, price: 150 },
-    ],
-    inStock: true,
-  },
-  {
-    id: 6,
-    name: "Multani Mitti",
-    category: "Skin Care",
-    image:
-      "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=300&h=300&fit=crop",
-    unit: "250g pack",
-    tiers: [
-      { moq: 30, price: 210 },
-      { moq: 100, price: 190 },
-      { moq: 300, price: 170 },
-    ],
-    inStock: true,
-  },
-];
+const ProductCard = ({ product, onAdd }) => {
+  const variants = product.variants || [];
+  const [variantLabel, setVariantLabel] = useState(
+    variants.find((v) => v.isDefault)?.label || variants[0]?.label || "",
+  );
+  const variant = variants.find((v) => v.label === variantLabel) || variants[0];
+  const [quantity, setQuantity] = useState(MIN_BULK_QUANTITY);
+  const [proposedPrice, setProposedPrice] = useState(variant?.price ?? "");
 
-const PAGE_SIZE = 6;
+  const handleVariantChange = (label) => {
+    setVariantLabel(label);
+    const next = variants.find((v) => v.label === label);
+    setProposedPrice(next?.price ?? "");
+  };
 
-const ProductCard = (p) => (
-  <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white transition hover:border-gray-200 hover:shadow-sm">
-    <div className="relative h-40 w-full overflow-hidden bg-gray-100">
-      <img src={p.image} alt={p.name} className="h-full w-full object-cover" />
-      {!p.inStock && (
-        <span className="absolute left-3 top-3 rounded-full bg-gray-900/80 px-2.5 py-1 text-xs font-medium text-white">
-          Out of stock
-        </span>
-      )}
-    </div>
+  const inStock = variants.some((v) => v.stock > 0);
+  const priceInvalid =
+    proposedPrice === "" || Number(proposedPrice) <= 0 || Number(proposedPrice) > (variant?.price ?? 0);
+  const quantityInvalid = Number(quantity) < MIN_BULK_QUANTITY;
 
-    <div className="p-4">
-      <p className="text-xs text-gray-400">{p.category}</p>
-      <h3 className="mt-0.5 font-medium text-[#202020]">{p.name}</h3>
-      <p className="mt-0.5 text-xs text-gray-500">{p.unit}</p>
-
-      <div className="mt-3 space-y-1.5 border-t border-gray-50 pt-3">
-        {p.tiers.map((tier, i) => (
-          <div key={i} className="flex items-center justify-between text-sm">
-            <span className="flex items-center gap-1.5 text-gray-500">
-              <FiPackage size={13} />
-              {tier.moq}+ units
-            </span>
-            <span className="font-medium text-[#202020]">
-              ₹{tier.price}/unit
-            </span>
-          </div>
-        ))}
+  return (
+    <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white transition hover:border-gray-200 hover:shadow-sm">
+      <div className="relative h-40 w-full overflow-hidden bg-gray-100">
+        <img
+          src={getProductImageUrl(product.images?.[0])}
+          alt={product.name}
+          className="h-full w-full object-cover"
+        />
+        {!inStock && (
+          <span className="absolute left-3 top-3 rounded-full bg-gray-900/80 px-2.5 py-1 text-xs font-medium text-white">
+            Out of stock
+          </span>
+        )}
       </div>
 
-      <button
-        disabled={!p.inStock}
-        className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-[#047B22] py-2 text-sm font-medium text-white transition hover:bg-[#03641c] disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
-      >
-        <FiPlus size={16} />
-        Add to bulk order
-      </button>
+      <div className="p-4">
+        <p className="text-xs text-gray-400">{product.category}</p>
+        <h3 className="mt-0.5 font-medium text-[#202020]">{product.name}</h3>
+
+        <div className="mt-3 space-y-2 border-t border-gray-50 pt-3">
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-gray-500">Variant</label>
+            <select
+              value={variantLabel}
+              onChange={(e) => handleVariantChange(e.target.value)}
+              className="w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm text-[#202020] outline-none focus:border-[#047B22]"
+            >
+              {variants.map((v) => (
+                <option key={v.label} value={v.label}>
+                  {v.label} — listed ₹{v.price}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-500">Quantity</label>
+              <input
+                type="number"
+                min={MIN_BULK_QUANTITY}
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+                className="w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm text-[#202020] outline-none focus:border-[#047B22]"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-500">
+                Your price/unit
+              </label>
+              <input
+                type="number"
+                min={1}
+                max={variant?.price}
+                value={proposedPrice}
+                onChange={(e) => setProposedPrice(e.target.value)}
+                className={`w-full rounded-lg border px-2.5 py-1.5 text-sm text-[#202020] outline-none ${
+                  priceInvalid ? "border-red-300" : "border-gray-200 focus:border-[#047B22]"
+                }`}
+              />
+            </div>
+          </div>
+          {priceInvalid && (
+            <p className="text-xs text-red-500">
+              Must be between ₹1 and the listed price (₹{variant?.price}).
+            </p>
+          )}
+          {quantityInvalid && (
+            <p className="text-xs text-red-500">
+              Minimum bulk quantity is {MIN_BULK_QUANTITY} units.
+            </p>
+          )}
+        </div>
+
+        <button
+          disabled={!inStock || priceInvalid || quantityInvalid}
+          onClick={() =>
+            onAdd({
+              productId: product._id,
+              variantLabel,
+              name: product.name,
+              listedPrice: variant?.price,
+              proposedPrice: Number(proposedPrice),
+              quantity: Number(quantity),
+            })
+          }
+          className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-[#047B22] py-2 text-sm font-medium text-white transition hover:bg-[#03641c] disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
+        >
+          <FiPlus size={16} />
+          Add to quote
+        </button>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const Catalog = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const draftCount = useSelector(selectDraftCount);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const categories = ["All", ...new Set(products.map((p) => p.category))];
+
+  useEffect(() => {
+    let cancelled = false;
+    getPublicProducts()
+      .then(({ data }) => {
+        if (!cancelled) setProducts(data?.data?.products || []);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <div className="space-y-6">
-      {/* Page header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-xl font-semibold text-[#202020] sm:text-2xl">
             Catalog
           </h1>
           <p className="mt-1 text-sm text-gray-500">
-            Browse wholesale pricing tiers and add products straight to a bulk
-            order.
+            Pick a variant, quantity, and your proposed bulk price, then add it to
+            your quote.
           </p>
         </div>
-        <button className="flex items-center justify-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50">
-          <FiDownload size={16} />
-          Download catalog
+        <button
+          onClick={() => navigate("/b2b/request-quote")}
+          className="flex items-center justify-center gap-2 rounded-lg border border-[#047B22] px-4 py-2 text-sm font-medium text-[#047B22] transition hover:bg-[#EAF3DE]"
+        >
+          <FiPackage size={16} />
+          Review quote {draftCount > 0 ? `(${draftCount})` : ""}
         </button>
       </div>
 
-      <CardGrid
-        data={PRODUCTS}
-        renderCard={ProductCard}
-        itemKey={(p) => p.id}
-        searchKeys={["name"]}
-        searchPlaceholder="Search products"
-        filters={[
-          { field: "category", label: "Category", options: CATEGORIES },
-        ]}
-        pageSize={PAGE_SIZE}
-        emptyMessage="No products match this search."
-      />
+      {loading ? (
+        <p className="py-10 text-center text-gray-500">Loading products...</p>
+      ) : (
+        <CardGrid
+          data={products}
+          renderCard={(product) => (
+            <ProductCard
+              product={product}
+              onAdd={(item) => dispatch(addDraftItem(item))}
+            />
+          )}
+          itemKey={(p) => p._id}
+          searchKeys={["name"]}
+          searchPlaceholder="Search products"
+          filters={[
+            { field: "category", label: "Category", options: categories },
+          ]}
+          pageSize={6}
+          emptyMessage="No products match this search."
+        />
+      )}
     </div>
   );
 };

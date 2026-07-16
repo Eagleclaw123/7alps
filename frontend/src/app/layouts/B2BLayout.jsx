@@ -24,7 +24,7 @@ const B2BLayout = () => {
       Sidebar={(props) => (
         <Sidebar
           {...props}
-          menuItems={b2bMenu}
+          menuItems={menuItems}
           mobileOpen={mobileOpen}
           onClose={() => setMobileOpen(false)}
         />

@@ -12,6 +12,8 @@ const allUsersRouter = require('./routes/userRoutes');
 const adminRouter = require('./routes/adminRoutes');
 const productRouter = require('./routes/productRoutes');
 const customerRouter = require('./routes/customerRoutes');
+const b2bRouter = require('./routes/b2bRoutes');
+const categoryRouter = require('./routes/categoryRoutes');
 
 const app = express();
 
@@ -21,7 +23,7 @@ app.use(helmet());
 // CORS — must be before body parser so preflight OPTIONS requests are handled
 app.use(
   cors({
-    origin: ['http://localhost:5173', 'http://localhost:3000'],
+    origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'],
     credentials: true,
   }),
 );
@@ -62,6 +64,8 @@ app.use('/api/v1/auth', allUsersRouter);
 app.use('/api/v1/admin', adminRouter);
 app.use('/api/v1/products', productRouter);
 app.use('/api/v1/customer', customerRouter);
+app.use('/api/v1/b2b', b2bRouter);
+app.use('/api/v1/categories', categoryRouter);
 
 app.all('/{*path}', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));

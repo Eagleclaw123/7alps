@@ -7,7 +7,7 @@ import AuthHeader from "../../components/AuthHeader";
 import AuthInput from "../../components/AuthInput";
 import AuthLayout from "../../components/AuthLayout";
 import PasswordInput from "../../components/PasswordInput";
-import { b2bLogin } from "../../../../shared/services/auth.service";
+import { b2bLoginRequest } from "../../../../shared/services/b2b.service";
 
 const initialFormData = {
   email: "",
@@ -39,12 +39,23 @@ const B2BLoginPage = () => {
     try {
       setLoading(true);
 
-      const { data } = await b2bLogin(formData);
+      const { data } = await b2bLoginRequest(formData);
 
-      // Store only non-sensitive business information
-      // localStorage.setItem("b2b", JSON.stringify(data.business));
+      const member = data?.data?.member;
 
-      navigate("/b2b/dashboard", {
+      // Store only non-sensitive display info — the JWT itself lives in an httpOnly cookie.
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          role: "b2b",
+          id: member?._id,
+          name: member?.name,
+          email: member?.email,
+          businessName: member?.businessName,
+        }),
+      );
+
+      navigate("/b2b", {
         replace: true,
       });
     } catch (error) {

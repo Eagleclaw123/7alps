@@ -81,6 +81,16 @@ const AdminLoginPage = () => {
 
       const adminUser = responseData?.data?.user;
 
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          role: "admin",
+          id: adminUser?._id,
+          name: adminUser?.Name,
+          email: adminUser?.Email,
+        }),
+      );
+
       navigate("/admin", {
         replace: true,
       });

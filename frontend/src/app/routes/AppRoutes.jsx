@@ -28,9 +28,8 @@ import CheckoutPage from "../../features/cart/pages/CheckoutPage";
 import ProtectedRoute from "./ProtectedRoute";
 import CustomerOrders from "../../features/customer/pages/CustomerOrders";
 import CustomerProfile from "../../features/customer/pages/CustomerProfile";
-import BulkOrders from "../../features/b2b/pages/BulkOrders";
 import RequestQuote from "../../features/b2b/pages/RequestQuote";
-import OrderHistory from "../../features/b2b/pages/OrderHistory";
+import B2BOrders from "../../features/b2b/pages/Orders";
 import Catalog from "../../features/b2b/pages/Catalog";
 import Dashboard from "../../features/admin/pages/Dashboard";
 import Products from "../../features/admin/pages/Products";
@@ -38,6 +37,7 @@ import Orders from "../../features/admin/pages/Orders";
 import Customers from "../../features/admin/pages/Customers";
 import Categories from "../../features/admin/pages/Categories";
 import Reviews from "../../features/admin/pages/Reviews";
+import B2BTeam from "../../features/admin/pages/B2BTeam";
 
 const AppRoutes = () => {
   return (
@@ -84,24 +84,23 @@ const AppRoutes = () => {
       <Route
         path="/b2b/"
         element={
-          // <ProtectedRoute role="b2b">
-          <B2BLayout />
-          // </ProtectedRoute>
+          <ProtectedRoute role="b2b">
+            <B2BLayout />
+          </ProtectedRoute>
         }
       >
         <Route index element={<B2BDashboard />} />
-        <Route path="bulk-orders" element={<BulkOrders />} />
         <Route path="request-quote" element={<RequestQuote />} />
-        <Route path="orders" element={<OrderHistory />} />
+        <Route path="orders" element={<B2BOrders />} />
         <Route path="catalog" element={<Catalog />} />
       </Route>
 
       <Route
         path="/admin/"
         element={
-          // <ProtectedRoute role="admin">
-          <AdminLayout />
-          // </ProtectedRoute>
+          <ProtectedRoute role="admin">
+            <AdminLayout />
+          </ProtectedRoute>
         }
       >
         <Route index element={<Dashboard />} />
@@ -110,6 +109,7 @@ const AppRoutes = () => {
         <Route path="customers" element={<Customers />} />
         <Route path="categories" element={<Categories />} />
         <Route path="reviews" element={<Reviews />} />
+        <Route path="b2b" element={<B2BTeam />} />
         {/* Add more admin routes here */}
       </Route>
       <Route element={<AuthLayout />}>
