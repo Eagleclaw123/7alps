@@ -7,11 +7,10 @@ import {
   toggleProductStatus,
   updateProduct,
 } from "../../../shared/services/product.service";
+import { getPublicCategories } from "../../../shared/services/category.service";
 import DataTable from "../../../shared/dashboard/components/DataTable";
 import Badge from "../../../shared/dashboard/components/Badge";
 import ProductForm from "../components/ProductForm";
-
-const CATEGORY_OPTIONS = ["Hair Care", "Skin Care", "Health & Wellness"];
 
 const PAGE_SIZE = 10;
 
@@ -30,7 +29,7 @@ const emptyVariant = () => ({
 
 const initialFormData = {
   name: "",
-  category: CATEGORY_OPTIONS[0],
+  category: "",
   subCategory: "",
   shortDescription: "",
   description: "",
@@ -53,6 +52,7 @@ const Products = () => {
   const [formData, setFormData] = useState(initialFormData);
   const [variants, setVariants] = useState([emptyVariant()]);
   const [lists, setLists] = useState(initialLists);
+  const [categoryOptions, setCategoryOptions] = useState([]);
 
   const [images, setImages] = useState([]); // [{ id, file, preview }]
   const [existingImages, setExistingImages] = useState([]);
@@ -78,6 +78,12 @@ const Products = () => {
 
   useEffect(() => {
     loadProducts();
+
+    getPublicCategories().then(({ data }) => {
+      const names = (data?.data?.categories || []).map((c) => c.name);
+      setCategoryOptions(names);
+      setFormData((prev) => (prev.category ? prev : { ...prev, category: names[0] || "" }));
+    });
   }, []);
 
   useEffect(() => {
@@ -166,7 +172,7 @@ const Products = () => {
     setEditingProductId(product._id);
     setFormData({
       name: product.name || "",
-      category: product.category || CATEGORY_OPTIONS[0],
+      category: product.category || categoryOptions[0] || "",
       subCategory: product.subCategory || "",
       shortDescription: product.shortDescription || "",
       description: product.description || "",
@@ -366,7 +372,7 @@ const Products = () => {
         ref={formTopRef}
         editingProductId={editingProductId}
         formData={formData}
-        categoryOptions={CATEGORY_OPTIONS}
+        categoryOptions={categoryOptions}
         images={images}
         existingImages={existingImages}
         onFormChange={handleChange}
@@ -398,7 +404,7 @@ const Products = () => {
               {
                 field: "category",
                 label: "Category",
-                options: ["All", ...CATEGORY_OPTIONS],
+                options: ["All", ...categoryOptions],
               },
             ]}
             pageSize={PAGE_SIZE}

@@ -8,8 +8,6 @@ import { normalizeProducts } from "../../products/utils/normalizeProduct";
 import SectionHeading from "../components/SectionHeading";
 import { useNavigate } from "react-router-dom";
 
-const tabs = ["All", "Hair Care", "Skin Care", "Health & Wellness"];
-
 const containerVariants = {
   hidden: {},
   visible: {
@@ -67,6 +65,11 @@ const OurFeaturedProducts = () => {
       cancelled = true;
     };
   }, []);
+
+  const tabs = useMemo(
+    () => ["All", ...new Set(productsData.map((product) => product.ProductCategory))],
+    [productsData],
+  );
 
   const filteredProducts = useMemo(() => {
     return activeTab === "All"

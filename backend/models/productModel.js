@@ -44,7 +44,7 @@ const productSchema = new mongoose.Schema(
     category: {
       type: String,
       required: [true, 'Category is required'],
-      enum: ['Hair Care', 'Skin Care', 'Health & Wellness'],
+      trim: true,
     },
     subCategory: {
       type: String,
