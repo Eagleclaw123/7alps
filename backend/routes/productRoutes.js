@@ -1,6 +1,7 @@
 const express = require('express');
 const authController = require('../controllers/authController');
 const productController = require('../controllers/productController');
+const reviewController = require('../controllers/reviewController');
 const { uploadProductImages } = require('../utils/upload');
 
 const router = express.Router();
@@ -8,6 +9,7 @@ const router = express.Router();
 // ── Public routes (no auth required) ─────────────────────────────────────────
 router.get('/public', productController.getPublicProducts);
 router.get('/public/:idOrSlug', productController.getPublicProduct);
+router.get('/public/:idOrSlug/reviews', reviewController.getProductReviews);
 
 // ── Admin routes (protected) ──────────────────────────────────────────────────
 router.use(authController.protect);

@@ -1,92 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CiSearch } from "react-icons/ci";
-import { HiOutlineDotsVertical } from "react-icons/hi";
+import { FiChevronDown, FiStar, FiCheck, FiTrash2, FiFlag } from "react-icons/fi";
 import {
-  FiChevronDown,
-  FiStar,
-  FiCheck,
-  FiTrash2,
-  FiFlag,
-} from "react-icons/fi";
-
-const REVIEWS = [
-  {
-    id: 1,
-    customer: "Esther Howard",
-    avatar: "https://i.pravatar.cc/80?img=47",
-    product: "Beetroot Powder",
-    rating: 5,
-    comment:
-      "Noticed a real difference in my hair volume within three weeks. Smells great too, no artificial fragrance.",
-    date: "2026-07-02",
-    status: "Published",
-  },
-  {
-    id: 2,
-    customer: "Leslie Alexander",
-    avatar: "https://i.pravatar.cc/80?img=12",
-    product: "Sandalwood Face Pack",
-    rating: 4,
-    comment:
-      "Good quality powder, mixes well with rose water. Packaging could be sturdier for shipping.",
-    date: "2026-07-01",
-    status: "Published",
-  },
-  {
-    id: 3,
-    customer: "Guy Hawkins",
-    avatar: "https://i.pravatar.cc/80?img=13",
-    product: "Ginger Powder",
-    rating: 2,
-    comment:
-      "Jar arrived half empty and the seal was broken. Contacted support but no response yet.",
-    date: "2026-06-29",
-    status: "Pending",
-  },
-  {
-    id: 4,
-    customer: "Savannah Nguyen",
-    avatar: "https://i.pravatar.cc/80?img=32",
-    product: "Brahmi Powder",
-    rating: 5,
-    comment: "My go-to for hair oil now. Repeat customer, always fresh stock.",
-    date: "2026-06-27",
-    status: "Published",
-  },
-  {
-    id: 5,
-    customer: "Bessie Cooper",
-    avatar: "https://i.pravatar.cc/80?img=26",
-    product: "Beetroot Powder",
-    rating: 1,
-    comment:
-      "This is clearly a fake review posted by a competitor, contains a link to another site.",
-    date: "2026-06-25",
-    status: "Flagged",
-  },
-  {
-    id: 6,
-    customer: "Ronald Richards",
-    avatar: "https://i.pravatar.cc/80?img=15",
-    product: "Sandalwood Face Pack",
-    rating: 3,
-    comment:
-      "Decent product, nothing exceptional. Would buy again if on discount.",
-    date: "2026-06-22",
-    status: "Published",
-  },
-  {
-    id: 7,
-    customer: "Marvin McKinney",
-    avatar: "https://i.pravatar.cc/80?img=51",
-    product: "Ginger Powder",
-    rating: 5,
-    comment:
-      "Fast delivery, great customer service when I asked about usage suggestions.",
-    date: "2026-06-20",
-    status: "Pending",
-  },
-];
+  getAllReviews,
+  updateReviewStatus,
+  deleteReview,
+} from "../../../shared/services/review.service";
 
 const STATUS_STYLES = {
   Published: "bg-[#EAF3DE] text-[#3B6D11]",
@@ -108,9 +27,7 @@ const Stars = ({ rating }) => (
       <FiStar
         key={i}
         size={14}
-        className={
-          i < rating ? "fill-[#F5A623] text-[#F5A623]" : "text-gray-200"
-        }
+        className={i < rating ? "fill-[#F5A623] text-[#F5A623]" : "text-gray-200"}
       />
     ))}
   </div>
@@ -120,29 +37,46 @@ const Reviews = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [filterOpen, setFilterOpen] = useState(false);
-  const [reviews, setReviews] = useState(REVIEWS);
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadReviews = () => {
+    setLoading(true);
+    getAllReviews()
+      .then(({ data }) => setReviews(data?.data?.reviews || []))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadReviews();
+  }, []);
 
   const filtered = useMemo(() => {
     return reviews.filter((r) => {
+      const customerName = r.customer?.name || "";
+      const productName = r.product?.name || "";
       const matchesSearch =
-        r.customer.toLowerCase().includes(search.toLowerCase()) ||
-        r.product.toLowerCase().includes(search.toLowerCase()) ||
+        customerName.toLowerCase().includes(search.toLowerCase()) ||
+        productName.toLowerCase().includes(search.toLowerCase()) ||
         r.comment.toLowerCase().includes(search.toLowerCase());
       const matchesStatus = statusFilter === "All" || r.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
   }, [reviews, search, statusFilter]);
 
-  const avgRating =
-    reviews.reduce((sum, r) => sum + r.rating, 0) / (reviews.length || 1);
+  const avgRating = reviews.length
+    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+    : 0;
   const pendingCount = reviews.filter((r) => r.status === "Pending").length;
 
-  const updateStatus = (id, status) => {
-    setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
+  const updateStatus = async (id, status) => {
+    await updateReviewStatus(id, status);
+    setReviews((prev) => prev.map((r) => (r._id === id ? { ...r, status } : r)));
   };
 
-  const removeReview = (id) => {
-    setReviews((prev) => prev.filter((r) => r.id !== id));
+  const removeReview = async (id) => {
+    await deleteReview(id);
+    setReviews((prev) => prev.filter((r) => r._id !== id));
   };
 
   return (
@@ -150,9 +84,7 @@ const Reviews = () => {
       {/* Header */}
       <div className="mb-1 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-[#202020] sm:text-2xl">
-            Reviews
-          </h1>
+          <h1 className="text-xl font-semibold text-[#202020] sm:text-2xl">Reviews</h1>
           <p className="mt-1 text-sm text-gray-500">
             See what customers are saying and keep your storefront trustworthy.
           </p>
@@ -161,12 +93,9 @@ const Reviews = () => {
 
       {/* Stat strip */}
       <div className="mt-6 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
-        <span className="font-semibold text-[#202020]">
-          {reviews.length} reviews
-        </span>
+        <span className="font-semibold text-[#202020]">{reviews.length} reviews</span>
         <span className="text-gray-400">
-          · {avgRating.toFixed(1)} average rating · {pendingCount} awaiting
-          moderation
+          · {avgRating.toFixed(1)} average rating · {pendingCount} awaiting moderation
         </span>
       </div>
 
@@ -210,9 +139,7 @@ const Reviews = () => {
                     setFilterOpen(false);
                   }}
                   className={`flex w-full items-center px-4 py-2 text-left text-sm transition hover:bg-gray-50 ${
-                    statusFilter === opt
-                      ? "font-medium text-[#047B22]"
-                      : "text-gray-600"
+                    statusFilter === opt ? "font-medium text-[#047B22]" : "text-gray-600"
                   }`}
                 >
                   {opt}
@@ -224,77 +151,77 @@ const Reviews = () => {
       </div>
 
       {/* Reviews list */}
-      <div className="mt-5 divide-y divide-gray-50">
-        {filtered.map((r) => (
-          <div
-            key={r.id}
-            className="flex flex-col gap-3 py-4 sm:flex-row sm:gap-4"
-          >
-            <img
-              src={r.avatar}
-              alt={r.customer}
-              className="h-9 w-9 shrink-0 rounded-full object-cover"
-            />
+      {loading ? (
+        <p className="py-10 text-center text-gray-500">Loading reviews...</p>
+      ) : (
+        <div className="mt-5 divide-y divide-gray-50">
+          {filtered.map((r) => (
+            <div key={r._id} className="flex flex-col gap-3 py-4 sm:flex-row sm:gap-4">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#EAF3DE] text-sm font-semibold text-[#3B6D11]">
+                {(r.customer?.name || "?").charAt(0).toUpperCase()}
+              </span>
 
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                <span className="font-medium text-[#202020]">{r.customer}</span>
-                <span className="text-xs text-gray-400">
-                  on <span className="text-gray-600">{r.product}</span>
-                </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <span className="font-medium text-[#202020]">
+                    {r.customer?.name || "Deleted customer"}
+                  </span>
+                  <span className="text-xs text-gray-400">
+                    on <span className="text-gray-600">{r.product?.name || "Deleted product"}</span>
+                  </span>
+                </div>
+
+                <div className="mt-1 flex items-center gap-3">
+                  <Stars rating={r.rating} />
+                  <span className="text-xs text-gray-400">
+                    {new Date(r.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+
+                <p className="mt-2 text-sm text-gray-600">{r.comment}</p>
+
+                <div className="mt-2">
+                  <StatusBadge status={r.status} />
+                </div>
               </div>
 
-              <div className="mt-1 flex items-center gap-3">
-                <Stars rating={r.rating} />
-                <span className="text-xs text-gray-400">{r.date}</span>
-              </div>
-
-              <p className="mt-2 text-sm text-gray-600">{r.comment}</p>
-
-              <div className="mt-2">
-                <StatusBadge status={r.status} />
+              <div className="flex shrink-0 items-start gap-1 sm:pl-2">
+                {r.status !== "Published" && (
+                  <button
+                    onClick={() => updateStatus(r._id, "Published")}
+                    title="Approve"
+                    className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition hover:bg-[#EAF3DE] hover:text-[#3B6D11]"
+                  >
+                    <FiCheck size={16} />
+                  </button>
+                )}
+                {r.status !== "Flagged" && (
+                  <button
+                    onClick={() => updateStatus(r._id, "Flagged")}
+                    title="Flag"
+                    className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition hover:bg-[#FAEEDA] hover:text-[#854F0B]"
+                  >
+                    <FiFlag size={16} />
+                  </button>
+                )}
+                <button
+                  onClick={() => removeReview(r._id)}
+                  title="Delete"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition hover:bg-[#FCEBEB] hover:text-[#A32D2D]"
+                >
+                  <FiTrash2 size={16} />
+                </button>
               </div>
             </div>
+          ))}
 
-            <div className="flex shrink-0 items-start gap-1 sm:pl-2">
-              {r.status !== "Published" && (
-                <button
-                  onClick={() => updateStatus(r.id, "Published")}
-                  title="Approve"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition hover:bg-[#EAF3DE] hover:text-[#3B6D11]"
-                >
-                  <FiCheck size={16} />
-                </button>
-              )}
-              {r.status !== "Flagged" && (
-                <button
-                  onClick={() => updateStatus(r.id, "Flagged")}
-                  title="Flag"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition hover:bg-[#FAEEDA] hover:text-[#854F0B]"
-                >
-                  <FiFlag size={16} />
-                </button>
-              )}
-              <button
-                onClick={() => removeReview(r.id)}
-                title="Delete"
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition hover:bg-[#FCEBEB] hover:text-[#A32D2D]"
-              >
-                <FiTrash2 size={16} />
-              </button>
-              <button className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-600">
-                <HiOutlineDotsVertical size={16} />
-              </button>
+          {filtered.length === 0 && (
+            <div className="py-14 text-center text-gray-400">
+              No reviews match this filter.
             </div>
-          </div>
-        ))}
-
-        {filtered.length === 0 && (
-          <div className="py-14 text-center text-gray-400">
-            No reviews match this filter.
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

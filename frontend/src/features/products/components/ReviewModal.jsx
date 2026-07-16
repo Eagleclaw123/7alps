@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { FiStar, FiX } from "react-icons/fi";
 
-const ReviewModal = ({ onClose }) => {
+const ReviewModal = ({ onClose, onSubmit }) => {
   const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const handleEsc = (e) => {
@@ -17,6 +20,28 @@ const ReviewModal = ({ onClose }) => {
       document.removeEventListener("keydown", handleEsc);
     };
   }, [onClose]);
+
+  const handleSubmit = async () => {
+    setError("");
+
+    if (rating === 0) {
+      setError("Please select a rating.");
+      return;
+    }
+    if (comment.trim().length < 5) {
+      setError("Please write at least a few words about your experience.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      await onSubmit({ rating, comment: comment.trim() });
+    } catch (err) {
+      setError(err.response?.data?.message || "Unable to submit review.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div
@@ -53,6 +78,7 @@ const ReviewModal = ({ onClose }) => {
               <button
                 key={item}
                 type="button"
+                aria-label={`Rate ${item} star${item > 1 ? "s" : ""}`}
                 onClick={() => setRating(item)}
                 className="transition hover:scale-110"
               >
@@ -66,31 +92,22 @@ const ReviewModal = ({ onClose }) => {
           </div>
         </div>
 
-        {/* Review Title */}
-        <div className="mb-5">
-          <label className="mb-2 block font-medium text-gray-700">
-            Review Title
-          </label>
-
-          <input
-            type="text"
-            placeholder="Give your review a title"
-            className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-[#0F6B3E]"
-          />
-        </div>
-
         {/* Review Content */}
         <div>
           <label className="mb-2 block font-medium text-gray-700">
-            Review Content
+            Your Review
           </label>
 
           <textarea
             rows={4}
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
             placeholder="Start writing here..."
             className="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-[#0F6B3E]"
           />
         </div>
+
+        {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
 
         {/* Buttons */}
         <div className="mt-8 flex justify-end gap-4">
@@ -101,8 +118,12 @@ const ReviewModal = ({ onClose }) => {
             Cancel
           </button>
 
-          <button className="rounded-lg bg-[#0F6B3E] px-8 py-3 font-medium text-white transition hover:bg-[#0C5B35]">
-            Submit Review
+          <button
+            onClick={handleSubmit}
+            disabled={submitting}
+            className="rounded-lg bg-[#0F6B3E] px-8 py-3 font-medium text-white transition hover:bg-[#0C5B35] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {submitting ? "Submitting..." : "Submit Review"}
           </button>
         </div>
       </div>
