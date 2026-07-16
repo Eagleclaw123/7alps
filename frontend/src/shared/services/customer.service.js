@@ -11,3 +11,7 @@ export const logoutCustomer = () => {
 export const updateCustomerAddresses = (addresses) => {
   return api.patch("/customer/addresses", { addresses });
 };
+
+export const updateCustomerProfile = (profile) => {
+  return api.patch("/customer/profile", profile);
+};

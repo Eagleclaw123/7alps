@@ -133,6 +133,23 @@ exports.logout = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: 'success', message: 'Logged out successfully' });
 });
 
+// PATCH /api/v1/customer/profile
+exports.updateProfile = catchAsync(async (req, res, next) => {
+  const { name, email } = req.body;
+
+  if (!name || !name.trim()) {
+    return next(new AppError('Name is required', 400));
+  }
+
+  const customer = await Customer.findByIdAndUpdate(
+    req.customer._id,
+    { name, email },
+    { new: true, runValidators: true },
+  );
+
+  res.status(200).json({ status: 'success', data: { customer } });
+});
+
 // PATCH /api/v1/customer/addresses
 exports.updateAddresses = catchAsync(async (req, res, next) => {
   const { addresses } = req.body;
