@@ -6,29 +6,23 @@ import {
   FiDollarSign,
 } from "react-icons/fi";
 import StatCard from "../../../shared/dashboard/components/StatCard";
+import { getDashboardStats } from "../../../shared/services/admin.service";
+
+const initialStats = {
+  totalCustomers: 0,
+  totalOrders: 0,
+  totalProducts: 0,
+  totalRevenue: 0,
+};
 
 const Dashboard = () => {
-  const [productsCount, setProductsCount] = useState(0);
+  const [stats, setStats] = useState(initialStats);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadCounts = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch(
-          (import.meta.env.VITE_API_BASE_URL ||
-            "http://localhost:3000/api/v1") + "/products",
-        );
-        const json = await res.json();
-        setProductsCount(json?.results || 0);
-      } catch (err) {
-        setProductsCount(0);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadCounts();
+    getDashboardStats()
+      .then(({ data }) => setStats({ ...initialStats, ...data?.data }))
+      .finally(() => setLoading(false));
   }, []);
 
   return (
@@ -37,25 +31,22 @@ const Dashboard = () => {
         <StatCard
           icon={<FiUsers size={20} />}
           label="Total Customers"
-          value="1,248"
-          delta="12%"
+          value={loading ? "..." : stats.totalCustomers.toLocaleString()}
         />
         <StatCard
           icon={<FiShoppingCart size={20} />}
           label="Total Orders"
-          value="356"
-          delta="9%"
+          value={loading ? "..." : stats.totalOrders.toLocaleString()}
         />
         <StatCard
           icon={<FiPackage size={20} />}
           label="Products"
-          value={loading ? "..." : String(productsCount)}
+          value={loading ? "..." : stats.totalProducts.toLocaleString()}
         />
         <StatCard
           icon={<FiDollarSign size={20} />}
           label="Revenue"
-          value="₹4.8L"
-          delta="16%"
+          value={loading ? "..." : `₹${stats.totalRevenue.toLocaleString()}`}
         />
       </div>
     </section>
