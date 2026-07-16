@@ -261,6 +261,8 @@ export const {
 
 export const selectCartItems = (state) => state.cart.items;
 
+export const selectCartStatus = (state) => state.cart.status;
+
 export const selectCartCount = (state) =>
   state.cart.items.reduce((count, item) => count + item.quantity, 0);
 

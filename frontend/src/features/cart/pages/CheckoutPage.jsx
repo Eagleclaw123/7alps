@@ -1,15 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 import {
-  fetchCart,
+  clearCart,
   selectCartItems,
+  selectCartStatus,
   selectShipping,
   selectSubtotal,
   selectTotal,
 } from "../../../store/slices/cartSlice";
 import { createOrder } from "../../../shared/services/order.service";
+import {
+  createRazorpayOrder,
+  verifyRazorpayPayment,
+} from "../../../shared/services/payment.service";
+import { loadRazorpayScript } from "../../../shared/utils/loadRazorpayScript";
+import AddressMapPicker from "../../../shared/components/map/AddressMapPicker";
 
 const initialAddress = {
   name: "",
@@ -63,14 +70,20 @@ const CheckoutPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const cartItems = useSelector(selectCartItems);
+  const cartStatus = useSelector(selectCartStatus);
   const subtotal = useSelector(selectSubtotal);
   const shipping = useSelector(selectShipping);
   const total = useSelector(selectTotal);
   const [address, setAddress] = useState(initialAddress);
+  const [paymentMethod, setPaymentMethod] = useState("COD");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
   const [touched, setTouched] = useState({});
+  // Synchronous (unlike state) so the empty-cart-redirect effect below can see
+  // it immediately — a state flag wouldn't apply until the next render, by
+  // which point the effect may already have fired once more with stale info.
+  const orderJustPlacedRef = useRef(false);
 
   const handleChange = ({ target: { name, value } }) => {
     setAddress((prev) => ({ ...prev, [name]: value }));
@@ -81,6 +94,25 @@ const CheckoutPage = () => {
         [name]: validators[name] ? validators[name](value) : "",
       }));
     }
+  };
+
+  // Auto-fills whatever the map picker resolved; leaves fields the picker
+  // couldn't determine (e.g. name/phone) untouched so manual entry still works.
+  const handleMapAddressChange = (parsed) => {
+    setAddress((prev) => ({
+      ...prev,
+      line1: parsed.line1 || prev.line1,
+      city: parsed.city || prev.city,
+      state: parsed.state || prev.state,
+      pincode: parsed.pincode || prev.pincode,
+    }));
+    setFieldErrors((prev) => ({
+      ...prev,
+      line1: parsed.line1 ? "" : prev.line1,
+      city: parsed.city ? "" : prev.city,
+      state: parsed.state ? "" : prev.state,
+      pincode: parsed.pincode ? "" : prev.pincode,
+    }));
   };
 
   const handleBlur = ({ target: { name, value } }) => {
@@ -106,6 +138,62 @@ const CheckoutPage = () => {
     return Object.values(nextErrors).every((msg) => !msg);
   };
 
+  const payWithRazorpay = async () => {
+    const { data: orderData } = await createRazorpayOrder();
+    const { razorpayOrderId, amount, currency, keyId } = orderData.data;
+
+    const Razorpay = await loadRazorpayScript();
+
+    return new Promise((resolve, reject) => {
+      // Razorpay's modal can fire `ondismiss` while it's closing *after* a
+      // successful payment too (not just on genuine user cancellation) — since
+      // our handler below has to await the backend verify call, that dismiss
+      // event can otherwise win the race and reject this promise as "cancelled"
+      // a moment before the verify call actually succeeds. This flag makes sure
+      // once Razorpay has called `handler` at all, nothing else can override it.
+      let settled = false;
+
+      const rzp = new Razorpay({
+        key: keyId,
+        amount,
+        currency,
+        order_id: razorpayOrderId,
+        name: "7ALP's",
+        description: "Order payment",
+        prefill: { name: address.name, contact: address.phone },
+        theme: { color: "#0F6B3E" },
+        handler: async (response) => {
+          settled = true;
+          try {
+            const { data: verifyData } = await verifyRazorpayPayment({
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+              shippingAddress: address,
+            });
+            resolve(verifyData);
+          } catch (err) {
+            reject(err);
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            if (settled) return;
+            settled = true;
+            reject(new Error("Payment cancelled"));
+          },
+        },
+      });
+
+      rzp.on("payment.failed", () => {
+        if (settled) return;
+        settled = true;
+        reject(new Error("Payment failed. Please try again."));
+      });
+      rzp.open();
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -117,22 +205,57 @@ const CheckoutPage = () => {
 
     try {
       setSubmitting(true);
-      await createOrder(address);
+
+      if (paymentMethod === "Razorpay") {
+        await payWithRazorpay();
+      } else {
+        await createOrder(address);
+      }
+
+      // Set before navigating/clearing: React can batch the route change and
+      // the cart-clear into the same render, so the empty-cart-redirect effect
+      // below could still fire once more on this (still technically mounted)
+      // page and steal the navigation. The ref is synchronous, so the effect
+      // sees it immediately, unlike a state flag which would need a re-render.
+      orderJustPlacedRef.current = true;
 
       navigate("/customer/orders", { state: { justPlaced: true } });
+
+      // The backend already cleared the cart as part of placing the order —
+      // sync local state to match so the header badge doesn't show stale items
+      // until a hard refresh.
+      dispatch(clearCart());
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          "Unable to place order. Please try again.",
-      );
+      if (err.message === "Payment cancelled") {
+        setError("Payment was cancelled.");
+      } else {
+        setError(
+          err.response?.data?.message ||
+            err.message ||
+            "Unable to place order. Please try again.",
+        );
+      }
     } finally {
       setSubmitting(false);
     }
   };
 
   useEffect(() => {
-    if (cartItems.length === 0) navigate("/cart", { replace: true });
-  }, [cartItems.length, navigate]);
+    // Skip if we just placed an order — the cart is legitimately empty now
+    // because of that, not because the user has nothing to check out.
+    if (orderJustPlacedRef.current) return;
+
+    // Wait for the cart to actually finish loading (it's server-backed for a
+    // logged-in customer) before deciding it's empty — otherwise a hard refresh
+    // on this page redirects away before the real cart has even been fetched.
+    if (cartStatus === "succeeded" && cartItems.length === 0) {
+      navigate("/cart", { replace: true });
+    }
+  }, [cartItems.length, cartStatus, navigate]);
+
+  if (cartStatus !== "succeeded" && cartItems.length === 0) {
+    return <p className="py-20 text-center text-gray-500">Loading your cart...</p>;
+  }
 
   if (cartItems.length === 0) return null;
 
@@ -165,6 +288,8 @@ const CheckoutPage = () => {
                 Required
               </span>
             </div>
+
+            <AddressMapPicker onAddressChange={handleMapAddressChange} />
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
@@ -317,11 +442,45 @@ const CheckoutPage = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 rounded-lg bg-[#F4F9F6] px-4 py-3 text-sm text-[#0F6B3E]">
-              <span className="font-medium">Payment:</span>
-              <span>
-                Cash on Delivery. Online payment options are coming soon.
-              </span>
+            <div className="space-y-2 border-t border-gray-100 pt-4">
+              <h2 className="text-lg font-semibold text-[#202020]">Payment Method</h2>
+
+              <label
+                className={`flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 text-sm transition-colors ${
+                  paymentMethod === "COD"
+                    ? "border-[#0F6B3E] bg-[#F4F9F6]"
+                    : "border-gray-200 hover:bg-gray-50"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="COD"
+                  checked={paymentMethod === "COD"}
+                  onChange={() => setPaymentMethod("COD")}
+                  className="accent-[#0F6B3E]"
+                />
+                <span className="font-medium text-[#202020]">Cash on Delivery</span>
+              </label>
+
+              <label
+                className={`flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 text-sm transition-colors ${
+                  paymentMethod === "Razorpay"
+                    ? "border-[#0F6B3E] bg-[#F4F9F6]"
+                    : "border-gray-200 hover:bg-gray-50"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="Razorpay"
+                  checked={paymentMethod === "Razorpay"}
+                  onChange={() => setPaymentMethod("Razorpay")}
+                  className="accent-[#0F6B3E]"
+                />
+                <span className="font-medium text-[#202020]">Pay Online</span>
+                <span className="text-xs text-gray-400">Cards, UPI, Netbanking &amp; more</span>
+              </label>
             </div>
 
             {error ? (
@@ -386,8 +545,10 @@ const CheckoutPage = () => {
               className="w-full rounded-xl bg-[#0F6B3E] px-6 py-3.5 font-semibold text-white transition-colors hover:bg-[#0d5c34] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {submitting
-                ? "Placing Order..."
-                : `Place Order — ₹${total.toLocaleString()}`}
+                ? "Processing..."
+                : paymentMethod === "Razorpay"
+                  ? `Pay — ₹${total.toLocaleString()}`
+                  : `Place Order — ₹${total.toLocaleString()}`}
             </button>
 
             <p className="text-center text-xs text-gray-400">
