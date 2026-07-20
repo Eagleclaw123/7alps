@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import DataTable from "../../../shared/dashboard/components/DataTable";
 import { getCustomers } from "../../../shared/services/admin.service";
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 10;
 
 const columns = [
   {
@@ -58,7 +58,9 @@ const Customers = () => {
     <div className="rounded-2xl border border-gray-100 bg-white p-4 sm:p-6">
       {/* Header */}
       <div className="mb-1">
-        <h1 className="text-xl font-semibold text-[#202020] sm:text-2xl">Customers</h1>
+        <h1 className="text-xl font-semibold text-[#202020] sm:text-2xl">
+          Customers
+        </h1>
         <p className="mt-1 text-sm text-gray-500">
           Everyone who has created an account on the storefront.
         </p>
@@ -66,12 +68,16 @@ const Customers = () => {
 
       {/* Stat strip */}
       <div className="mt-6 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
-        <span className="font-semibold text-[#202020]">{customers.length} customers</span>
+        <span className="font-semibold text-[#202020]">
+          {customers.length} customers
+        </span>
       </div>
 
       <div className="mt-4">
         {loading ? (
-          <p className="py-10 text-center text-gray-500">Loading customers...</p>
+          <p className="py-10 text-center text-gray-500">
+            Loading customers...
+          </p>
         ) : (
           <DataTable
             data={customers}

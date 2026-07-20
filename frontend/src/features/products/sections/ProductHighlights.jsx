@@ -22,7 +22,7 @@ const ProductHighlights = ({ product }) => {
         <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#6B8F3E]">
           Overview
         </p>
-        <h2 className="mb-10 font-serif text-3xl text-[#22301A]">
+        <h2 className="mb-10 font-medium text-3xl text-[#22301A]">
           Key highlights
         </h2>
 

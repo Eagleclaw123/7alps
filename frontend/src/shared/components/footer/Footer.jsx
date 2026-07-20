@@ -4,47 +4,61 @@ import { FiPhone } from "react-icons/fi";
 import { CiMail, CiLocationOn } from "react-icons/ci";
 import { motion } from "framer-motion";
 
+// TODO: swap these placeholder social URLs for your real profile links
 const socialMediaIconsInfo = [
   {
     icon: "https://res.cloudinary.com/dasvdkncm/image/upload/v1781970699/image_46_qhhum1.png",
+    href: "https://instagram.com/",
+    label: "Instagram",
   },
   {
     icon: "https://res.cloudinary.com/dasvdkncm/image/upload/v1781970828/image_47_crtmhd.png",
+    href: "https://facebook.com/",
+    label: "Facebook",
   },
   {
     icon: "https://res.cloudinary.com/dasvdkncm/image/upload/v1781970699/image_48_tmqj8v.png",
+    href: "https://linkedin.com/",
+    label: "LinkedIn",
   },
 ];
 
+// TODO: point these at your real routes/section ids (e.g. "/about", "#about")
 const cols = [
   {
     title: "Quick link",
     links: [
-      "Home",
-      "About Us",
-      "Products",
-      "Global Trade",
-      "Industries We Serve",
-      "Contact Us",
+      { label: "Home", href: "/" },
+      { label: "About Us", href: "#about" },
+      { label: "Products", href: "#products" },
+      { label: "Global Trade", href: "#global-trade" },
+      { label: "Industries We Serve", href: "#industries" },
+      { label: "Contact Us", href: "#contact" },
     ],
   },
   {
     title: "Categories",
     links: [
-      "Hair Care Solutions",
-      "Skin Care Essentials",
-      "Health & Wellness",
-      "Herbal Powders",
-      "Natural Ingredients",
-      "Bulk Supply Solutions",
+      { label: "Hair Care Solutions", href: "#hair-care" },
+      { label: "Skin Care Essentials", href: "#skin-care" },
+      { label: "Health & Wellness", href: "#health-wellness" },
+      { label: "Herbal Powders", href: "#herbal-powders" },
+      { label: "Natural Ingredients", href: "#natural-ingredients" },
+      { label: "Bulk Supply Solutions", href: "#bulk-supply" },
     ],
   },
   {
     title: "Contact",
     links: [
-      "+91 79010 82907",
-      "7alp.globalmark@gmail.com",
-      "Madhapur, Hyderabad",
+      { label: "+91 79010 82907", href: "tel:+917901082907" },
+      {
+        label: "7alp.globalmark@gmail.com",
+        href: "mailto:7alp.globalmark@gmail.com",
+      },
+      {
+        label: "Madhapur, Hyderabad",
+        href: "https://www.google.com/maps/search/?api=1&query=Madhapur%2C+Hyderabad",
+      },
     ],
   },
   {
@@ -120,23 +134,33 @@ const Footer = () => {
               </div>
               {c.title === "Follow Us" ? (
                 <div className="mt-5 flex flex-wrap gap-3">
-                  {socialMediaIconsInfo.map((Icon, i) => (
+                  {socialMediaIconsInfo.map((social, i) => (
                     <a
                       key={i}
-                      href="#"
-                      aria-label="Social"
+                      href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={social.label}
                       className="h-10 w-10 flex items-center justify-center"
                     >
-                      <img src={Icon.icon} alt="" />
+                      <img src={social.icon} alt={social.label} />
                     </a>
                   ))}
                 </div>
               ) : (
                 <ul className="mt-5 space-y-4">
                   {c.links.map((l, index) => (
-                    <li key={l}>
+                    <li key={l.label}>
                       <a
-                        href="#"
+                        href={l.href}
+                        target={
+                          l.href?.startsWith("http") ? "_blank" : undefined
+                        }
+                        rel={
+                          l.href?.startsWith("http")
+                            ? "noopener noreferrer"
+                            : undefined
+                        }
                         className="text-[16px] text-white/80 hover:text-white transition-colors flex items-start gap-3"
                       >
                         {c.title === "Contact" && (
@@ -153,7 +177,7 @@ const Footer = () => {
                           </>
                         )}
 
-                        <span>{l}</span>
+                        <span>{l.label}</span>
                       </a>
                     </li>
                   ))}
@@ -173,10 +197,10 @@ const Footer = () => {
           {" "}
           <div>© {new Date().getFullYear()} 7 ALP's. All rights reserved.</div>
           <div className="flex items-center gap-5">
-            <a href="#" className="hover:text-background">
+            <a href="/privacy" className="hover:text-background">
               Privacy
             </a>
-            <a href="#" className="hover:text-background">
+            <a href="/terms" className="hover:text-background">
               Terms
             </a>
           </div>

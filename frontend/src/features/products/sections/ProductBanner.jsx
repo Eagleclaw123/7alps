@@ -1,5 +1,6 @@
 import { GoArrowRight } from "react-icons/go";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const ProductBanner = () => {
   return (
@@ -8,50 +9,51 @@ const ProductBanner = () => {
         backgroundImage:
           "url('https://res.cloudinary.com/dasvdkncm/image/upload/v1783565540/ashwagandha-powder-and-dried-root-in-wooden-bowls-natural-adaptogen-herbal-medicine-photo_fl7rar.jpg')",
       }}
-      className="bg-cover bg-center h-[70vh] md:h-[40vh] xl:h-[70vh] flex flex-col justify-center items-center text-center"
+      className="relative flex h-[70vh] items-center justify-center bg-cover bg-center text-center md:h-[45vh] xl:h-[65vh]"
     >
-      <motion.div
-        className="space-y-5"
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{
-          duration: 0.9,
-          ease: [0.25, 0.1, 0.25, 1],
-        }}
-      >
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/25" />
+
+      <div className="relative z-10 mx-auto max-w-4xl px-6">
         <motion.h2
-          className="text-[35px] xl:text-[44px] text-white font-semibold"
+          className="text-4xl font-semibold leading-tight text-white md:text-5xl"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.1 }}
+          transition={{ duration: 0.8 }}
         >
-          Let's Build a Healthier Future Together
+          Discover Nature's Finest
+          <br />
+          Herbal Products
         </motion.h2>
 
         <motion.p
-          className="text-[18px] xl:text-[24px] max-w-2xl mx-auto text-white"
+          className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-gray-200 md:text-xl"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          Connecting Nature's Finest Ingredients to Businesses and Markets
-          Across the World
+          Explore our complete collection of premium herbal powders and natural
+          wellness products, carefully sourced to deliver purity, quality, and
+          everyday wellness.
         </motion.p>
 
-        <motion.button
-          className="bg-[#1C6A00] text-white py-3 px-5 rounded"
+        <motion.div
+          className="mt-8"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.3 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
         >
-          Become a Partner
-          <GoArrowRight className="inline ml-1.5" />
-        </motion.button>
-      </motion.div>
+          <Link to="/products">
+            <button className="inline-flex items-center gap-2 rounded-lg bg-[#0F6B3E] px-7 py-3 font-medium text-white transition hover:bg-[#0b5b35]">
+              Enquire Now
+              <GoArrowRight size={18} />
+            </button>
+          </Link>
+        </motion.div>
+      </div>
     </section>
   );
 };

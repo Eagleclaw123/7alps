@@ -7,6 +7,7 @@ import { normalizeProducts } from "../utils/normalizeProduct";
 import ProductFilter from "../components/ProductFilter";
 import ProductCard from "../components/ProductCard";
 import Pagination from "../../../shared/components/ui/Pagination";
+import SectionHeading from "../../home/components/SectionHeading";
 
 const containerVariants = {
   hidden: {},
@@ -160,6 +161,18 @@ const Products = () => {
   return (
     <section className="py-10 px-6 xl:px-0">
       <div className="mx-auto max-w-7xl">
+        <SectionHeading
+          eyebrow="Our Products"
+          title={
+            <>
+              Discover Our{" "}
+              <span className="font-manrope font-normal text-[#008521]">
+                Herbal Collection
+              </span>
+            </>
+          }
+          description="Browse our complete range of premium herbal powders and natural wellness products, carefully sourced to support healthy living."
+        />
         <button
           onClick={() => onClose()}
           className="mb-6 bg-[#E4E4E4] py-2 px-6 rounded hover:bg-[#d0d0d0] transition-colors cursor-pointer font-medium"

@@ -11,9 +11,11 @@ const SectionHeading = ({
   const alignmentClass = align === "center" ? "mx-auto text-center" : "";
 
   return (
-    <div className={`max-w-xl space-y-4 ${alignmentClass} ${className}`.trim()}>
+    <div
+      className={`space-y-4 text-center max-w-2xl mx-auto ${alignmentClass} ${className}`.trim()}
+    >
       {eyebrow ? (
-        <div className="flex items-center gap-2 justify-start">
+        <div className="flex items-center gap-2 justify-center">
           <div className="h-2 w-2 rounded-full bg-[#047B22]" />
 
           <p className="font-ibm-mono text-[13px] font-semibold uppercase tracking-[0.2em] text-[#047B22] sm:text-sm">
@@ -32,7 +34,7 @@ const SectionHeading = ({
 
       {description ? (
         <p
-          className={`text-[14px] md:text-[18px] xl:text-[20px] max-w-xl text-gray-600 ${descriptionClassName}`.trim()}
+          className={`text-[14px] md:text-[18px] xl:text-[20px] text-gray-600 ${descriptionClassName}`.trim()}
         >
           {description}
         </p>

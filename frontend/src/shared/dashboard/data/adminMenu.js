@@ -54,12 +54,12 @@ const adminMenu = [
     icon: FiBriefcase,
     path: "/admin/b2b",
   },
-  {
-    id: 8,
-    title: "Settings",
-    icon: FiSettings,
-    path: "/admin/settings",
-  },
+  // {
+  //   id: 8,
+  //   title: "Settings",
+  //   icon: FiSettings,
+  //   path: "/admin/settings",
+  // },
   {
     id: 9,
     title: "Logout",

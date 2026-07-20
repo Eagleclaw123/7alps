@@ -70,7 +70,7 @@ const ProductIngredients = ({ product }) => {
         <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#6B8F3E]">
           What&apos;s inside
         </p>
-        <h2 className="mb-10 font-serif text-3xl text-[#22301A]">
+        <h2 className="mb-10 font-medium text-3xl text-[#22301A]">
           Grown, gathered, kept honest
         </h2>
 

@@ -9,11 +9,11 @@ const ProductGallery = ({ product }) => {
   return (
     <div className="flex flex-col gap-4">
       {/* Main image */}
-      <div className="overflow-hidden rounded-2xl bg-[#F8FAF8] flex flex-col items-center justify-center">
+      <div className="overflow-hidden rounded-2xl bg-[#F8FAF8] flex flex-col items-center justify-center h-[500px]">
         <img
           src={images[activeIndex]}
           alt={product.ProductName}
-          className="h-[500px] w-[500px] object-cover rounded-xl"
+          className="h-[400px] w-[500px] object-cover rounded-xl"
         />
       </div>
 

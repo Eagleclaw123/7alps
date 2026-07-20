@@ -12,7 +12,7 @@ const ProductsPage = () => {
 
       <AnimatedPage>
         <ProductHeroSection />
-        <CategorySection />
+        {/* <CategorySection /> */}
         <Products />
         <ProductBanner />
       </AnimatedPage>

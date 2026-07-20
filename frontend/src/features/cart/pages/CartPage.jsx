@@ -15,6 +15,7 @@ import {
   updateQuantity as updateQuantityThunk,
 } from "../../../store/slices/cartSlice";
 import NewsletterBanner from "../components/NewsletterBanner";
+import { selectCustomer } from "../../../store/slices/authSlice";
 
 const CartPage = () => {
   const dispatch = useDispatch();
@@ -22,6 +23,7 @@ const CartPage = () => {
   const items = useSelector(selectCartItems);
   const subtotal = useSelector(selectSubtotal);
   const itemCount = useSelector(selectCartCount);
+  const customer = useSelector(selectCustomer);
 
   const handleUpdateQuantity = (id, delta) => {
     const { productId, variantLabel } = parseItemId(id);
@@ -42,8 +44,6 @@ const CartPage = () => {
   return (
     <div className="py-8 mt-16 px-6 xl:px-0">
       <div className="mx-auto max-w-7xl overflow-hidden rounded-sm">
-        <CartBanner />
-
         <div className="py-6">
           <h1 className="mb-6 text-3xl font-semibold text-gray-900">
             Shopping Cart
@@ -58,7 +58,9 @@ const CartPage = () => {
             />
             <CartFooter
               subtotal={subtotal}
-              onCheckout={() => navigate("/checkout")}
+              onCheckout={() =>
+                navigate(customer ? "/checkout" : "/customer/login")
+              }
             />
             <NewsletterBanner />
           </div>

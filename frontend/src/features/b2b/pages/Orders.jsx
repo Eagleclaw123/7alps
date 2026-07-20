@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { FiPackage, FiDollarSign, FiCheckCircle, FiTruck } from "react-icons/fi";
+import {
+  FiPackage,
+  FiDollarSign,
+  FiCheckCircle,
+  FiTruck,
+} from "react-icons/fi";
 import StatCard from "../../../shared/dashboard/components/StatCard";
 import Badge from "../../../shared/dashboard/components/Badge";
 import DataTable from "../../../shared/dashboard/components/DataTable";
@@ -24,7 +29,8 @@ const columns = [
   {
     key: "products",
     header: "Products",
-    render: (o) => o.items.map((i) => `${i.name} (${i.variantLabel})`).join(", "),
+    render: (o) =>
+      o.items.map((i) => `${i.name} (${i.variantLabel})`).join(", "),
   },
   {
     key: "quantity",
@@ -67,16 +73,30 @@ const Orders = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-[#202020] sm:text-2xl">Orders</h1>
+        <h1 className="text-xl font-semibold text-[#202020] sm:text-2xl">
+          Orders
+        </h1>
         <p className="mt-1 text-sm text-gray-500">
           Bulk orders created once your quote requests are approved.
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard icon={<FiPackage size={20} />} label="Total orders" value={orders.length} />
-        <StatCard icon={<FiTruck size={20} />} label="In progress" value={inTransitCount} />
-        <StatCard icon={<FiCheckCircle size={20} />} label="Delivered" value={deliveredCount} />
+        <StatCard
+          icon={<FiPackage size={20} />}
+          label="Total orders"
+          value={orders.length}
+        />
+        <StatCard
+          icon={<FiTruck size={20} />}
+          label="In progress"
+          value={inTransitCount}
+        />
+        <StatCard
+          icon={<FiCheckCircle size={20} />}
+          label="Delivered"
+          value={deliveredCount}
+        />
         <StatCard
           icon={<FiDollarSign size={20} />}
           label="Total value"
@@ -92,12 +112,19 @@ const Orders = () => {
             data={orders}
             columns={columns}
             rowKey={(o) => o._id}
-            searchKeys={[]}
+            searchKeys={["productsText"]}
             filters={[
               {
                 field: "status",
                 label: "Status",
-                options: ["All", "Confirmed", "Processing", "Shipped", "Delivered", "Cancelled"],
+                options: [
+                  "All",
+                  "Confirmed",
+                  "Processing",
+                  "Shipped",
+                  "Delivered",
+                  "Cancelled",
+                ],
               },
             ]}
             pageSize={PAGE_SIZE}

@@ -43,18 +43,18 @@ const FAQs = () => {
       >
         <div className="grid grid-cols-1 xl:grid-cols-10 gap-10 xl:gap-16 items-start">
           {/* LEFT CONTENT */}
-          <motion.div variants={fadeUp} className="xl:col-span-3">
+          <motion.div variants={fadeUp} className="xl:col-span-4">
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-1 items-center gap-10">
               <div>
                 <div className="mb-3 flex items-center gap-2">
                   <div className="h-2 w-2 rounded-full bg-[#047B22]" />
                   <p className="font-ibm-mono text-[13px] font-semibold uppercase tracking-[0.2em] text-[#047B22] sm:text-sm">
-                    FAQs
+                    Common Questions
                   </p>
                 </div>
 
                 <h2 className="mb-4 text-2xl leading-tight sm:text-3xl lg:text-[40px] font-semibold">
-                  Common <br />
+                  Frequently Asked <br />
                   <span className="font-manrope text-[#008521] font-normal">
                     Questions
                   </span>
@@ -76,7 +76,7 @@ const FAQs = () => {
           </motion.div>
 
           {/* FAQ LIST */}
-          <motion.div variants={container} className="xl:col-span-7 space-y-4">
+          <motion.div variants={container} className="xl:col-span-6 space-y-4">
             {SevenAlpsFAQs.map((faq) => {
               const isOpen = openId === faq.id;
 

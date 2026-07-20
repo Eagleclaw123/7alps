@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { LiaUndoAltSolid } from "react-icons/lia";
+
 import {
   Search,
   SlidersHorizontal,
@@ -92,13 +94,11 @@ const CustomerOrders = () => {
               Vie and manage your orders.
             </p>
           </div>
-
           {location.state?.justPlaced ? (
             <div className="mt-4 rounded-xl bg-green-50 p-4 text-green-700">
               Your order has been placed successfully!
             </div>
           ) : null}
-
           {/* Search + Filter */}
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
             <div className="relative w-full sm:w-80">
@@ -111,14 +111,13 @@ const CustomerOrders = () => {
                 className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-700 outline-none focus:border-[#047B22] focus:ring-1 focus:ring-[#047B22]"
               />
             </div>
-            <button className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
+            {/* <button className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
               <SlidersHorizontal className="h-4 w-4" />
               Filter
-            </button>
+            </button> */}
           </div>
 
-          {/* Tabs */}
-          <div className="mt-6 overflow-x-auto rounded-2xl border border-gray-200 bg-white px-6">
+          {/* <div className="mt-6 overflow-x-auto rounded-2xl border border-gray-200 bg-white px-6">
             <div className="flex gap-8 whitespace-nowrap">
               {TABS.map((tab) => (
                 <button
@@ -134,8 +133,7 @@ const CustomerOrders = () => {
                 </button>
               ))}
             </div>
-          </div>
-
+          </div> */}
           {/* Orders list */}
           <div className="mt-6 space-y-6">
             {loading ? (
@@ -183,11 +181,11 @@ const CustomerOrders = () => {
                             key={`${item.product}-${item.variantLabel}`}
                             className="flex items-center gap-4 py-3"
                           >
-                            {/* <img
-                            src={item.image}
-                            alt={item.name}
-                            className="h-14 w-14 flex-shrink-0 rounded-lg object-cover"
-                          /> */}
+                            <img
+                              src="https://res.cloudinary.com/dasvdkncm/image/upload/v1781964030/Rectangle_3463727_tn3bsh.png"
+                              alt={item.name}
+                              className="h-14 w-14 flex-shrink-0 rounded-lg object-cover"
+                            />
                             <span className="flex-1 text-sm text-gray-700">
                               {item.name} ({item.variantLabel}) ×{" "}
                               {item.quantity}
@@ -200,7 +198,8 @@ const CustomerOrders = () => {
                       </div>
 
                       <button className="mt-4 rounded-lg border border-[#047B22] px-4 py-2 text-sm font-medium text-[#047B22] hover:bg-green-50">
-                        View Details
+                        Order Again
+                        <LiaUndoAltSolid className="inline-block ml-1" />
                       </button>
                     </div>
 
@@ -261,7 +260,6 @@ const CustomerOrders = () => {
               ))
             )}
           </div>
-
           {/* Pagination */}
           {!loading && filteredOrders.length > 0 ? (
             <Pagination

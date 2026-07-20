@@ -82,7 +82,9 @@ const Products = () => {
     getPublicCategories().then(({ data }) => {
       const names = (data?.data?.categories || []).map((c) => c.name);
       setCategoryOptions(names);
-      setFormData((prev) => (prev.category ? prev : { ...prev, category: names[0] || "" }));
+      setFormData((prev) =>
+        prev.category ? prev : { ...prev, category: names[0] || "" },
+      );
     });
   }, []);
 

@@ -3,6 +3,8 @@ import { FiX } from "react-icons/fi";
 
 import SidebarItem from "./SidebarItem";
 import Logo from "./Logo";
+import ContactSupportModal from "./ContactSupportModal";
+import { useState } from "react";
 
 const overlayVariants = {
   hidden: { opacity: 0 },
@@ -53,7 +55,8 @@ const itemVariants = {
   },
 };
 
-const SidebarMobile = ({ open, onClose, menuItems }) => {
+const SidebarMobile = ({ open, onClose, menuItems, portal }) => {
+  const [showSupportModal, setShowSupportModal] = useState(false);
   return (
     <AnimatePresence>
       {open && (
@@ -108,19 +111,31 @@ const SidebarMobile = ({ open, onClose, menuItems }) => {
             </motion.nav>
 
             {/* Footer */}
-            <div className="border-t border-gray-200 p-5">
-              <div className="rounded-2xl bg-gradient-to-r from-[#0F6B3E] to-[#1A8F55] p-5 text-white">
-                <h3 className="font-semibold">Need Help?</h3>
+            {portal === "b2b" && (
+              <div className="border-t border-gray-200 p-5">
+                <div className="rounded-2xl bg-gradient-to-r from-[#0F6B3E] to-[#1A8F55] p-5 text-white">
+                  <h3 className="font-semibold">Need Help?</h3>
 
-                <p className="mt-2 text-sm opacity-90">
-                  Contact our support team anytime.
-                </p>
+                  <p className="mt-2 text-sm opacity-90">
+                    Contact our support team anytime.
+                  </p>
 
-                <button className="mt-4 w-full rounded-xl bg-white py-2 text-sm font-semibold text-[#0F6B3E] transition hover:scale-[1.02]">
-                  Contact Support
-                </button>
+                  <button
+                    className="mt-4 w-full rounded-xl bg-white py-2 text-sm font-semibold text-[#0F6B3E] transition hover:scale-[1.02]"
+                    onClick={() => setShowSupportModal(true)}
+                  >
+                    Contact Support
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
+            {/* Modal — pure controlled component, renders null when isOpen is false */}
+            {portal === "b2b" && (
+              <ContactSupportModal
+                isOpen={showSupportModal}
+                onClose={() => setShowSupportModal(false)}
+              />
+            )}
           </motion.aside>
         </>
       )}

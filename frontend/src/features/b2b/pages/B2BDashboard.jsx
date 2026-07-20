@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { FiFileText, FiClock, FiPackage, FiDollarSign } from "react-icons/fi";
 import StatCard from "../../../shared/dashboard/components/StatCard";
 import { getB2BDashboardStats } from "../../../shared/services/b2b.service";
+import DashboardVisuals from "../components/DashboardVisuals";
 
 const initialStats = {
   totalQuotes: 0,
@@ -44,6 +45,8 @@ const B2BDashboard = () => {
           value={loading ? "..." : `₹${stats.totalSales.toLocaleString()}`}
         />
       </div>
+
+      {!loading && <DashboardVisuals stats={stats} />}
     </section>
   );
 };

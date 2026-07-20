@@ -5,6 +5,7 @@ import HowItWorks from "../sections/HowItWorks";
 import OurProcessHeroSection from "../sections/OurProcessHeroSection";
 import PowderTimeline from "../sections/PowderTimeline";
 import ProcessIntro from "../sections/ProcessIntro";
+import QualityBanner from "../sections/QualityBanner";
 
 const ProcessPage = () => {
   return (
@@ -15,7 +16,8 @@ const ProcessPage = () => {
         <OurProcessHeroSection />
         {/* <HowItWorks />
          */}
-        <ProcessIntro />
+        {/* <ProcessIntro /> */}
+        <QualityBanner />
         <PowderTimeline />
         <HonestHerb />
       </AnimatedPage>

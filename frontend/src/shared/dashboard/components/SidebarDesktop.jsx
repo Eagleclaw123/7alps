@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
-import { FiHeadphones } from "react-icons/fi";
+import { FiChevronLeft, FiChevronRight, FiHeadphones } from "react-icons/fi";
 
 import SidebarItem from "./SidebarItem";
 import Logo from "./Logo";
+import ContactSupportModal from "./ContactSupportModal";
 
-const SidebarDesktop = ({ menuItems, collapsed, setCollapsed }) => {
+const SidebarDesktop = ({ menuItems, collapsed, setCollapsed, portal }) => {
+  const [showSupportModal, setShowSupportModal] = useState(false);
+
   return (
     <motion.aside
       animate={{
@@ -40,20 +42,33 @@ const SidebarDesktop = ({ menuItems, collapsed, setCollapsed }) => {
           )}
         </button>
       </div>
+
       {/* Navigation */}
       <nav className="flex-1 space-y-2 overflow-y-auto px-3 py-6">
         {menuItems.map((item) => (
           <SidebarItem key={item.id} item={item} collapsed={collapsed} />
         ))}
       </nav>
-      {/* Footer */}
-      {!collapsed && (
+
+      {/* Footer — Contact Support is B2B-only */}
+      {portal === "b2b" && !collapsed && (
         <div className="border-t border-gray-200 p-5">
-          <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0F6B3E] to-[#1A8F55] py-3 text-sm font-semibold text-white shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+          <button
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0F6B3E] to-[#1A8F55] py-3 text-sm font-semibold text-white shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
+            onClick={() => setShowSupportModal(true)}
+          >
             <FiHeadphones size={18} />
             Contact Support
           </button>
         </div>
+      )}
+
+      {/* Modal — only mounted for the b2b portal, so admin never carries the extra markup */}
+      {portal === "b2b" && (
+        <ContactSupportModal
+          isOpen={showSupportModal}
+          onClose={() => setShowSupportModal(false)}
+        />
       )}
     </motion.aside>
   );

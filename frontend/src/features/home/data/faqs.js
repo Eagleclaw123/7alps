@@ -41,10 +41,10 @@ export const SevenAlpsFAQs = [
     answer:
       "Each product page includes detailed information about its ingredients, benefits, and recommended usage. If you need further assistance, our support team is here to help you choose the right product.",
   },
-  {
-    id: 8,
-    question: "How should I store herbal products?",
-    answer:
-      "Store your products in a cool, dry place away from direct sunlight and moisture. Always keep the container tightly closed after use to maintain freshness and quality.",
-  },
+  // {
+  //   id: 8,
+  //   question: "How should I store herbal products?",
+  //   answer:
+  //     "Store your products in a cool, dry place away from direct sunlight and moisture. Always keep the container tightly closed after use to maintain freshness and quality.",
+  // },
 ];
