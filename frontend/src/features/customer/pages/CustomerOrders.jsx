@@ -10,10 +10,13 @@ import {
   CreditCard,
   MapPin,
   BadgeIndianRupee,
+  Check,
+  X,
 } from "lucide-react";
 import { getMyOrders } from "../../../shared/services/order.service";
 import AnimatedPage from "../../../shared/components/ui/AnimatedPage";
 import Pagination from "../../products/components/ProductPagination";
+import OrderTrackingBar from "../components/OrderTrackingBar";
 
 const TABS = [
   "All Orders",
@@ -32,7 +35,16 @@ const STATUS_STYLES = {
   Cancelled: "bg-red-50 text-red-700",
 };
 
+// Ordered tracking steps. Every order progresses left -> right through these.
+const TRACKING_STEPS = ["Confirmed", "Processing", "Shipped", "Delivered"];
+
 const PAGE_SIZE = 5;
+
+/**
+ * Horizontal order-tracking stepper (checkmark circles connected by a
+ * progress line), similar to the "Order confirmed / Shipped / Delivered"
+ * bar shown on the order-detail reference design.
+ */
 
 const CustomerOrders = () => {
   const location = useLocation();
@@ -170,6 +182,14 @@ const CustomerOrders = () => {
                     >
                       {order.status}
                     </span>
+                  </div>
+
+                  {/* Order tracking bar */}
+                  <div className="mt-5 rounded-xl border border-gray-100 bg-white px-4 py-3">
+                    <OrderTrackingBar
+                      status={order.status}
+                      TRACKING_STEPS={TRACKING_STEPS}
+                    />
                   </div>
 
                   <div className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-[1.6fr_1fr]">
