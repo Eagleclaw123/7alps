@@ -7,6 +7,9 @@ const router = express.Router();
 
 // ── Auth (no auth required) ───────────────────────────────────────────────────
 router.post('/login', b2bAuthController.login);
+router.post('/forgotPassword', b2bAuthController.forgotPassword);
+router.post('/verifyOTP', b2bAuthController.verifyOTP);
+router.post('/resetPasswordAfterOTP', b2bAuthController.resetPasswordAfterOTP);
 
 // ── Protected ──────────────────────────────────────────────────────────────────
 router.use(b2bAuthController.protectB2B);

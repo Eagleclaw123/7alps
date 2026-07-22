@@ -36,6 +36,7 @@ exports.buildOrderFromCart = async (customerId, shippingAddress, session, paymen
     orderItems.push({
       product: product._id,
       name: product.name,
+      image: product.images?.[0],
       variantLabel: cartItem.variantLabel,
       price: variant.price,
       quantity: cartItem.quantity,

@@ -47,6 +47,8 @@ const b2bSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    passwordResetToken: String,
+    passwordResetExpires: Date,
   },
   { timestamps: true },
 );

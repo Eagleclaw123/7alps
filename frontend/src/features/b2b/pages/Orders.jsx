@@ -58,6 +58,12 @@ const Orders = () => {
       .finally(() => setLoading(false));
   }, []);
 
+  const ordersWithSearchFields = orders.map((o) => ({
+    ...o,
+    orderIdText: o._id.slice(-8).toUpperCase(),
+    productsText: o.items.map((i) => `${i.name} (${i.variantLabel})`).join(", "),
+  }));
+
   const totalValue = orders.reduce((sum, o) => sum + o.totalAmount, 0);
   const deliveredCount = orders.filter((o) => o.status === "Delivered").length;
   const inTransitCount = orders.filter((o) =>
@@ -89,10 +95,11 @@ const Orders = () => {
           <p className="py-10 text-center text-gray-500">Loading orders...</p>
         ) : (
           <DataTable
-            data={orders}
+            data={ordersWithSearchFields}
             columns={columns}
             rowKey={(o) => o._id}
-            searchKeys={[]}
+            searchKeys={["orderIdText", "productsText"]}
+            searchPlaceholder="Search order ID or product"
             filters={[
               {
                 field: "status",

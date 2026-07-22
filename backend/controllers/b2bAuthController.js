@@ -1,8 +1,10 @@
+const crypto = require('crypto');
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 const B2BMember = require('../models/b2bModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const sendEmail = require('../utils/email');
 
 const signToken = (id) =>
   jwt.sign({ id, type: 'b2b' }, process.env.JWT_SECRET, {
@@ -76,6 +78,81 @@ exports.logout = catchAsync(async (req, res, next) => {
 // GET /api/v1/b2b/status
 exports.getCurrentStatus = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: 'success', data: { member: req.b2bMember } });
+});
+
+const generateOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+// POST /api/v1/b2b/forgotPassword
+exports.forgotPassword = catchAsync(async (req, res, next) => {
+  const { email } = req.body;
+
+  const member = await B2BMember.findOne({ email: email?.toLowerCase() });
+  if (!member) {
+    return next(new AppError('No B2B account found with this email address.', 404));
+  }
+
+  const otp = generateOTP();
+  member.passwordResetToken = crypto.createHash('sha256').update(otp).digest('hex');
+  member.passwordResetExpires = Date.now() + 5 * 60 * 1000;
+  await member.save({ validateBeforeSave: false });
+
+  try {
+    await sendEmail({
+      email: member.email,
+      subject: 'Your Password Reset OTP (valid for 5 minutes)',
+      message: `Your OTP for password reset is: ${otp}\n\nThis OTP will expire in 5 minutes.`,
+    });
+
+    res.status(200).json({ status: 'success', message: 'OTP sent to email!' });
+  } catch (err) {
+    member.passwordResetToken = undefined;
+    member.passwordResetExpires = undefined;
+    await member.save({ validateBeforeSave: false });
+    return next(new AppError('There was an error sending the email. Try again later!', 500));
+  }
+});
+
+// POST /api/v1/b2b/verifyOTP
+exports.verifyOTP = catchAsync(async (req, res, next) => {
+  const { email, otp } = req.body;
+
+  const hashedToken = crypto.createHash('sha256').update(otp || '').digest('hex');
+
+  const member = await B2BMember.findOne({
+    email: email?.toLowerCase(),
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() },
+  });
+
+  if (!member) {
+    return next(new AppError('Invalid or expired OTP', 400));
+  }
+
+  res.status(200).json({ status: 'success', message: 'OTP verified successfully' });
+});
+
+// POST /api/v1/b2b/resetPasswordAfterOTP
+exports.resetPasswordAfterOTP = catchAsync(async (req, res, next) => {
+  const { email, password, passwordConfirm } = req.body;
+
+  const member = await B2BMember.findOne({
+    email: email?.toLowerCase(),
+    passwordResetExpires: { $gt: Date.now() },
+  });
+
+  if (!member) {
+    return next(new AppError('Session expired, please try again', 400));
+  }
+
+  member.password = password;
+  member.passwordConfirm = passwordConfirm;
+  member.passwordResetToken = undefined;
+  member.passwordResetExpires = undefined;
+  await member.save();
+
+  createSendToken(member, 200, res);
 });
 
 // Protect middleware — mirrors authController.protect but for B2BMember docs

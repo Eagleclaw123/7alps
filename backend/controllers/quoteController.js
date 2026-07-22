@@ -48,6 +48,7 @@ const buildQuoteItems = async (requestedItems) => {
     items.push({
       product: product._id,
       name: product.name,
+      image: product.images?.[0],
       variantLabel,
       quantity: quantityNum,
       proposedPrice: priceNum,
@@ -137,11 +138,34 @@ exports.getMyDashboardStats = catchAsync(async (req, res, next) => {
 // ── Admin-facing ───────────────────────────────────────────────────────────────
 
 // GET /api/v1/admin/quotes
+// Supports ?status=Pending&search=acme&dateFrom=2026-07-01&dateTo=2026-07-31
+// `search` matches the requesting member's name/email/business name, the buyer
+// business name on the quote, or any item's product name (case-insensitive).
 exports.getAllQuotes = catchAsync(async (req, res, next) => {
-  const filter = {};
-  if (req.query.status) filter.status = req.query.status;
+  const { status, search, dateFrom, dateTo } = req.query;
 
-  const quotes = await Quote.find(filter).populate('b2bMember', 'name email businessName').sort('-createdAt');
+  const filter = {};
+  if (status) filter.status = status;
+
+  if (dateFrom || dateTo) {
+    filter.createdAt = {};
+    if (dateFrom) filter.createdAt.$gte = new Date(dateFrom);
+    if (dateTo) filter.createdAt.$lte = new Date(dateTo);
+  }
+
+  let quotes = await Quote.find(filter).populate('b2bMember', 'name email businessName').sort('-createdAt');
+
+  if (search) {
+    const term = search.toLowerCase();
+    quotes = quotes.filter(
+      (quote) =>
+        quote.b2bMember?.name?.toLowerCase().includes(term) ||
+        quote.b2bMember?.email?.toLowerCase().includes(term) ||
+        quote.b2bMember?.businessName?.toLowerCase().includes(term) ||
+        quote.buyerBusinessName?.toLowerCase().includes(term) ||
+        quote.items.some((item) => item.name.toLowerCase().includes(term)),
+    );
+  }
 
   res.status(200).json({ status: 'success', results: quotes.length, data: { quotes } });
 });
@@ -191,6 +215,7 @@ exports.approveQuote = catchAsync(async (req, res, next) => {
       const orderItems = finalItems.map((item) => ({
         product: item.product,
         name: item.name,
+        image: item.image,
         variantLabel: item.variantLabel,
         price: item.proposedPrice,
         quantity: item.quantity,

@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>7ALP's Platform Documentation</title>
+<style>
+  @page { size: A4; margin: 56px 48px; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: #202020;
+    font-size: 13.5px;
+    line-height: 1.55;
+    margin: 0;
+  }
+  .cover {
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: 30vh;
+    page-break-after: always;
+  }
+  .eyebrow {
+    color: #047B22;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .cover h1 {
+    font-size: 42px;
+    font-weight: 800;
+    margin: 0 0 14px 0;
+    color: #16311f;
+  }
+  .cover p.lead {
+    font-size: 15px;
+    color: #3a3a3a;
+    max-width: 460px;
+    margin: 0 0 26px 0;
+  }
+  .cover .meta {
+    border-top: 1px solid #e5e5e5;
+    padding-top: 12px;
+    font-size: 11.5px;
+    color: #8a8a8a;
+    max-width: 460px;
+  }
+  h2.section {
+    color: #047B22;
+    font-size: 19px;
+    font-weight: 800;
+    border-bottom: 1px solid #e5e5e5;
+    padding-bottom: 10px;
+    margin: 34px 0 16px 0;
+    break-after: avoid;
+  }
+  h2.section:first-of-type { margin-top: 0; }
+  h3 {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: #16311f;
+    margin: 22px 0 8px 0;
+    break-after: avoid;
+  }
+  p { margin: 8px 0; }
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  ul { margin: 8px 0; padding-left: 20px; }
+  li { margin: 4px 0; }
+  code {
+    font-family: "SFMono-Regular", Consolas, Menlo, monospace;
+    background: #eef3ea;
+    color: #2b5e1e;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0 18px 0;
+    break-inside: avoid;
+    font-size: 12.5px;
+  }
+  th {
+    background: #EAF3DE;
+    color: #16311f;
+    text-align: left;
+    font-weight: 700;
+    padding: 8px 12px;
+  }
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  .callout {
+    border-left: 3px solid;
+    padding: 12px 16px;
+    margin: 14px 0;
+    border-radius: 4px;
+    font-size: 12.5px;
+    break-inside: avoid;
+  }
+  .callout.info { background: #EEF6EA; border-color: #047B22; }
+  .callout.warn { background: #FBF0E1; border-color: #C4841D; }
+  .callout b { display: inline; }
+  .footer-note {
+    margin-top: 40px;
+    font-size: 11px;
+    color: #a0a0a0;
+  }
+  .badge-new {
+    display: inline-block;
+    background: #047B22;
+    color: white;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 10px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <div class="eyebrow">Platform Documentation</div>
+  <h1>7ALP's</h1>
+  <p class="lead">A complete walkthrough of the storefront, admin console, and B2B wholesale portal — every login, route, and feature, as currently implemented.</p>
+  <div class="meta">Updated 2026-07-22 &middot; Frontend: React 19 + Vite + Redux Toolkit + Tailwind 4 &middot; Backend: Node.js + Express 5 + MongoDB (Mongoose)</div>
+</section>
+
+<h2 class="section">1. Architecture Overview</h2>
+<p>The platform is a two-app monorepo: a React single-page app (<code>frontend/</code>) talking to a REST API (<code>backend/</code>) mounted under <code>/api/v1</code>. There are three independent authentication systems — Customer, Admin, and B2B — each with its own JWT stored in an httpOnly cookie, so a login in one role never grants access to another.</p>
+<div class="two-col">
+  <div>
+    <h3>Frontend stack</h3>
+    <ul>
+      <li>React 19, React Router 7</li>
+      <li>Redux Toolkit (cart, auth, B2B draft-quote state)</li>
+      <li>Tailwind CSS 4</li>
+      <li>Axios (shared instance, cookie credentials on)</li>
+      <li>Google Maps JS API (Places + Geocoding)</li>
+      <li>Razorpay Checkout.js</li>
+    </ul>
+  </div>
+  <div>
+    <h3>Backend stack</h3>
+    <ul>
+      <li>Express 5, MongoDB via Mongoose</li>
+      <li>JWT + httpOnly cookies per role</li>
+      <li>Cloudflare R2 for product images</li>
+      <li>Razorpay Node SDK</li>
+      <li>Resend for transactional email (OTPs / password reset)<span class="badge-new">new</span></li>
+      <li>Helmet, rate limiting, custom sanitize middleware</li>
+    </ul>
+  </div>
+</div>
+
+<h2 class="section">2. Logins</h2>
+
+<h3>Customer</h3>
+<p>Mobile number + OTP, no password. A single flow handles both signup and login — if the number isn't recognized, the customer is asked for a name and an account is created automatically on OTP verification.</p>
+<table>
+  <tr><th>Field</th><th>Detail</th></tr>
+  <tr><td>Login route</td><td><code>/customer/login</code> &rarr; <code>/customer/verify-otp</code></td></tr>
+  <tr><td>Session</td><td>JWT in httpOnly cookie <code>customerToken</code></td></tr>
+  <tr><td>Dev fallback OTP</td><td><code>123456</code> always works until a real SMS provider is wired up</td></tr>
+</table>
+
+<h3>Admin</h3>
+<p>Email + password. Two roles: <code>Admin</code> and <code>SuperAdmin</code> (currently identical permissions — the distinction exists in the schema for future use).</p>
+<table>
+  <tr><th>Field</th><th>Detail</th></tr>
+  <tr><td>Login route</td><td><code>/admin/login</code></td></tr>
+  <tr><td>Session</td><td>JWT in httpOnly cookie <code>adminToken</code></td></tr>
+  <tr><td>Seeded account</td><td><code>7alpsadmin@7alps.com</code> / <code>7alps123</code> (run <code>npm run seed</code> in <code>backend/</code>... see note below)</td></tr>
+  <tr><td>Forgot password<span class="badge-new">backend done</span></td><td>OTP email flow &mdash; <code>POST /api/v1/auth/forgotPassword</code> &rarr; <code>verifyOTP</code> &rarr; <code>resetPasswordAfterOTP</code>, delivered via Resend. Fully built, tested end-to-end against the live database. The <code>/admin/forgot-password</code> page in the frontend is still a static form and has not been wired to call these endpoints yet.</td></tr>
+</table>
+
+<div class="callout warn">
+  <b>Careful with <code>npm run seed</code>.</b> That script reseeds the <i>product catalog</i> from scratch (it deletes existing products first) — it is not the admin-account seeder. The admin account is seeded via <code>node dev-data/seedAdmin.js</code> directly, which is safe to re-run (it checks before creating).
+</div>
+
+<h3>B2B (marketing team)</h3>
+<p>Email + password, same shape as Admin login, but a completely separate account collection. B2B accounts are <b>created by an admin</b> — there is no self-signup. Each B2B login represents an internal marketing-team member who sells in bulk on behalf of a business buyer.</p>
+<table>
+  <tr><th>Field</th><th>Detail</th></tr>
+  <tr><td>Login route</td><td><code>/b2b/login</code></td></tr>
+  <tr><td>Session</td><td>JWT in httpOnly cookie <code>b2bToken</code></td></tr>
+  <tr><td>Account creation</td><td>Admin &rarr; B2B Team &rarr; Add member</td></tr>
+  <tr><td>Seeded account</td><td><code>b2bpartner@7alps.com</code> / <code>7alps123</code> (<code>npm run seed:b2b</code>)</td></tr>
+  <tr><td>Forgot password<span class="badge-new">new</span></td><td>Same OTP flow as Admin, built from scratch this round &mdash; <code>POST /api/v1/b2b/forgotPassword</code> &rarr; <code>verifyOTP</code> &rarr; <code>resetPasswordAfterOTP</code>, delivered via Resend. New <code>passwordResetToken</code>/<code>passwordResetExpires</code> fields added to the B2B member schema. Backend-complete and tested end-to-end; no frontend page wired to it yet.</td></tr>
+</table>
+
+<h2 class="section">3. Route Map</h2>
+
+<h3>Public (no login)</h3>
+<table>
+  <tr><th>Route</th><th>Page</th></tr>
+  <tr><td><code>/</code></td><td>Home — hero, categories, featured products, process, testimonials, FAQs</td></tr>
+  <tr><td><code>/products</code></td><td>Full catalog with filters</td></tr>
+  <tr><td><code>/products/:id</code></td><td>Product detail — gallery, info, ingredients, reviews</td></tr>
+  <tr><td><code>/our-process</code></td><td>Sourcing/production story</td></tr>
+  <tr><td><code>/why-7alps</code></td><td>Brand positioning / comparison</td></tr>
+  <tr><td><code>/global-trade</code></td><td>Export/trade information</td></tr>
+  <tr><td><code>/partners</code></td><td>Partnerships page</td></tr>
+  <tr><td><code>/b2b-portal</code></td><td>Wholesale marketing/landing page (static content, not the logged-in B2B portal)</td></tr>
+  <tr><td><code>/contact</code></td><td>Contact form + map embed</td></tr>
+  <tr><td><code>/cart</code></td><td>Shopping cart (guest or logged-in)</td></tr>
+</table>
+
+<h3>Customer (requires customer login)</h3>
+<table>
+  <tr><th>Route</th><th>Page</th></tr>
+  <tr><td><code>/checkout</code></td><td>Shipping address (with map picker) + payment method + place order</td></tr>
+  <tr><td><code>/customer/orders</code></td><td>Order history, with a product photo per line item<span class="badge-new">new</span></td></tr>
+  <tr><td><code>/customer/profile</code></td><td>Personal details + address book (with map picker)</td></tr>
+</table>
+
+<h3>Admin (requires admin login)</h3>
+<table>
+  <tr><th>Route</th><th>Page</th></tr>
+  <tr><td><code>/admin</code></td><td>Dashboard — customers, orders, products, revenue</td></tr>
+  <tr><td><code>/admin/products</code></td><td>Product CRUD, variants, image upload</td></tr>
+  <tr><td><code>/admin/categories</code></td><td>Category CRUD</td></tr>
+  <tr><td><code>/admin/orders</code></td><td>All orders (customer + B2B), status updates</td></tr>
+  <tr><td><code>/admin/customers</code></td><td>Customer list with order/spend stats</td></tr>
+  <tr><td><code>/admin/reviews</code></td><td>Review moderation</td></tr>
+  <tr><td><code>/admin/b2b</code></td><td>B2B Team — members + quote approval</td></tr>
+</table>
+
+<h3>B2B (requires B2B login)</h3>
+<table>
+  <tr><th>Route</th><th>Page</th></tr>
+  <tr><td><code>/b2b</code></td><td>Dashboard — quotes, orders, sales stats</td></tr>
+  <tr><td><code>/b2b/catalog</code></td><td>Browse products, propose bulk price/qty</td></tr>
+  <tr><td><code>/b2b/request-quote</code></td><td>Buyer details (with map picker) + submit + quote history</td></tr>
+  <tr><td><code>/b2b/orders</code></td><td>Orders created from approved quotes, searchable by order ID or product<span class="badge-new">new</span></td></tr>
+</table>
+
+<h2 class="section">4. Feature Walkthrough</h2>
+
+<h3>Customer-facing storefront</h3>
+<ul>
+  <li><b>Browse &amp; filter</b> — category, price, search, rating sort.</li>
+  <li><b>Cart</b> — guest cart in localStorage; merges into the server cart automatically on login.</li>
+  <li><b>Checkout</b> — shipping address form with an embedded Google Maps picker (search or drag a pin to auto-fill address fields); choice of <b>Cash on Delivery</b> or <b>Pay Online (Razorpay)</b>.</li>
+  <li><b>Orders</b> — history with status, itemized breakdown (now including each item's product photo), shipping address.</li>
+  <li><b>Profile</b> — editable name/email; a real address book (add/edit/delete/set-default), each entry fillable via the same map picker.</li>
+  <li><b>Reviews</b> — logged-in customers can rate &amp; review a product they're viewing; reviews are held as <code>Pending</code> until an admin publishes them.</li>
+</ul>
+
+<h3>Admin console</h3>
+<ul>
+  <li><b>Dashboard</b> — live counts: customers, orders, products, revenue.</li>
+  <li><b>Products</b> — full CRUD, multiple variants per product (label/price/MRP/stock), multi-image upload to Cloudflare R2.</li>
+  <li><b>Categories</b> — add/edit/activate/delete; delete is blocked if products still reference the category, with a clear error explaining why.</li>
+  <li><b>Orders</b> — every order (storefront and B2B) in one place; inline status changes (Confirmed &rarr; Processing &rarr; Shipped &rarr; Delivered/Cancelled).</li>
+  <li><b>Customers</b> — every registered customer with their order count and lifetime spend.</li>
+  <li><b>Reviews</b> — moderate: publish, flag, or delete any submitted review.</li>
+  <li><b>B2B Team</b> — create marketing-team logins; see each member's total bulk orders and sales; review a pending quote (adjust quantity/price if needed), approve it — which atomically decrements stock and creates a real order — or reject it with a reason. The Quotes list endpoint now also accepts <code>search</code> (member name/email/business/product) and <code>dateFrom</code>/<code>dateTo</code> query params for filtering, in addition to <code>status</code><span class="badge-new">new</span> — the admin UI still only wires up the <code>status</code> dropdown, so exposing search/date in the tab itself is a small follow-up.</li>
+</ul>
+
+<h3>B2B wholesale portal</h3>
+<ul>
+  <li><b>Catalog</b> — the same live product catalog; the member picks a variant, a bulk quantity (10+ units), and proposes their own discounted unit price (capped at the listed retail price).</li>
+  <li><b>Request Quote</b> — the products picked in Catalog collect into a draft; the member adds the buyer's business name and delivery address (map picker included) and submits it for admin approval. Past quotes and their status are listed below the form.</li>
+  <li><b>Orders</b> — once admin approves a quote, it becomes a real order here; now searchable by order ID or product name<span class="badge-new">new</span>, alongside the existing status filter.</li>
+  <li><b>Dashboard</b> — quote counts by status, total orders, total sales.</li>
+</ul>
+
+<h2 class="section">5. Payments</h2>
+<p>Cash on Delivery is the default and always available. <b>Razorpay is fully live and has been verified with a real completed test transaction</b> — order creation, the checkout modal, signature verification, and order confirmation all work end to end. If <code>RAZORPAY_KEY_ID</code>/<code>RAZORPAY_KEY_SECRET</code> in <code>backend/.env</code> are ever blanked out, attempting to pay online returns a clear "not configured yet" error rather than failing silently — it never crashes the server either way.</p>
+<div class="callout info">
+  <b>How it works:</b> the backend computes the charge amount itself from the customer's live server-side cart — it never trusts a client-supplied amount, which is the standard payment-security practice (a client could otherwise tamper with what it pays). <code>POST /customer/payments/razorpay-order</code> creates the Razorpay order sized to that amount; the frontend opens Razorpay's Standard Checkout modal with it; on success, <code>POST /customer/payments/razorpay-verify</code> checks the HMAC-SHA256 signature Razorpay returns before creating the real order, decrementing stock, and clearing the cart — mirroring the same transaction the COD path uses.
+</div>
+
+<h2 class="section">6. Email (Resend)<span class="badge-new">new</span></h2>
+<p>All transactional email — signup OTPs, and now both the Admin and B2B forgot-password OTP flows — sends through <a href="#" style="color:#047B22;">Resend</a> instead of the previous Gmail/Nodemailer setup. The change is isolated to <code>backend/utils/email.js</code>, which keeps the same <code>sendEmail({ email, subject, message })</code> signature, so no caller had to change.</p>
+<table>
+  <tr><th>Field</th><th>Detail</th></tr>
+  <tr><td>Config</td><td><code>RESEND_API_KEY</code> + <code>RESEND_FROM_EMAIL</code> in <code>backend/.env</code></td></tr>
+  <tr><td>Sender address</td><td><code>7Alps &lt;7alps@lanvaus.com&gt;</code> — <code>lanvaus.com</code> is verified with Resend; a dedicated 7alps domain is expected soon and this address can move to it with a one-line <code>.env</code> change</td></tr>
+  <tr><td>Verified end-to-end</td><td>Live test emails sent to an arbitrary external address and to a <code>7alps.com</code> address on 2026-07-22 — both accepted and delivered by the API, confirming domain verification unlocked sending to real recipients (not just the account owner)</td></tr>
+</table>
+<div class="callout info">
+  <b>Domain verified — sandbox restriction lifted.</b> Earlier testing showed the Resend account could only deliver to its own registered address until a domain was verified. With <code>lanvaus.com</code> now verified, OTP emails send to any recipient. When the dedicated 7alps domain is ready, update <code>RESEND_FROM_EMAIL</code> to use it instead.
+</div>
+
+<h2 class="section">7. Testing Reference</h2>
+<table>
+  <tr><th>What</th><th>Value</th></tr>
+  <tr><td>Admin login</td><td><code>7alpsadmin@7alps.com</code> / <code>7alps123</code></td></tr>
+  <tr><td>B2B login</td><td><code>b2bpartner@7alps.com</code> / <code>7alps123</code></td></tr>
+  <tr><td>Customer login</td><td>Any 10-digit mobile number, OTP <code>123456</code></td></tr>
+  <tr><td>Razorpay test card (recommended)</td><td><code>5267 3181 8797 5449</code> (Mastercard) — any future expiry, any 3-digit CVV</td></tr>
+  <tr><td>Razorpay test OTP</td><td>Any 4-10 digit number (e.g. <code>1234</code>) — it's a test-mode simulation, not a fixed code</td></tr>
+  <tr><td>Password-reset OTP (Admin/B2B)<span class="badge-new">new</span></td><td>Emailed via Resend from <code>7alps@lanvaus.com</code>, delivered to the real account email (see Section 6)</td></tr>
+</table>
+<div class="callout warn">
+  <b>Avoid the generic <code>4111 1111 1111 1111</code> Visa test card</b> — Razorpay's test environment treats it as a foreign-issued card, and most test accounts (this one included) have international card acceptance disabled by default, so it fails with <code>international_transaction_not_allowed</code>. The Mastercard number above is domestic and works reliably.
+</div>
+
+<h2 class="section">8. Known Limitations</h2>
+<ul>
+  <li><b>Admin/B2B "Forgot Password" pages are still frontend UI shells</b> — the backend OTP flow is now fully built and tested for both roles (Section 2), but neither <code>/admin/forgot-password</code> nor <code>/b2b/forgot-password</code> is wired to call it yet; the forms still just render with no submit handler.</li>
+  <li><b>Admin Quotes tab filtering is backend-only</b> — <code>GET /api/v1/admin/quotes</code> now accepts <code>search</code>/<code>dateFrom</code>/<code>dateTo</code>, but the B2B Team page's Quotes tab UI still only exposes the pre-existing <code>status</code> dropdown.</li>
+  <li><b>SMS OTP delivery is not wired up</b> — OTPs are logged to the server console in development, and <code>123456</code> is always accepted as a fallback until a real SMS provider (e.g. MSG91, Twilio) is integrated.</li>
+  <li><b>The home page's decorative "Shop by category" tiles are static content</b> (curated imagery in a fixed 3-tile layout), separate from the real, admin-managed Category system used everywhere else (product forms, filters, B2B catalog).</li>
+  <li><b>No order/quote-status confirmation emails</b> — order placement, quote approval/rejection, etc. remain visible in-app only; Resend is currently used only for the OTP flows above.</li>
+  <li><b>Email sender is on a shared parent-company domain</b> — OTPs currently send from <code>7alps@lanvaus.com</code>. A dedicated 7alps domain is expected soon; once verified with Resend, update <code>RESEND_FROM_EMAIL</code> in <code>backend/.env</code> to move onto it.</li>
+</ul>
+
+<p class="footer-note">7ALP's Platform Documentation — generated automatically from the current codebase.</p>
+
+</body>
+</html>

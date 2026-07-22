@@ -10,6 +10,7 @@ const quoteItemSchema = new mongoose.Schema(
       required: true,
     },
     name: { type: String, required: true },
+    image: { type: String },
     variantLabel: { type: String, required: true },
     quantity: {
       type: Number,

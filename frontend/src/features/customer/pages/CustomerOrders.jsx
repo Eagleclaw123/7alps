@@ -183,11 +183,17 @@ const CustomerOrders = () => {
                             key={`${item.product}-${item.variantLabel}`}
                             className="flex items-center gap-4 py-3"
                           >
-                            {/* <img
-                            src={item.image}
-                            alt={item.name}
-                            className="h-14 w-14 flex-shrink-0 rounded-lg object-cover"
-                          /> */}
+                            {item.image ? (
+                              <img
+                                src={item.image}
+                                alt={item.name}
+                                className="h-14 w-14 flex-shrink-0 rounded-lg object-cover"
+                              />
+                            ) : (
+                              <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg bg-green-50">
+                                <Package className="h-6 w-6 text-[#047B22]" />
+                              </span>
+                            )}
                             <span className="flex-1 text-sm text-gray-700">
                               {item.name} ({item.variantLabel}) ×{" "}
                               {item.quantity}
