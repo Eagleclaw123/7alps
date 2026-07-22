@@ -54,7 +54,7 @@ const WhyChoose7Alps = () => {
                     <Icon size={24} />
                   </div>
 
-                  <h3 className="text-[24px]">{heading}</h3>
+                  <h3 className="text-[22px] font-medium">{heading}</h3>
                   <p className="text-[16px]">{subHeading}</p>
                 </motion.li>
               ))}
@@ -98,7 +98,7 @@ const WhyChoose7Alps = () => {
                   <Icon size={24} />
                 </div>
 
-                <h3 className="text-[24px]">{heading}</h3>
+                <h3 className="text-[22px] font-medium">{heading}</h3>
                 <p className="text-[16px]">{subHeading}</p>
               </motion.li>
             ))}

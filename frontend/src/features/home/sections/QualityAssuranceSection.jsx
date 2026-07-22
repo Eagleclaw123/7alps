@@ -25,10 +25,10 @@ const features = [
 
 const QualityAssuranceSection = () => {
   return (
-    <section className="px-6 xl:px-0 mt-16 py-16 bg-white">
+    <section className="px-6 xl:px-0 mt-16 py-16 bg-gray-100/30">
       <div className="mx-auto max-w-7xl">
         {/* Top */}
-        <div className="grid items-center gap-12 lg:grid-cols-2">
+        <div className="grid items-center gap-6 lg:grid-cols-2">
           {/* Content */}
           <div>
             <div className="mb-3 flex items-center gap-2">
@@ -58,7 +58,7 @@ const QualityAssuranceSection = () => {
           {/* Image */}
           <div>
             <img
-              src="https://res.cloudinary.com/dasvdkncm/image/upload/v1781971248/Rectangle_3463742_npqczv.png"
+              src="https://res.cloudinary.com/dasvdkncm/image/upload/v1784520833/fresh-organic-herbs-ground-for-healthy-seasoning-free-photo_ytd1mr.jpg"
               alt="Quality Assurance"
               className="h-[450px] w-full rounded-3xl object-cover"
             />
@@ -73,13 +73,15 @@ const QualityAssuranceSection = () => {
                 <Icon size={28} />
               </div>
 
-              <h3 className="text-3xl font-semibold text-[#2C2C2C]">{title}</h3>
+              <h3 className="text-[22px] font-semibold text-[#2C2C2C]">
+                {title}
+              </h3>
 
-              <p className="mt-4 leading-8 text-gray-600">{description}</p>
+              <p className="mt-4 text-[16px]">{description}</p>
 
-              <button className="mt-8 flex h-12 w-12 items-center justify-center rounded-full bg-[#E8F5EC] text-[#0F6B3E] transition hover:scale-110 hover:bg-[#0F6B3E] hover:text-white">
+              {/* <button className="mt-8 flex h-12 w-12 items-center justify-center rounded-full bg-[#E8F5EC] text-[#0F6B3E] transition hover:scale-110 hover:bg-[#0F6B3E] hover:text-white">
                 <GoArrowUpRight size={20} />
-              </button>
+              </button> */}
             </div>
           ))}
         </div>

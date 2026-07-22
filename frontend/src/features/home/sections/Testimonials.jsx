@@ -6,7 +6,7 @@ const bottomCards = testimonials.slice(4, 8);
 
 const Testimonials = () => {
   return (
-    <section className="overflow-hidden mt-16">
+    <section className="overflow-hidden mt-10">
       <div>
         <h2 className="text-[40px] mb-10 max-w-md mx-auto text-center font-semibold">
           See what our customers are saying

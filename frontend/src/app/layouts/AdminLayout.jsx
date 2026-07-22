@@ -28,6 +28,7 @@ const AdminLayout = () => {
           menuItems={menuItems}
           mobileOpen={mobileOpen}
           onClose={() => setMobileOpen(false)}
+          portal="admin"
         />
       )}
       Header={() => (

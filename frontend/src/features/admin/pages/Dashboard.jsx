@@ -7,6 +7,7 @@ import {
 } from "react-icons/fi";
 import StatCard from "../../../shared/dashboard/components/StatCard";
 import { getDashboardStats } from "../../../shared/services/admin.service";
+import AdminDashboardVisuals from "../components/AdminDashboardVisuals";
 
 const initialStats = {
   totalCustomers: 0,
@@ -49,6 +50,7 @@ const Dashboard = () => {
           value={loading ? "..." : `₹${stats.totalRevenue.toLocaleString()}`}
         />
       </div>
+      {!loading && <AdminDashboardVisuals stats={stats} />}
     </section>
   );
 };

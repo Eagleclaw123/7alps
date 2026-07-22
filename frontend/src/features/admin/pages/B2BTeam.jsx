@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { FiPlus, FiCheck, FiX, FiUsers, FiFileText, FiDollarSign } from "react-icons/fi";
+import {
+  FiPlus,
+  FiCheck,
+  FiX,
+  FiUsers,
+  FiFileText,
+  FiDollarSign,
+} from "react-icons/fi";
 import DataTable from "../../../shared/dashboard/components/DataTable";
 import Badge from "../../../shared/dashboard/components/Badge";
 import StatCard from "../../../shared/dashboard/components/StatCard";
@@ -31,6 +38,8 @@ const initialMemberForm = {
   password: "",
   passwordConfirm: "",
 };
+
+const PAGE_SIZE = 10;
 
 const MembersTab = () => {
   const [members, setMembers] = useState([]);
@@ -88,7 +97,11 @@ const MembersTab = () => {
   const columns = [
     { key: "name", header: "Name" },
     { key: "email", header: "Email" },
-    { key: "businessName", header: "Business", render: (m) => m.businessName || "—" },
+    {
+      key: "businessName",
+      header: "Business",
+      render: (m) => m.businessName || "—",
+    },
     { key: "totalOrders", header: "Orders", render: (m) => m.totalOrders || 0 },
     {
       key: "totalSales",
@@ -100,7 +113,10 @@ const MembersTab = () => {
       header: "Status",
       render: (m) => (
         <button onClick={() => handleToggleActive(m)}>
-          <Badge value={m.active ? "Active" : "Inactive"} styles={STATUS_STYLES} />
+          <Badge
+            value={m.active ? "Active" : "Inactive"}
+            styles={STATUS_STYLES}
+          />
         </button>
       ),
     },
@@ -109,8 +125,16 @@ const MembersTab = () => {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <StatCard icon={<FiUsers size={20} />} label="B2B Members" value={members.length} />
-        <StatCard icon={<FiFileText size={20} />} label="Total Bulk Orders" value={totalOrders} />
+        <StatCard
+          icon={<FiUsers size={20} />}
+          label="B2B Members"
+          value={members.length}
+        />
+        <StatCard
+          icon={<FiFileText size={20} />}
+          label="Total Bulk Orders"
+          value={totalOrders}
+        />
         <StatCard
           icon={<FiDollarSign size={20} />}
           label="Total B2B Sales"
@@ -131,7 +155,10 @@ const MembersTab = () => {
         </div>
 
         {formOpen && (
-          <form onSubmit={handleCreate} className="mt-4 grid gap-4 border-t border-gray-100 pt-4 sm:grid-cols-2">
+          <form
+            onSubmit={handleCreate}
+            className="mt-4 grid gap-4 border-t border-gray-100 pt-4 sm:grid-cols-2"
+          >
             <input
               required
               placeholder="Name"
@@ -185,7 +212,9 @@ const MembersTab = () => {
               className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#047B22] focus:ring-2 focus:ring-[#047B22]/10"
             />
 
-            {error && <p className="text-sm text-red-600 sm:col-span-2">{error}</p>}
+            {error && (
+              <p className="text-sm text-red-600 sm:col-span-2">{error}</p>
+            )}
 
             <div className="flex justify-end gap-3 sm:col-span-2">
               <button
@@ -208,7 +237,9 @@ const MembersTab = () => {
 
         <div className="mt-5">
           {loading ? (
-            <p className="py-10 text-center text-gray-500">Loading members...</p>
+            <p className="py-10 text-center text-gray-500">
+              Loading members...
+            </p>
           ) : (
             <DataTable
               data={members}
@@ -216,7 +247,7 @@ const MembersTab = () => {
               rowKey={(m) => m._id}
               searchKeys={["name", "email", "businessName"]}
               searchPlaceholder="Search members"
-              pageSize={8}
+              pageSize={PAGE_SIZE}
               emptyMessage="No B2B members yet."
             />
           )}
@@ -260,7 +291,9 @@ const QuotesTab = () => {
 
   const updateItem = (index, field, value) => {
     setEditableItems((prev) =>
-      prev.map((item, i) => (i === index ? { ...item, [field]: Number(value) } : item)),
+      prev.map((item, i) =>
+        i === index ? { ...item, [field]: Number(value) } : item,
+      ),
     );
   };
 
@@ -300,14 +333,27 @@ const QuotesTab = () => {
   };
 
   const columns = [
-    { key: "member", header: "Member", render: (q) => q.b2bMember?.name || "—" },
+    {
+      key: "member",
+      header: "Member",
+      render: (q) => q.b2bMember?.name || "—",
+    },
     {
       key: "items",
       header: "Products",
-      render: (q) => q.items.map((i) => `${i.name} (${i.variantLabel})`).join(", "),
+      render: (q) =>
+        q.items.map((i) => `${i.name} (${i.variantLabel})`).join(", "),
     },
-    { key: "totalAmount", header: "Total", render: (q) => `₹${q.totalAmount.toLocaleString()}` },
-    { key: "createdAt", header: "Requested", render: (q) => new Date(q.createdAt).toLocaleDateString() },
+    {
+      key: "totalAmount",
+      header: "Total",
+      render: (q) => `₹${q.totalAmount.toLocaleString()}`,
+    },
+    {
+      key: "createdAt",
+      header: "Requested",
+      render: (q) => new Date(q.createdAt).toLocaleDateString(),
+    },
     {
       key: "status",
       header: "Status",
@@ -342,6 +388,7 @@ const QuotesTab = () => {
               data={quotes}
               columns={columns}
               rowKey={(q) => q._id}
+              searchKeys={["productsText"]}
               filters={[
                 {
                   field: "status",
@@ -349,7 +396,7 @@ const QuotesTab = () => {
                   options: ["All", "Pending", "Approved", "Rejected"],
                 },
               ]}
-              pageSize={8}
+              pageSize={PAGE_SIZE}
               emptyMessage="No quote requests yet."
             />
           )}
@@ -364,20 +411,28 @@ const QuotesTab = () => {
                 Review quote — {selectedQuote.b2bMember?.name}
               </h2>
               <p className="text-sm text-gray-500">
-                {selectedQuote.buyerBusinessName} · {selectedQuote.shippingAddress?.city},{" "}
+                {selectedQuote.buyerBusinessName} ·{" "}
+                {selectedQuote.shippingAddress?.city},{" "}
                 {selectedQuote.shippingAddress?.state}
               </p>
             </div>
-            <button onClick={closeReview} className="text-gray-400 hover:text-gray-600">
+            <button
+              onClick={closeReview}
+              className="text-gray-400 hover:text-gray-600"
+            >
               <FiX size={20} />
             </button>
           </div>
 
           <div className="mt-4 space-y-3">
             {editableItems.map((item, index) => (
-              <div key={`${item.product}-${item.variantLabel}`} className="flex flex-wrap items-center gap-3">
+              <div
+                key={`${item.product}-${item.variantLabel}`}
+                className="flex flex-wrap items-center gap-3"
+              >
                 <span className="flex-1 text-sm font-medium text-[#202020]">
-                  {item.name} <span className="text-gray-400">({item.variantLabel})</span>
+                  {item.name}{" "}
+                  <span className="text-gray-400">({item.variantLabel})</span>
                 </span>
                 <div className="space-y-1">
                   <label className="text-xs text-gray-400">Qty</label>
@@ -385,7 +440,9 @@ const QuotesTab = () => {
                     type="number"
                     min={1}
                     value={item.quantity}
-                    onChange={(e) => updateItem(index, "quantity", e.target.value)}
+                    onChange={(e) =>
+                      updateItem(index, "quantity", e.target.value)
+                    }
                     className="w-24 rounded-lg border border-gray-200 px-2 py-1.5 text-sm outline-none focus:border-[#047B22]"
                   />
                 </div>
@@ -395,7 +452,9 @@ const QuotesTab = () => {
                     type="number"
                     min={1}
                     value={item.proposedPrice}
-                    onChange={(e) => updateItem(index, "proposedPrice", e.target.value)}
+                    onChange={(e) =>
+                      updateItem(index, "proposedPrice", e.target.value)
+                    }
                     className="w-24 rounded-lg border border-gray-200 px-2 py-1.5 text-sm outline-none focus:border-[#047B22]"
                   />
                 </div>
@@ -418,7 +477,9 @@ const QuotesTab = () => {
             />
           </div>
 
-          {actionError && <p className="mt-3 text-sm text-red-600">{actionError}</p>}
+          {actionError && (
+            <p className="mt-3 text-sm text-red-600">{actionError}</p>
+          )}
 
           <div className="mt-5 flex justify-end gap-3">
             <button
@@ -450,7 +511,9 @@ const B2BTeam = () => {
   return (
     <section className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-[#202020] sm:text-2xl">B2B Team</h1>
+        <h1 className="text-xl font-semibold text-[#202020] sm:text-2xl">
+          B2B Team
+        </h1>
         <p className="mt-1 text-sm text-gray-500">
           Manage marketing team logins and review their bulk quote requests.
         </p>

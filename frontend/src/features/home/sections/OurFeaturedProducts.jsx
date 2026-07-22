@@ -67,7 +67,10 @@ const OurFeaturedProducts = () => {
   }, []);
 
   const tabs = useMemo(
-    () => ["All", ...new Set(productsData.map((product) => product.ProductCategory))],
+    () => [
+      "All",
+      ...new Set(productsData.map((product) => product.ProductCategory)),
+    ],
     [productsData],
   );
 
@@ -78,7 +81,7 @@ const OurFeaturedProducts = () => {
   }, [activeTab, productsData]);
 
   return (
-    <section className="px-6 xl:px-0 mt-16">
+    <section className="px-6 xl:px-0 ">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -87,7 +90,7 @@ const OurFeaturedProducts = () => {
           transition={{ duration: 0.8 }}
         >
           <SectionHeading
-            eyebrow="Our Collection"
+            eyebrow="Customer Favorites"
             title={
               <>
                 Discover Our Best-Selling{" "}
@@ -96,7 +99,7 @@ const OurFeaturedProducts = () => {
                 </span>
               </>
             }
-            description="Explore our carefully selected herbal products, crafted with natural ingredients to support your daily health, beauty, and wellness journey."
+            description="The powders our customers reorder most — trusted for results, loved for quality."
           />
         </motion.div>
 
@@ -123,9 +126,9 @@ const OurFeaturedProducts = () => {
             ))}
           </motion.div>
 
-          <button className="w-full rounded-lg bg-[#A39200] px-4 py-2 text-white sm:w-auto lg:shrink-0">
+          {/* <button className="w-full rounded-lg bg-[#A39200] px-4 py-2 text-white sm:w-auto lg:shrink-0">
             Enquiry for B2B Purpose
-          </button>
+          </button> */}
         </div>
 
         {loading ? (

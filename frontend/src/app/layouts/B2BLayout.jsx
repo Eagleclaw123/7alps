@@ -27,6 +27,7 @@ const B2BLayout = () => {
           menuItems={menuItems}
           mobileOpen={mobileOpen}
           onClose={() => setMobileOpen(false)}
+          portal="b2b"
         />
       )}
       Header={() => (

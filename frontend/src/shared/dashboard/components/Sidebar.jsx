@@ -7,6 +7,7 @@ const Sidebar = ({
   setCollapsed,
   mobileOpen,
   onClose,
+  portal,
 }) => {
   return (
     <>
@@ -16,6 +17,7 @@ const Sidebar = ({
           menuItems={menuItems}
           collapsed={collapsed}
           setCollapsed={setCollapsed}
+          portal={portal}
         />
       </div>
 
@@ -24,6 +26,7 @@ const Sidebar = ({
         open={mobileOpen}
         onClose={onClose}
         menuItems={menuItems}
+        portal={portal}
       />
     </>
   );

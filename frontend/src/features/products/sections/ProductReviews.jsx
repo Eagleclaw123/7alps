@@ -3,7 +3,10 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { FiMessageCircle, FiStar } from "react-icons/fi";
 import ReviewModal from "../components/ReviewModal";
-import { getProductReviews, createReview } from "../../../shared/services/review.service";
+import {
+  getProductReviews,
+  createReview,
+} from "../../../shared/services/review.service";
 import { selectCustomer } from "../../../store/slices/authSlice";
 
 const ProductReviews = ({ product }) => {
@@ -31,7 +34,9 @@ const ProductReviews = ({ product }) => {
 
   const handleWriteReview = () => {
     if (!customer) {
-      navigate("/customer/login", { state: { from: { pathname: `/products/${product.id}` } } });
+      navigate("/customer/login", {
+        state: { from: { pathname: `/products/${product.id}` } },
+      });
       return;
     }
     setShowReviewModal(true);
@@ -55,7 +60,7 @@ const ProductReviews = ({ product }) => {
                 From buyers
               </p>
 
-              <h2 className="mb-10 font-serif text-3xl text-[#22301A]">
+              <h2 className="mb-10 font-medium text-3xl text-[#22301A]">
                 Customer Reviews
               </h2>
             </div>
@@ -95,7 +100,9 @@ const ProductReviews = ({ product }) => {
           </div>
 
           {loading ? (
-            <p className="py-10 text-center text-gray-500">Loading reviews...</p>
+            <p className="py-10 text-center text-gray-500">
+              Loading reviews...
+            </p>
           ) : reviewCount === 0 ? (
             <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-gray-300 py-12">
               <FiMessageCircle className="text-gray-400" size={24} />
@@ -109,10 +116,16 @@ const ProductReviews = ({ product }) => {
               {reviews.map((review) => (
                 <div key={review._id} className="rounded-xl bg-white p-5">
                   <div className="flex items-center justify-between">
-                    <h4 className="font-semibold">{review.customer?.name || "Customer"}</h4>
+                    <h4 className="font-semibold">
+                      {review.customer?.name || "Customer"}
+                    </h4>
                     <div className="flex gap-0.5 text-[#EF9F27]">
                       {Array.from({ length: 5 }).map((_, i) => (
-                        <FiStar key={i} size={12} fill={i < review.rating ? "#EF9F27" : "none"} />
+                        <FiStar
+                          key={i}
+                          size={12}
+                          fill={i < review.rating ? "#EF9F27" : "none"}
+                        />
                       ))}
                     </div>
                   </div>

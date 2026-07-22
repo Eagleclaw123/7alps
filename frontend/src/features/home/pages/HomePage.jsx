@@ -6,7 +6,7 @@ import Categories from "../sections/Categories";
 import FAQs from "../sections/FAQs";
 import FeatureMarquee from "../sections/FeatureMarquee";
 import GlobalTrade from "../sections/GlobalTrade";
-import HeroSection from "../sections/HeroSection";
+import MainHeroSection from "../sections/MainHeroSection";
 import OurFeaturedProducts from "../sections/OurFeaturedProducts";
 import QualityAssuranceSection from "../sections/QualityAssuranceSection";
 import Testimonials from "../sections/Testimonials";
@@ -18,8 +18,8 @@ const HomePage = () => {
       <SEO {...homeSEO} />
 
       <AnimatedPage>
-        <HeroSection />
-        <FeatureMarquee />
+        <MainHeroSection />
+        {/* <FeatureMarquee /> */}
         <Categories />
         <OurFeaturedProducts />
         <WhyChoose7Alps />

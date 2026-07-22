@@ -88,8 +88,13 @@ const CustomerProfile = () => {
     setAddressError("");
   };
 
-  const handleAddressFieldChange = ({ target: { name, value, type, checked } }) => {
-    setAddressForm((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
+  const handleAddressFieldChange = ({
+    target: { name, value, type, checked },
+  }) => {
+    setAddressForm((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   const handleMapAddressChange = (parsed) => {
@@ -111,7 +116,12 @@ const CustomerProfile = () => {
     e.preventDefault();
     setAddressError("");
 
-    if (!addressForm.line1.trim() || !addressForm.city.trim() || !addressForm.state.trim() || !addressForm.pincode.trim()) {
+    if (
+      !addressForm.line1.trim() ||
+      !addressForm.city.trim() ||
+      !addressForm.state.trim() ||
+      !addressForm.pincode.trim()
+    ) {
       setAddressError("Address line 1, city, state, and pincode are required.");
       return;
     }
@@ -149,7 +159,10 @@ const CustomerProfile = () => {
   };
 
   const handleSetDefault = async (index) => {
-    const nextAddresses = addresses.map((a, i) => ({ ...a, isDefault: i === index }));
+    const nextAddresses = addresses.map((a, i) => ({
+      ...a,
+      isDefault: i === index,
+    }));
     await persistAddresses(nextAddresses);
   };
 
@@ -211,7 +224,9 @@ const CustomerProfile = () => {
           className="space-y-5 bg-white p-7 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
         >
           <div className="flex items-center justify-between border-b border-[#F0EEE7] pb-4">
-            <h3 className="text-lg font-medium text-[#1A1A18]">Personal Details</h3>
+            <h3 className="text-lg font-medium text-[#1A1A18]">
+              Personal Details
+            </h3>
             {!editingProfile ? (
               <button
                 type="button"
@@ -225,7 +240,9 @@ const CustomerProfile = () => {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-[#9C8F73]">Full Name</label>
+              <label className="text-xs font-medium text-[#9C8F73]">
+                Full Name
+              </label>
               <input
                 name="name"
                 value={profile.name}
@@ -236,7 +253,9 @@ const CustomerProfile = () => {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-[#9C8F73]">Email</label>
+              <label className="text-xs font-medium text-[#9C8F73]">
+                Email
+              </label>
               <input
                 name="email"
                 type="email"
@@ -250,15 +269,19 @@ const CustomerProfile = () => {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-[#9C8F73]">Phone Number</label>
+            <label className="text-xs font-medium text-[#9C8F73]">
+              Phone Number
+            </label>{" "}
             <input
               value={customer?.mobile || ""}
               disabled
-              className="w-full border border-[#E8E4DB] bg-[#FAF9F6] px-3 py-2.5 text-sm text-[#6B6A63] outline-none sm:w-1/2"
+              className="w-full border border-[#E8E4DB] px-3 py-2.5 text-sm text-[#1A1A18] outline-none transition-colors focus:border-[#0F6B3E] disabled:bg-[#FAF9F6] disabled:text-[#6B6A63]"
             />
           </div>
 
-          {profileError ? <p className="text-sm text-red-600">{profileError}</p> : null}
+          {profileError ? (
+            <p className="text-sm text-red-600">{profileError}</p>
+          ) : null}
 
           {editingProfile ? (
             <div className="flex justify-end gap-3 border-t border-[#F0EEE7] pt-5">
@@ -266,7 +289,10 @@ const CustomerProfile = () => {
                 type="button"
                 onClick={() => {
                   setEditingProfile(false);
-                  setProfile({ name: customer.name || "", email: customer.email || "" });
+                  setProfile({
+                    name: customer.name || "",
+                    email: customer.email || "",
+                  });
                   setProfileError("");
                 }}
                 className="px-5 py-2.5 text-sm font-medium text-[#6B6A63] transition-colors hover:text-[#1A1A18]"
@@ -288,7 +314,9 @@ const CustomerProfile = () => {
       {/* Address book */}
       <div className="bg-white p-7 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
         <div className="flex items-center justify-between border-b border-[#F0EEE7] pb-4">
-          <h3 className="text-lg font-medium text-[#1A1A18]">Delivery Addresses</h3>
+          <h3 className="text-lg font-medium text-[#1A1A18]">
+            Delivery Addresses
+          </h3>
           {editingAddressIndex === null ? (
             <button
               type="button"
@@ -313,7 +341,9 @@ const CustomerProfile = () => {
                 className="space-y-2 border border-[#E8E4DB] p-4 text-sm"
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-medium text-[#1A1A18]">{addr.label}</span>
+                  <span className="font-medium text-[#1A1A18]">
+                    {addr.label}
+                  </span>
                   {addr.isDefault ? (
                     <span className="rounded-full bg-[#EAF3DE] px-2 py-0.5 text-xs font-medium text-[#3B6D11]">
                       Default
@@ -364,12 +394,17 @@ const CustomerProfile = () => {
         )}
 
         {editingAddressIndex !== null ? (
-          <form onSubmit={handleSaveAddress} className="mt-5 space-y-4 border-t border-[#F0EEE7] pt-5">
+          <form
+            onSubmit={handleSaveAddress}
+            className="mt-5 space-y-4 border-t border-[#F0EEE7] pt-5"
+          >
             <AddressMapPicker onAddressChange={handleMapAddressChange} />
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-[#9C8F73]">Label</label>
+                <label className="text-xs font-medium text-[#9C8F73]">
+                  Label
+                </label>
                 <input
                   name="label"
                   value={addressForm.label}
@@ -379,7 +414,9 @@ const CustomerProfile = () => {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-[#9C8F73]">Phone (optional)</label>
+                <label className="text-xs font-medium text-[#9C8F73]">
+                  Phone (optional)
+                </label>
                 <input
                   name="phone"
                   value={addressForm.phone}
@@ -391,7 +428,9 @@ const CustomerProfile = () => {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-[#9C8F73]">Address Line 1</label>
+              <label className="text-xs font-medium text-[#9C8F73]">
+                Address Line 1
+              </label>
               <input
                 name="line1"
                 value={addressForm.line1}
@@ -402,7 +441,9 @@ const CustomerProfile = () => {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-[#9C8F73]">Address Line 2 (optional)</label>
+              <label className="text-xs font-medium text-[#9C8F73]">
+                Address Line 2 (optional)
+              </label>
               <input
                 name="line2"
                 value={addressForm.line2}
@@ -414,7 +455,9 @@ const CustomerProfile = () => {
 
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-[#9C8F73]">City</label>
+                <label className="text-xs font-medium text-[#9C8F73]">
+                  City
+                </label>
                 <input
                   name="city"
                   value={addressForm.city}
@@ -423,7 +466,9 @@ const CustomerProfile = () => {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-[#9C8F73]">State</label>
+                <label className="text-xs font-medium text-[#9C8F73]">
+                  State
+                </label>
                 <input
                   name="state"
                   value={addressForm.state}
@@ -432,7 +477,9 @@ const CustomerProfile = () => {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-[#9C8F73]">Pincode</label>
+                <label className="text-xs font-medium text-[#9C8F73]">
+                  Pincode
+                </label>
                 <input
                   name="pincode"
                   value={addressForm.pincode}
@@ -454,7 +501,9 @@ const CustomerProfile = () => {
               Set as default address
             </label>
 
-            {addressError ? <p className="text-sm text-red-600">{addressError}</p> : null}
+            {addressError ? (
+              <p className="text-sm text-red-600">{addressError}</p>
+            ) : null}
 
             <div className="flex justify-end gap-3 border-t border-[#F0EEE7] pt-4">
               <button
