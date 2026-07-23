@@ -3,7 +3,7 @@ export const categories = [
     id: 1,
     title: "Hair Care",
     image:
-      "https://res.cloudinary.com/dasvdkncm/image/upload/v1784534803/Gemini_Generated_Image_4wkv614wkv614wkv_okfwkj.png",
+      "https://res.cloudinary.com/dasvdkncm/image/upload/v1784795649/high-angle-bowl-with-powder-scoops_x2u4ki.jpg",
     description: "Explore our carefully selected herbal products",
   },
   {

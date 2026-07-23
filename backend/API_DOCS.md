@@ -243,8 +243,8 @@ come from a specific variant.
 
 Returns all **active** products. Optional query params:
 
-| Param      | Type   | Description                                                    |
-| ---------- | ------ | ---------------------------------------------------------------- |
+| Param      | Type   | Description                                                        |
+| ---------- | ------ | ------------------------------------------------------------------ |
 | `category` | string | Filter by category (`Hair Care`, `Skin Care`, `Health & Wellness`) |
 
 **Response `200`:**
@@ -270,8 +270,20 @@ Returns all **active** products. Optional query params:
         "storageInstructions": "Store in a cool, dry place...",
         "tags": ["natural", "organic"],
         "variants": [
-          { "label": "100g", "price": 249, "mrp": 299, "stock": 20, "isDefault": true },
-          { "label": "250g", "price": 499, "mrp": 599, "stock": 10, "isDefault": false }
+          {
+            "label": "100g",
+            "price": 249,
+            "mrp": 299,
+            "stock": 20,
+            "isDefault": true
+          },
+          {
+            "label": "250g",
+            "price": 499,
+            "mrp": 599,
+            "stock": 10,
+            "isDefault": false
+          }
         ],
         "images": [
           "https://pub-xxxxxxxx.r2.dev/products/1234567890-abc123.png",
@@ -313,7 +325,7 @@ Returns a single active product by MongoDB `_id` or `slug`.
 Returns **all** products including inactive ones.
 
 | Param      | Type             | Description             |
-| ---------- | ---------------- | ------------------------ |
+| ---------- | ---------------- | ----------------------- |
 | `active`   | `true` / `false` | Filter by active status |
 | `category` | string           | Filter by category      |
 
@@ -323,22 +335,22 @@ Returns **all** products including inactive ones.
 
 Create a new product. Send as `multipart/form-data`.
 
-| Field                 | Type   | Required | Description                                                                |
-| --------------------- | ------ | -------- | --------------------------------------------------------------------------- |
-| `name`                | string | ✅       | Product name (slug auto-generated)                                        |
-| `category`             | string | ✅       | One of `Hair Care`, `Skin Care`, `Health & Wellness`                       |
-| `subCategory`          | string |          | Optional                                                                   |
-| `variants`             | JSON string | ✅  | `[{ "label", "price", "mrp"?, "stock"?, "isDefault"? }, ...]` — at least 1 |
-| `shortDescription`     | string |          | One-liner for cards/listings                                              |
-| `description`          | string |          | Full description                                                          |
-| `taglines`             | JSON array or comma-separated string |  | Marketing one-liners                              |
-| `keyHighlights`        | JSON array or comma-separated string |  | Bullet features                                    |
-| `ingredients`          | JSON array or comma-separated string |  | Ingredient list                                    |
-| `usageSuggestions`     | JSON array or comma-separated string |  | Bullet usage tips                                  |
-| `storageInstructions`  | string |          | Storage guidance                                                           |
-| `tags`                 | JSON array or comma-separated string |  | Search/filter tags                                 |
-| `active`               | boolean |          | Default `true`                                                            |
-| `images`               | file[] |          | 1 or more images, up to 8 (max 5 MB each) — uploaded to Cloudflare R2      |
+| Field                 | Type                                 | Required | Description                                                                |
+| --------------------- | ------------------------------------ | -------- | -------------------------------------------------------------------------- |
+| `name`                | string                               | ✅       | Product name (slug auto-generated)                                         |
+| `category`            | string                               | ✅       | One of `Hair Care`, `Skin Care`, `Health & Wellness`                       |
+| `subCategory`         | string                               |          | Optional                                                                   |
+| `variants`            | JSON string                          | ✅       | `[{ "label", "price", "mrp"?, "stock"?, "isDefault"? }, ...]` — at least 1 |
+| `shortDescription`    | string                               |          | One-liner for cards/listings                                               |
+| `description`         | string                               |          | Full description                                                           |
+| `taglines`            | JSON array or comma-separated string |          | Marketing one-liners                                                       |
+| `keyHighlights`       | JSON array or comma-separated string |          | Bullet features                                                            |
+| `ingredients`         | JSON array or comma-separated string |          | Ingredient list                                                            |
+| `usageSuggestions`    | JSON array or comma-separated string |          | Bullet usage tips                                                          |
+| `storageInstructions` | string                               |          | Storage guidance                                                           |
+| `tags`                | JSON array or comma-separated string |          | Search/filter tags                                                         |
+| `active`              | boolean                              |          | Default `true`                                                             |
+| `images`              | file[]                               |          | 1 or more images, up to 8 (max 5 MB each) — uploaded to Cloudflare R2      |
 
 **Response `201`:** `{ "status": "success", "data": { "product": {...} } }`
 
@@ -550,7 +562,7 @@ All errors follow this shape:
 ```
 
 | Status | Meaning                                      |
-| ------ | --------------------------------------------- |
+| ------ | -------------------------------------------- |
 | `400`  | Bad request / validation error               |
 | `401`  | Not authenticated / wrong credentials        |
 | `403`  | Authenticated but not authorised             |

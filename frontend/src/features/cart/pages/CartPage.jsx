@@ -4,6 +4,7 @@ import CartList from "../components/CartList";
 import OrderSummary from "../components/OrderSummary";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 import {
   updateQuantity,
@@ -16,6 +17,8 @@ import {
 } from "../../../store/slices/cartSlice";
 import NewsletterBanner from "../components/NewsletterBanner";
 import { selectCustomer } from "../../../store/slices/authSlice";
+import { Leaf } from "lucide-react";
+import HeroBanner from "../../../shared/components/ui/HeroBanner";
 
 const CartPage = () => {
   const dispatch = useDispatch();
@@ -42,13 +45,16 @@ const CartPage = () => {
   };
 
   return (
-    <div className="py-8 mt-16 px-6 xl:px-0">
-      <div className="mx-auto max-w-7xl overflow-hidden rounded-sm">
-        <div className="py-6">
-          <h1 className="mb-6 text-3xl font-semibold text-gray-900">
-            Shopping Cart
-          </h1>
-
+    <>
+      {/* ── Hero banner ──────────────────────────────────────────── */}
+      <HeroBanner
+        eyebrow="Cart"
+        title="Your Cart"
+        description="Review your selected herbal blends before checking out."
+        image="https://res.cloudinary.com/dasvdkncm/image/upload/v1784788176/ChatGPT_Image_Jul_23_2026_11_57_14_AM_gbwvsk.png"
+      />
+      <div className="py-8 px-6 xl:px-0">
+        <div className="mx-auto max-w-7xl overflow-hidden rounded-sm">
           <div>
             <OrderSummary itemCount={itemCount} />
             <CartList
@@ -66,7 +72,7 @@ const CartPage = () => {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

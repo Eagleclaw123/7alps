@@ -17,6 +17,9 @@ import {
 } from "../../../shared/services/payment.service";
 import { loadRazorpayScript } from "../../../shared/utils/loadRazorpayScript";
 import AddressMapPicker from "../../../shared/components/map/AddressMapPicker";
+import { Leaf } from "lucide-react";
+import { motion } from "framer-motion";
+import HeroBanner from "../../../shared/components/ui/HeroBanner";
 
 const initialAddress = {
   name: "",
@@ -254,310 +257,323 @@ const CheckoutPage = () => {
   }, [cartItems.length, cartStatus, navigate]);
 
   if (cartStatus !== "succeeded" && cartItems.length === 0) {
-    return <p className="py-20 text-center text-gray-500">Loading your cart...</p>;
+    return (
+      <p className="py-20 text-center text-gray-500">Loading your cart...</p>
+    );
   }
 
   if (cartItems.length === 0) return null;
 
   return (
-    <section className="py-10 mt-20 px-6 xl:px-0">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-8 flex items-center gap-3">
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-[#202020]">
-              Checkout
-            </h1>
-            <p className="text-sm text-gray-500">
-              Review your details and confirm your order
-            </p>
-          </div>
-        </div>
+    <>
+      {/* ── Hero banner ──────────────────────────────────────────── */}
 
-        <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
-          <form
-            id="checkout-form"
-            onSubmit={handleSubmit}
-            noValidate
-            className="space-y-5 rounded-2xl border border-gray-100 bg-white p-6"
-          >
-            <div className="flex items-center justify-between border-b border-gray-100 pb-4">
-              <h2 className="text-lg font-semibold text-[#202020]">
-                Shipping Address
-              </h2>
-              <span className="text-xs font-medium uppercase tracking-wide text-gray-400">
-                Required
-              </span>
-            </div>
-
-            <AddressMapPicker onAddressChange={handleMapAddressChange} />
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-gray-500">
-                  Full Name
-                </label>
-                <input
-                  name="name"
-                  value={address.name}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  placeholder="e.g. Priya Sharma"
-                  required
-                  className={`w-full rounded-lg border px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:ring-2 ${
-                    fieldErrors.name
-                      ? "border-red-400 focus:border-red-400 focus:ring-red-100"
-                      : "border-gray-300 focus:border-[#0F6B3E] focus:ring-[#0F6B3E]/10"
-                  }`}
-                />
-                {fieldErrors.name ? (
-                  <p className="text-xs text-red-600">{fieldErrors.name}</p>
-                ) : null}
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-gray-500">
-                  Phone Number
-                </label>
-                <input
-                  name="phone"
-                  value={address.phone}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  placeholder="10-digit mobile number"
-                  required
-                  inputMode="numeric"
-                  maxLength={10}
-                  className={`w-full rounded-lg border px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:ring-2 ${
-                    fieldErrors.phone
-                      ? "border-red-400 focus:border-red-400 focus:ring-red-100"
-                      : "border-gray-300 focus:border-[#0F6B3E] focus:ring-[#0F6B3E]/10"
-                  }`}
-                />
-                {fieldErrors.phone ? (
-                  <p className="text-xs text-red-600">{fieldErrors.phone}</p>
-                ) : null}
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-gray-500">
-                Address Line 1
-              </label>
-              <input
-                name="line1"
-                value={address.line1}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                placeholder="House no., street, area"
-                required
-                className={`w-full rounded-lg border px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:ring-2 ${
-                  fieldErrors.line1
-                    ? "border-red-400 focus:border-red-400 focus:ring-red-100"
-                    : "border-gray-300 focus:border-[#0F6B3E] focus:ring-[#0F6B3E]/10"
-                }`}
-              />
-              {fieldErrors.line1 ? (
-                <p className="text-xs text-red-600">{fieldErrors.line1}</p>
-              ) : null}
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-gray-500">
-                Address Line 2 (optional)
-              </label>
-              <input
-                name="line2"
-                value={address.line2}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                placeholder="Landmark, apartment, etc."
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:border-[#0F6B3E] focus:ring-2 focus:ring-[#0F6B3E]/10"
-              />
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-gray-500">
-                  City
-                </label>
-                <input
-                  name="city"
-                  value={address.city}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  placeholder="City"
-                  required
-                  className={`w-full rounded-lg border px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:ring-2 ${
-                    fieldErrors.city
-                      ? "border-red-400 focus:border-red-400 focus:ring-red-100"
-                      : "border-gray-300 focus:border-[#0F6B3E] focus:ring-[#0F6B3E]/10"
-                  }`}
-                />
-                {fieldErrors.city ? (
-                  <p className="text-xs text-red-600">{fieldErrors.city}</p>
-                ) : null}
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-gray-500">
-                  State
-                </label>
-                <input
-                  name="state"
-                  value={address.state}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  placeholder="State"
-                  required
-                  className={`w-full rounded-lg border px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:ring-2 ${
-                    fieldErrors.state
-                      ? "border-red-400 focus:border-red-400 focus:ring-red-100"
-                      : "border-gray-300 focus:border-[#0F6B3E] focus:ring-[#0F6B3E]/10"
-                  }`}
-                />
-                {fieldErrors.state ? (
-                  <p className="text-xs text-red-600">{fieldErrors.state}</p>
-                ) : null}
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-gray-500">
-                  Pincode
-                </label>
-                <input
-                  name="pincode"
-                  value={address.pincode}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  placeholder="6-digit pincode"
-                  required
-                  inputMode="numeric"
-                  maxLength={6}
-                  className={`w-full rounded-lg border px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:ring-2 ${
-                    fieldErrors.pincode
-                      ? "border-red-400 focus:border-red-400 focus:ring-red-100"
-                      : "border-gray-300 focus:border-[#0F6B3E] focus:ring-[#0F6B3E]/10"
-                  }`}
-                />
-                {fieldErrors.pincode ? (
-                  <p className="text-xs text-red-600">{fieldErrors.pincode}</p>
-                ) : null}
-              </div>
-            </div>
-
-            <div className="space-y-2 border-t border-gray-100 pt-4">
-              <h2 className="text-lg font-semibold text-[#202020]">Payment Method</h2>
-
-              <label
-                className={`flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 text-sm transition-colors ${
-                  paymentMethod === "COD"
-                    ? "border-[#0F6B3E] bg-[#F4F9F6]"
-                    : "border-gray-200 hover:bg-gray-50"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value="COD"
-                  checked={paymentMethod === "COD"}
-                  onChange={() => setPaymentMethod("COD")}
-                  className="accent-[#0F6B3E]"
-                />
-                <span className="font-medium text-[#202020]">Cash on Delivery</span>
-              </label>
-
-              <label
-                className={`flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 text-sm transition-colors ${
-                  paymentMethod === "Razorpay"
-                    ? "border-[#0F6B3E] bg-[#F4F9F6]"
-                    : "border-gray-200 hover:bg-gray-50"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value="Razorpay"
-                  checked={paymentMethod === "Razorpay"}
-                  onChange={() => setPaymentMethod("Razorpay")}
-                  className="accent-[#0F6B3E]"
-                />
-                <span className="font-medium text-[#202020]">Pay Online</span>
-                <span className="text-xs text-gray-400">Cards, UPI, Netbanking &amp; more</span>
-              </label>
-            </div>
-
-            {error ? (
-              <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
-                {error}
-              </p>
-            ) : null}
-          </form>
-
-          <aside className="h-fit space-y-4 rounded-2xl border border-gray-100 bg-white p-6 lg:top-24">
-            <h2 className="text-lg font-semibold text-[#202020]">
-              Order Summary
-            </h2>
-
-            <div className="max-h-64 space-y-3 overflow-y-auto pr-1 text-sm">
-              {cartItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex justify-between gap-3 text-gray-600"
-                >
-                  <span className="leading-snug">
-                    {item.name}{" "}
-                    <span className="text-gray-400">
-                      ({item.variantLabel}) × {item.quantity}
-                    </span>
-                  </span>
-                  <span className="whitespace-nowrap font-medium text-[#202020]">
-                    ₹{(item.price * item.quantity).toLocaleString()}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <hr className="border-gray-100" />
-
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm text-gray-600">
-                <span>Subtotal</span>
-                <span>₹{subtotal.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between text-sm text-gray-600">
-                <span>Shipping</span>
-                <span
-                  className={shipping === 0 ? "font-medium text-[#0F6B3E]" : ""}
-                >
-                  {shipping === 0 ? "FREE" : `₹${shipping}`}
+      <HeroBanner
+        eyebrow="Checkout"
+        title="Checkout"
+        description="Just a few steps away from your next wellness ritual."
+        image="https://res.cloudinary.com/dasvdkncm/image/upload/v1784788176/ChatGPT_Image_Jul_23_2026_11_57_14_AM_gbwvsk.png"
+      />
+      <section className="py-10 px-6 xl:px-0">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
+            <form
+              id="checkout-form"
+              onSubmit={handleSubmit}
+              noValidate
+              className="space-y-5 rounded-2xl border border-gray-100 bg-white p-6"
+            >
+              <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+                <h2 className="text-lg font-semibold text-[#202020]">
+                  Shipping Address
+                </h2>
+                <span className="text-xs font-medium uppercase tracking-wide text-gray-400">
+                  Required
                 </span>
               </div>
-            </div>
 
-            <hr className="border-gray-100" />
+              <AddressMapPicker onAddressChange={handleMapAddressChange} />
 
-            <div className="flex justify-between text-lg font-semibold text-[#202020]">
-              <span>Total</span>
-              <span className="text-[#047B22]">₹{total.toLocaleString()}</span>
-            </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-gray-500">
+                    Full Name
+                  </label>
+                  <input
+                    name="name"
+                    value={address.name}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    placeholder="e.g. Priya Sharma"
+                    required
+                    className={`w-full rounded-lg border px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:ring-2 ${
+                      fieldErrors.name
+                        ? "border-red-400 focus:border-red-400 focus:ring-red-100"
+                        : "border-gray-300 focus:border-[#0F6B3E] focus:ring-[#0F6B3E]/10"
+                    }`}
+                  />
+                  {fieldErrors.name ? (
+                    <p className="text-xs text-red-600">{fieldErrors.name}</p>
+                  ) : null}
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-gray-500">
+                    Phone Number
+                  </label>
+                  <input
+                    name="phone"
+                    value={address.phone}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    placeholder="10-digit mobile number"
+                    required
+                    inputMode="numeric"
+                    maxLength={10}
+                    className={`w-full rounded-lg border px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:ring-2 ${
+                      fieldErrors.phone
+                        ? "border-red-400 focus:border-red-400 focus:ring-red-100"
+                        : "border-gray-300 focus:border-[#0F6B3E] focus:ring-[#0F6B3E]/10"
+                    }`}
+                  />
+                  {fieldErrors.phone ? (
+                    <p className="text-xs text-red-600">{fieldErrors.phone}</p>
+                  ) : null}
+                </div>
+              </div>
 
-            <button
-              type="submit"
-              form="checkout-form"
-              disabled={submitting}
-              className="w-full rounded-xl bg-[#0F6B3E] px-6 py-3.5 font-semibold text-white transition-colors hover:bg-[#0d5c34] disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {submitting
-                ? "Processing..."
-                : paymentMethod === "Razorpay"
-                  ? `Pay — ₹${total.toLocaleString()}`
-                  : `Place Order — ₹${total.toLocaleString()}`}
-            </button>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-gray-500">
+                  Address Line 1
+                </label>
+                <input
+                  name="line1"
+                  value={address.line1}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  placeholder="House no., street, area"
+                  required
+                  className={`w-full rounded-lg border px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:ring-2 ${
+                    fieldErrors.line1
+                      ? "border-red-400 focus:border-red-400 focus:ring-red-100"
+                      : "border-gray-300 focus:border-[#0F6B3E] focus:ring-[#0F6B3E]/10"
+                  }`}
+                />
+                {fieldErrors.line1 ? (
+                  <p className="text-xs text-red-600">{fieldErrors.line1}</p>
+                ) : null}
+              </div>
 
-            <p className="text-center text-xs text-gray-400">
-              By placing this order you agree to our terms of service.
-            </p>
-          </aside>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-gray-500">
+                  Address Line 2 (optional)
+                </label>
+                <input
+                  name="line2"
+                  value={address.line2}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  placeholder="Landmark, apartment, etc."
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:border-[#0F6B3E] focus:ring-2 focus:ring-[#0F6B3E]/10"
+                />
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-gray-500">
+                    City
+                  </label>
+                  <input
+                    name="city"
+                    value={address.city}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    placeholder="City"
+                    required
+                    className={`w-full rounded-lg border px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:ring-2 ${
+                      fieldErrors.city
+                        ? "border-red-400 focus:border-red-400 focus:ring-red-100"
+                        : "border-gray-300 focus:border-[#0F6B3E] focus:ring-[#0F6B3E]/10"
+                    }`}
+                  />
+                  {fieldErrors.city ? (
+                    <p className="text-xs text-red-600">{fieldErrors.city}</p>
+                  ) : null}
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-gray-500">
+                    State
+                  </label>
+                  <input
+                    name="state"
+                    value={address.state}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    placeholder="State"
+                    required
+                    className={`w-full rounded-lg border px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:ring-2 ${
+                      fieldErrors.state
+                        ? "border-red-400 focus:border-red-400 focus:ring-red-100"
+                        : "border-gray-300 focus:border-[#0F6B3E] focus:ring-[#0F6B3E]/10"
+                    }`}
+                  />
+                  {fieldErrors.state ? (
+                    <p className="text-xs text-red-600">{fieldErrors.state}</p>
+                  ) : null}
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-gray-500">
+                    Pincode
+                  </label>
+                  <input
+                    name="pincode"
+                    value={address.pincode}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    placeholder="6-digit pincode"
+                    required
+                    inputMode="numeric"
+                    maxLength={6}
+                    className={`w-full rounded-lg border px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:ring-2 ${
+                      fieldErrors.pincode
+                        ? "border-red-400 focus:border-red-400 focus:ring-red-100"
+                        : "border-gray-300 focus:border-[#0F6B3E] focus:ring-[#0F6B3E]/10"
+                    }`}
+                  />
+                  {fieldErrors.pincode ? (
+                    <p className="text-xs text-red-600">
+                      {fieldErrors.pincode}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+
+              <div className="space-y-2 border-t border-gray-100 pt-4">
+                <h2 className="text-lg font-semibold text-[#202020]">
+                  Payment Method
+                </h2>
+
+                <label
+                  className={`flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 text-sm transition-colors ${
+                    paymentMethod === "COD"
+                      ? "border-[#0F6B3E] bg-[#F4F9F6]"
+                      : "border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="COD"
+                    checked={paymentMethod === "COD"}
+                    onChange={() => setPaymentMethod("COD")}
+                    className="accent-[#0F6B3E]"
+                  />
+                  <span className="font-medium text-[#202020]">
+                    Cash on Delivery
+                  </span>
+                </label>
+
+                <label
+                  className={`flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 text-sm transition-colors ${
+                    paymentMethod === "Razorpay"
+                      ? "border-[#0F6B3E] bg-[#F4F9F6]"
+                      : "border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="Razorpay"
+                    checked={paymentMethod === "Razorpay"}
+                    onChange={() => setPaymentMethod("Razorpay")}
+                    className="accent-[#0F6B3E]"
+                  />
+                  <span className="font-medium text-[#202020]">Pay Online</span>
+                  <span className="text-xs text-gray-400">
+                    Cards, UPI, Netbanking &amp; more
+                  </span>
+                </label>
+              </div>
+
+              {error ? (
+                <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+                  {error}
+                </p>
+              ) : null}
+            </form>
+
+            <aside className="h-fit space-y-4 rounded-2xl border border-gray-100 bg-white p-6 lg:top-24">
+              <h2 className="text-lg font-semibold text-[#202020]">
+                Order Summary
+              </h2>
+
+              <div className="max-h-64 space-y-3 overflow-y-auto pr-1 text-sm">
+                {cartItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex justify-between gap-3 text-gray-600"
+                  >
+                    <span className="leading-snug">
+                      {item.name}{" "}
+                      <span className="text-gray-400">
+                        ({item.variantLabel}) × {item.quantity}
+                      </span>
+                    </span>
+                    <span className="whitespace-nowrap font-medium text-[#202020]">
+                      ₹{(item.price * item.quantity).toLocaleString()}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <hr className="border-gray-100" />
+
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Subtotal</span>
+                  <span>₹{subtotal.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Shipping</span>
+                  <span
+                    className={
+                      shipping === 0 ? "font-medium text-[#0F6B3E]" : ""
+                    }
+                  >
+                    {shipping === 0 ? "FREE" : `₹${shipping}`}
+                  </span>
+                </div>
+              </div>
+
+              <hr className="border-gray-100" />
+
+              <div className="flex justify-between text-lg font-semibold text-[#202020]">
+                <span>Total</span>
+                <span className="text-[#047B22]">
+                  ₹{total.toLocaleString()}
+                </span>
+              </div>
+
+              <button
+                type="submit"
+                form="checkout-form"
+                disabled={submitting}
+                className="w-full rounded-xl bg-[#0F6B3E] px-6 py-3.5 font-semibold text-white transition-colors hover:bg-[#0d5c34] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {submitting
+                  ? "Processing..."
+                  : paymentMethod === "Razorpay"
+                    ? `Pay — ₹${total.toLocaleString()}`
+                    : `Place Order — ₹${total.toLocaleString()}`}
+              </button>
+
+              <p className="text-center text-xs text-gray-400">
+                By placing this order you agree to our terms of service.
+              </p>
+            </aside>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 };
 

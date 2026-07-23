@@ -1,15 +1,20 @@
+import {
+  b2bForgotPassword,
+  b2bResetPasswordAfterOTP,
+  b2bVerifyOTP,
+} from "../../../../shared/services/b2b.service";
 import AuthLayout from "../../components/AuthLayout";
-import ForgotPasswordForm from "../../components/ForgotPasswordForm";
+import ForgotPasswordFlow from "../../components/ForgotPasswordFlow";
 
 const B2BForgotPasswordPage = () => {
   return (
     <AuthLayout>
-      <ForgotPasswordForm
-        title="Forgot Password"
-        subtitle="Enter your registered business email to receive a password reset link."
-        label="Business Email"
-        placeholder="Enter your business email"
+      <ForgotPasswordFlow
+        role="b2b"
         loginPath="/b2b/login"
+        forgotPasswordFn={b2bForgotPassword}
+        verifyOTPFn={b2bVerifyOTP}
+        resetPasswordFn={b2bResetPasswordAfterOTP}
       />
     </AuthLayout>
   );

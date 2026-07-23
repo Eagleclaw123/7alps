@@ -43,3 +43,27 @@ export const getMyB2BOrders = () => {
 export const getMyB2BOrder = (id) => {
   return api.get(`/b2b/orders/${id}`);
 };
+
+// b2b service file — add these
+
+export const b2bForgotPassword = (email) => {
+  return api.post("/forgotPassword", { email });
+};
+
+export const b2bVerifyOTP = (email, otp) => {
+  return api.post("/verifyOTP", { email, otp });
+};
+
+export const b2bResetPasswordAfterOTP = (
+  email,
+  otp,
+  password,
+  passwordConfirm,
+) => {
+  return api.post("/resetPasswordAfterOTP", {
+    email,
+    otp,
+    password,
+    passwordConfirm,
+  });
+};

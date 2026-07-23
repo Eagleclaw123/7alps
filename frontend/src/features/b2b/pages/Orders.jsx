@@ -67,7 +67,9 @@ const Orders = () => {
   const ordersWithSearchFields = orders.map((o) => ({
     ...o,
     orderIdText: o._id.slice(-8).toUpperCase(),
-    productsText: o.items.map((i) => `${i.name} (${i.variantLabel})`).join(", "),
+    productsText: o.items
+      .map((i) => `${i.name} (${i.variantLabel})`)
+      .join(", "),
   }));
 
   const totalValue = orders.reduce((sum, o) => sum + o.totalAmount, 0);
@@ -118,8 +120,8 @@ const Orders = () => {
             data={ordersWithSearchFields}
             columns={columns}
             rowKey={(o) => o._id}
-            searchKeys={["orderIdText", "productsText"]}
-            searchPlaceholder="Search order ID or product"
+            searchKeys={["productsText"]}
+            searchPlaceholder="Search product"
             filters={[
               {
                 field: "status",

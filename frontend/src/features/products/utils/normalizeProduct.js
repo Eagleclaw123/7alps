@@ -6,6 +6,19 @@ const getDefaultVariant = (variants) => {
   return variants.find((v) => v.isDefault) || variants[0];
 };
 
+// Some category names come back HTML-entity-encoded (e.g. "Health &amp; Wellness")
+// while others are plain ("Health & Wellness"). Decode so both collapse to one value.
+const decodeHtmlEntities = (str) => {
+  if (typeof str !== "string") return str;
+  return str
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .trim();
+};
+
 // Adapts a backend Product document to the flat shape (`ProductName`,
 // `ProductImage`, ...) the existing product UI components already expect.
 export const normalizeProduct = (product) => {
@@ -19,7 +32,7 @@ export const normalizeProduct = (product) => {
     id: product._id,
     ProductName: product.name,
     ProductDescription: product.shortDescription || product.description || "",
-    ProductCategory: product.category,
+    ProductCategory: decodeHtmlEntities(product.category),
     ProductRating: product.ratingsAverage || "New",
     ProductPrice: defaultVariant?.price ?? 0,
     ProductImages: images,

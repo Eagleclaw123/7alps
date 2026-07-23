@@ -80,6 +80,8 @@ const OurFeaturedProducts = () => {
       : productsData.filter((product) => product.ProductCategory === activeTab);
   }, [activeTab, productsData]);
 
+  console.log(tabs);
+
   return (
     <section className="px-6 xl:px-0 ">
       <div className="max-w-7xl mx-auto">

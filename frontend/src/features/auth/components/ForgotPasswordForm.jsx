@@ -13,7 +13,17 @@ const ForgotPasswordForm = ({
   loginPath,
   registerPath,
   registerText,
+  email,
+  onEmailChange,
+  onSubmit,
+  loading,
+  error,
 }) => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit?.();
+  };
+
   return (
     <AuthCard>
       <div className="mb-8">
@@ -26,10 +36,20 @@ const ForgotPasswordForm = ({
 
       <AuthHeader title={title} subtitle={subtitle} />
 
-      <form className="space-y-6">
-        <AuthInput label={label} type="email" placeholder={placeholder} />
+      <form className="space-y-6" onSubmit={handleSubmit}>
+        <AuthInput
+          label={label}
+          type="email"
+          placeholder={placeholder}
+          value={email}
+          onChange={(e) => onEmailChange(e.target.value)}
+        />
 
-        <AuthButton type="submit">Send Reset Link</AuthButton>
+        {error && <p className="text-sm text-red-600">{error}</p>}
+
+        <AuthButton type="submit" disabled={loading}>
+          {loading ? "Sending..." : "Send Reset Link"}
+        </AuthButton>
 
         <p className="text-center text-sm text-gray-600">
           Remember your password?{" "}

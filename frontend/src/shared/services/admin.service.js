@@ -61,3 +61,25 @@ export const updateOrderStatus = (id, status) => {
 export const getCustomers = () => {
   return api.get("/admin/customers");
 };
+
+export const adminForgotPassword = (email) => {
+  return api.post("/auth/forgotPassword", { email });
+};
+
+export const adminVerifyOTP = (email, otp) => {
+  return api.post("/auth/verifyOTP", { email, otp });
+};
+
+export const adminResetPasswordAfterOTP = (
+  email,
+  otp,
+  password,
+  passwordConfirm,
+) => {
+  return api.post("/auth/resetPasswordAfterOTP", {
+    email,
+    otp,
+    password,
+    passwordConfirm,
+  });
+};

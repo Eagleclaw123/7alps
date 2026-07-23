@@ -1,15 +1,20 @@
+import {
+  adminForgotPassword,
+  adminResetPasswordAfterOTP,
+  adminVerifyOTP,
+} from "../../../../shared/services/admin.service";
 import AuthLayout from "../../components/AuthLayout";
-import ForgotPasswordForm from "../../components/ForgotPasswordForm";
+import ForgotPasswordFlow from "../../components/ForgotPasswordFlow";
 
 const AdminForgotPasswordPage = () => {
   return (
     <AuthLayout>
-      <ForgotPasswordForm
-        title="Forgot Password"
-        subtitle="Enter your admin email to receive a password reset link."
-        label="Admin Email"
-        placeholder="Enter your admin email"
+      <ForgotPasswordFlow
+        role="admin"
         loginPath="/admin/login"
+        forgotPasswordFn={adminForgotPassword}
+        verifyOTPFn={adminVerifyOTP}
+        resetPasswordFn={adminResetPasswordAfterOTP}
       />
     </AuthLayout>
   );
