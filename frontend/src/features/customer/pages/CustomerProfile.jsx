@@ -12,6 +12,22 @@ import {
 import AddressMapPicker from "../../../shared/components/map/AddressMapPicker";
 import HeroBanner from "../../../shared/components/ui/HeroBanner";
 
+/**
+ * DESIGN TOKENS (make sure these exist wherever the rest of the app
+ * pulls its type scale from — tailwind.config.js or an @font-face block):
+ *
+ *   font-serif  -> "Fraunces", serif      (display / names / section titles)
+ *   font-sans   -> "Inter", sans-serif    (body / inputs / buttons)
+ *
+ * Google Fonts import, if not already present:
+ *   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+ *
+ * Palette used throughout:
+ *   canvas  #FBF8F2   ink     #201F1B   forest      #16442C
+ *   forest-deep #0E3220   clay #B4652F   sage #EEF1E6
+ *   stone   #86806F   line    #E3DFD2
+ */
+
 const initialProfile = {
   name: "",
   email: "",
@@ -27,6 +43,28 @@ const emptyAddressForm = {
   phone: "",
   isDefault: false,
 };
+
+/* Dashed "perforation" strip used on address tags — the page's signature detail */
+const Perforation = () => (
+  <div
+    className="h-px w-full"
+    style={{
+      backgroundImage:
+        "repeating-linear-gradient(to right, #C9C2AE 0, #C9C2AE 6px, transparent 6px, transparent 13px)",
+    }}
+  />
+);
+
+/* Small tracked-out field label, apothecary-tag style */
+const FieldLabel = ({ children }) => (
+  <label className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#86806F]">
+    {children}
+  </label>
+);
+
+/* Underline input — replaces the boxed input with a label-style field */
+const underlineInput =
+  "w-full border-0 border-b border-[#E3DFD2] bg-transparent px-0 py-2 text-[15px] text-[#201F1B] outline-none transition-colors focus:border-[#16442C] disabled:text-[#86806F] placeholder:text-[#B8B2A0]";
 
 const CustomerProfile = () => {
   const dispatch = useDispatch();
@@ -182,14 +220,14 @@ const CustomerProfile = () => {
   if (!customer) {
     return (
       <section className="mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8 my-30">
-        <p className="text-sm text-[#6B6A63]">Loading your profile...</p>
+        <p className="text-sm text-[#86806F]">Loading your profile...</p>
       </section>
     );
   }
 
   return (
-    <>
-      {" "}
+    // <div className="bg-[#FBF8F2]">
+    <div>
       {/* ── Hero banner ──────────────────────────────────────────── */}
       <HeroBanner
         eyebrow="Profile"
@@ -197,64 +235,85 @@ const CustomerProfile = () => {
         description="Manage your details, preferences, and saved addresses."
         image="https://res.cloudinary.com/dasvdkncm/image/upload/v1784788176/ChatGPT_Image_Jul_23_2026_11_57_14_AM_gbwvsk.png"
       />
-      <section className="mx-auto max-w-7xl space-y-8 py-10 px-6 xl:px-0">
+
+      <section className="mx-auto max-w-7xl space-y-10 py-12 px-6 xl:px-0">
         <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
-          {/* Identity card */}
-          <div className="flex flex-col items-center gap-4 bg-white p-8 text-center shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#0F6B3E] font-serif text-2xl text-white">
-              {initials}
+          {/* ── Identity card ─────────────────────────────────────── */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="flex flex-col items-center gap-5 border border-[#E3DFD2] bg-white p-8 text-center"
+          >
+            <div className="relative flex h-24 w-24 items-center justify-center rounded-full border border-[#B4652F]/40">
+              <div className="flex h-[76px] w-[76px] items-center justify-center rounded-full bg-[#16442C] font-seri text-2xl italic text-white">
+                {initials}
+              </div>
+              <Leaf
+                size={16}
+                className="absolute -right-1 -top-1 rotate-45 text-[#B4652F]"
+                fill="#B4652F"
+              />
             </div>
+
             <div>
-              <p className="font-serif text-xl text-[#1A1A18]">
+              <p className="font-medium text-xl text-[#201F1B]">
                 {customer?.name || "Your Name"}
               </p>
-              <p className="mt-1 text-sm text-[#6B6A63]">
+              <p className="mt-1 text-sm text-[#86806F]">
                 {customer?.email || "your@email.com"}
               </p>
             </div>
-            <div className="w-full border-t border-[#F0EEE7] pt-4 text-sm text-[#6B6A63]">
-              {customer?.mobile || "No phone number added"}
-            </div>
-          </div>
 
-          {/* Personal Details */}
-          <form
+            <div className="w-full pt-2">
+              <Perforation />
+              <p className="pt-4 text-sm tracking-wide text-[#201F1B]">
+                {customer?.mobile || "No phone number added"}
+              </p>
+            </div>
+          </motion.div>
+
+          {/* ── Personal Details ──────────────────────────────────── */}
+          <motion.form
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.05 }}
             onSubmit={handleSaveProfile}
-            className="space-y-5 bg-white p-7 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+            className="space-y-6 border border-[#E3DFD2] bg-white p-8"
           >
-            <div className="flex items-center justify-between border-b border-[#F0EEE7] pb-4">
-              <h3 className="text-lg font-medium text-[#1A1A18]">
-                Personal Details
-              </h3>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Leaf size={16} className="text-[#16442C]" />
+                <h3 className="font-medium text-xl text-[#201F1B] ">
+                  Personal Details
+                </h3>
+              </div>
               {!editingProfile ? (
                 <button
                   type="button"
                   onClick={() => setEditingProfile(true)}
-                  className="border border-[#0F6B3E] px-4 py-2 text-xs font-medium text-[#0F6B3E] transition-colors hover:bg-[#0F6B3E] hover:text-white"
+                  className="rounded-full border border-[#16442C] whitespace-nowrap px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-[#16442C] transition-colors hover:bg-[#16442C] hover:text-white"
                 >
                   Edit Profile
                 </button>
               ) : null}
             </div>
+            <Perforation />
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-6 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-[#9C8F73]">
-                  Full Name
-                </label>
+                <FieldLabel>Full Name</FieldLabel>
                 <input
                   name="name"
                   value={profile.name}
                   onChange={handleProfileChange}
                   disabled={!editingProfile}
                   placeholder="e.g. Priya Sharma"
-                  className="w-full border border-[#E8E4DB] px-3 py-2.5 text-sm text-[#1A1A18] outline-none transition-colors focus:border-[#0F6B3E] disabled:bg-[#FAF9F6] disabled:text-[#6B6A63]"
+                  className={underlineInput}
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-[#9C8F73]">
-                  Email
-                </label>
+                <FieldLabel>Email</FieldLabel>
                 <input
                   name="email"
                   type="email"
@@ -262,19 +321,17 @@ const CustomerProfile = () => {
                   onChange={handleProfileChange}
                   disabled={!editingProfile}
                   placeholder="you@example.com"
-                  className="w-full border border-[#E8E4DB] px-3 py-2.5 text-sm text-[#1A1A18] outline-none transition-colors focus:border-[#0F6B3E] disabled:bg-[#FAF9F6] disabled:text-[#6B6A63]"
+                  className={underlineInput}
                 />
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-[#9C8F73]">
-                Phone Number
-              </label>{" "}
+            <div className="max-w-xs space-y-1.5">
+              <FieldLabel>Phone Number</FieldLabel>
               <input
                 value={customer?.mobile || ""}
                 disabled
-                className="w-full border border-[#E8E4DB] px-3 py-2.5 text-sm text-[#1A1A18] outline-none transition-colors focus:border-[#0F6B3E] disabled:bg-[#FAF9F6] disabled:text-[#6B6A63]"
+                className={underlineInput}
               />
             </div>
 
@@ -283,7 +340,7 @@ const CustomerProfile = () => {
             ) : null}
 
             {editingProfile ? (
-              <div className="flex justify-end gap-3 border-t border-[#F0EEE7] pt-5">
+              <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => {
@@ -294,98 +351,116 @@ const CustomerProfile = () => {
                     });
                     setProfileError("");
                   }}
-                  className="px-5 py-2.5 text-sm font-medium text-[#6B6A63] transition-colors hover:text-[#1A1A18]"
+                  className="px-5 py-2.5 text-sm font-medium text-[#86806F] transition-colors hover:text-[#201F1B]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={savingProfile}
-                  className="bg-[#0F6B3E] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#0d5c34] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="bg-[#16442C] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#0E3220] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {savingProfile ? "Saving..." : "Save Changes"}
                 </button>
               </div>
             ) : null}
-          </form>
+          </motion.form>
         </div>
 
-        {/* Address book */}
-        <div className="bg-white p-7 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-          <div className="flex items-center justify-between border-b border-[#F0EEE7] pb-4">
-            <h3 className="text-lg font-medium text-[#1A1A18]">
-              Delivery Addresses
-            </h3>
+        {/* ── Address book ─────────────────────────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+          className="border border-[#E3DFD2] bg-white p-8"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Leaf size={16} className="text-[#16442C]" />
+              <h3 className="font-medium text-xl text-[#201F1B]">
+                Delivery Addresses
+              </h3>
+            </div>
             {editingAddressIndex === null ? (
               <button
                 type="button"
                 onClick={openNewAddressForm}
-                className="flex items-center gap-2 bg-[#0F6B3E] px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-[#0d5c34]"
+                className="flex items-center gap-2 rounded-full bg-[#16442C] px-5 py-2 text-xs font-semibold uppercase tracking-wide text-white transition-colors hover:bg-[#0E3220]"
               >
                 <FiPlus size={14} />
                 Add Address
               </button>
             ) : null}
           </div>
+          <div className="pt-4">
+            <Perforation />
+          </div>
 
           {addresses.length === 0 && editingAddressIndex === null ? (
-            <p className="py-8 text-center text-sm text-[#6B6A63]">
-              No saved addresses yet. Add one to speed up checkout.
-            </p>
+            <div className="flex flex-col items-center gap-2 py-12 text-center">
+              <Leaf size={20} className="text-[#B8B2A0]" />
+              <p className="text-sm text-[#86806F]">
+                No saved addresses yet. Add one to speed up checkout.
+              </p>
+            </div>
           ) : (
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div className="mt-6 grid gap-5 sm:grid-cols-2">
               {addresses.map((addr, index) => (
                 <div
                   key={`${addr.label}-${index}`}
-                  className="space-y-2 border border-[#E8E4DB] p-4 text-sm"
+                  className="relative border border-[#E3DFD2] bg-[#FBF8F2]/60"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-[#1A1A18]">
-                      {addr.label}
-                    </span>
-                    {addr.isDefault ? (
-                      <span className="rounded-full bg-[#EAF3DE] px-2 py-0.5 text-xs font-medium text-[#3B6D11]">
-                        Default
+                  <Perforation />
+                  <div className="space-y-2.5 p-5 text-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-1.5 font-serif text-base text-[#201F1B]">
+                        <Leaf size={13} className="text-[#16442C]" />
+                        {addr.label}
                       </span>
-                    ) : (
+                      {addr.isDefault ? (
+                        <span className="rounded-full bg-[#B4652F]/10 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-[#B4652F]">
+                          Default
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleSetDefault(index)}
+                          className="text-[11px] font-semibold uppercase tracking-wide text-[#16442C] hover:underline"
+                        >
+                          Set as default
+                        </button>
+                      )}
+                    </div>
+                    <p className="leading-relaxed text-[#5B564A]">
+                      {addr.line1}
+                      {addr.line2 ? `, ${addr.line2}` : ""}
+                      <br />
+                      {addr.city}, {addr.state} - {addr.pincode}
+                      {addr.phone ? (
+                        <>
+                          <br />
+                          Phone: {addr.phone}
+                        </>
+                      ) : null}
+                    </p>
+                    <div className="flex gap-4 pt-1.5">
                       <button
                         type="button"
-                        onClick={() => handleSetDefault(index)}
-                        className="text-xs font-medium text-[#0F6B3E] hover:underline"
+                        onClick={() => openEditAddressForm(index)}
+                        className="flex items-center gap-1 text-xs font-medium text-[#16442C] hover:underline"
                       >
-                        Set as default
+                        <FiEdit2 size={12} />
+                        Edit
                       </button>
-                    )}
-                  </div>
-                  <p className="text-[#6B6A63]">
-                    {addr.line1}
-                    {addr.line2 ? `, ${addr.line2}` : ""}
-                    <br />
-                    {addr.city}, {addr.state} - {addr.pincode}
-                    {addr.phone ? (
-                      <>
-                        <br />
-                        Phone: {addr.phone}
-                      </>
-                    ) : null}
-                  </p>
-                  <div className="flex gap-3 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => openEditAddressForm(index)}
-                      className="flex items-center gap-1 text-xs font-medium text-[#0F6B3E] hover:underline"
-                    >
-                      <FiEdit2 size={12} />
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteAddress(index)}
-                      className="flex items-center gap-1 text-xs font-medium text-red-500 hover:underline"
-                    >
-                      <FiTrash2 size={12} />
-                      Delete
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteAddress(index)}
+                        className="flex items-center gap-1 text-xs font-medium text-red-500 hover:underline"
+                      >
+                        <FiTrash2 size={12} />
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -395,107 +470,93 @@ const CustomerProfile = () => {
           {editingAddressIndex !== null ? (
             <form
               onSubmit={handleSaveAddress}
-              className="mt-5 space-y-4 border-t border-[#F0EEE7] pt-5"
+              className="mt-6 space-y-5 border-t border-[#E3DFD2] pt-6"
             >
               <AddressMapPicker onAddressChange={handleMapAddressChange} />
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-6 sm:grid-cols-2">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-[#9C8F73]">
-                    Label
-                  </label>
+                  <FieldLabel>Label</FieldLabel>
                   <input
                     name="label"
                     value={addressForm.label}
                     onChange={handleAddressFieldChange}
                     placeholder="Home, Work, etc."
-                    className="w-full border border-[#E8E4DB] px-3 py-2.5 text-sm outline-none focus:border-[#0F6B3E]"
+                    className={underlineInput}
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-[#9C8F73]">
-                    Phone (optional)
-                  </label>
+                  <FieldLabel>Phone (optional)</FieldLabel>
                   <input
                     name="phone"
                     value={addressForm.phone}
                     onChange={handleAddressFieldChange}
                     placeholder="10-digit mobile number"
-                    className="w-full border border-[#E8E4DB] px-3 py-2.5 text-sm outline-none focus:border-[#0F6B3E]"
+                    className={underlineInput}
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-[#9C8F73]">
-                  Address Line 1
-                </label>
+                <FieldLabel>Address Line 1</FieldLabel>
                 <input
                   name="line1"
                   value={addressForm.line1}
                   onChange={handleAddressFieldChange}
                   placeholder="House no., street, area"
-                  className="w-full border border-[#E8E4DB] px-3 py-2.5 text-sm outline-none focus:border-[#0F6B3E]"
+                  className={underlineInput}
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-[#9C8F73]">
-                  Address Line 2 (optional)
-                </label>
+                <FieldLabel>Address Line 2 (optional)</FieldLabel>
                 <input
                   name="line2"
                   value={addressForm.line2}
                   onChange={handleAddressFieldChange}
                   placeholder="Landmark, apartment, etc."
-                  className="w-full border border-[#E8E4DB] px-3 py-2.5 text-sm outline-none focus:border-[#0F6B3E]"
+                  className={underlineInput}
                 />
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-3">
+              <div className="grid gap-6 sm:grid-cols-3">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-[#9C8F73]">
-                    City
-                  </label>
+                  <FieldLabel>City</FieldLabel>
                   <input
                     name="city"
                     value={addressForm.city}
                     onChange={handleAddressFieldChange}
-                    className="w-full border border-[#E8E4DB] px-3 py-2.5 text-sm outline-none focus:border-[#0F6B3E]"
+                    className={underlineInput}
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-[#9C8F73]">
-                    State
-                  </label>
+                  <FieldLabel>State</FieldLabel>
                   <input
                     name="state"
                     value={addressForm.state}
                     onChange={handleAddressFieldChange}
-                    className="w-full border border-[#E8E4DB] px-3 py-2.5 text-sm outline-none focus:border-[#0F6B3E]"
+                    className={underlineInput}
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-[#9C8F73]">
-                    Pincode
-                  </label>
+                  <FieldLabel>Pincode</FieldLabel>
                   <input
                     name="pincode"
                     value={addressForm.pincode}
                     onChange={handleAddressFieldChange}
                     maxLength={6}
-                    className="w-full border border-[#E8E4DB] px-3 py-2.5 text-sm outline-none focus:border-[#0F6B3E]"
+                    className={underlineInput}
                   />
                 </div>
               </div>
 
-              <label className="flex items-center gap-2 text-sm text-[#1A1A18]">
+              <label className="flex items-center gap-2 text-sm text-[#201F1B]">
                 <input
                   type="checkbox"
                   name="isDefault"
                   checked={addressForm.isDefault}
                   onChange={handleAddressFieldChange}
-                  className="accent-[#0F6B3E]"
+                  className="accent-[#16442C]"
                 />
                 Set as default address
               </label>
@@ -504,11 +565,11 @@ const CustomerProfile = () => {
                 <p className="text-sm text-red-600">{addressError}</p>
               ) : null}
 
-              <div className="flex justify-end gap-3 border-t border-[#F0EEE7] pt-4">
+              <div className="flex justify-end gap-3 border-t border-[#E3DFD2] pt-5">
                 <button
                   type="button"
                   onClick={closeAddressForm}
-                  className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-[#6B6A63] transition-colors hover:text-[#1A1A18]"
+                  className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-[#86806F] transition-colors hover:text-[#201F1B]"
                 >
                   <FiX size={14} />
                   Cancel
@@ -516,7 +577,7 @@ const CustomerProfile = () => {
                 <button
                   type="submit"
                   disabled={savingAddress}
-                  className="flex items-center gap-2 bg-[#0F6B3E] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#0d5c34] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex items-center gap-2 bg-[#16442C] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#0E3220] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <FiCheck size={14} />
                   {savingAddress ? "Saving..." : "Save Address"}
@@ -524,9 +585,9 @@ const CustomerProfile = () => {
               </div>
             </form>
           ) : null}
-        </div>
+        </motion.div>
       </section>
-    </>
+    </div>
   );
 };
 

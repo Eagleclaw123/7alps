@@ -30,12 +30,16 @@ const initialBuyer = {
 const validators = {
   buyerBusinessName: (v) => (!v.trim() ? "Business name is required" : ""),
   name: (v) => (!v.trim() ? "Contact name is required" : ""),
-  phone: (v) => (!/^[6-9]\d{9}$/.test(v.trim()) ? "Enter a valid 10-digit mobile number" : ""),
+  phone: (v) =>
+    !/^[6-9]\d{9}$/.test(v.trim())
+      ? "Enter a valid 10-digit mobile number"
+      : "",
   line1: (v) => (!v.trim() ? "Address line 1 is required" : ""),
   line2: () => "",
   city: (v) => (!v.trim() ? "City is required" : ""),
   state: (v) => (!v.trim() ? "State is required" : ""),
-  pincode: (v) => (!/^\d{6}$/.test(v.trim()) ? "Enter a valid 6-digit pincode" : ""),
+  pincode: (v) =>
+    !/^\d{6}$/.test(v.trim()) ? "Enter a valid 6-digit pincode" : "",
 };
 
 const STATUS_STYLES = {
@@ -48,15 +52,24 @@ const columns = [
   {
     key: "items",
     header: "Products",
-    render: (q) => q.items.map((i) => `${i.name} (${i.variantLabel})`).join(", "),
+    render: (q) =>
+      q.items.map((i) => `${i.name} (${i.variantLabel})`).join(", "),
   },
   {
     key: "quantity",
     header: "Quantity",
     render: (q) => `${q.items.reduce((sum, i) => sum + i.quantity, 0)} units`,
   },
-  { key: "createdAt", header: "Requested", render: (q) => new Date(q.createdAt).toLocaleDateString() },
-  { key: "totalAmount", header: "Proposed total", render: (q) => `₹${q.totalAmount.toLocaleString()}` },
+  {
+    key: "createdAt",
+    header: "Requested",
+    render: (q) => new Date(q.createdAt).toLocaleDateString(),
+  },
+  {
+    key: "totalAmount",
+    header: "Proposed total",
+    render: (q) => `₹${q.totalAmount.toLocaleString()}`,
+  },
   {
     key: "status",
     header: "Status",
@@ -125,7 +138,9 @@ const RequestQuote = () => {
       nextErrors[field] = validators[field](buyer[field] || "");
     });
     setFieldErrors(nextErrors);
-    setTouched(Object.keys(validators).reduce((acc, f) => ({ ...acc, [f]: true }), {}));
+    setTouched(
+      Object.keys(validators).reduce((acc, f) => ({ ...acc, [f]: true }), {}),
+    );
     return Object.values(nextErrors).every((msg) => !msg);
   };
 
@@ -135,7 +150,9 @@ const RequestQuote = () => {
     setSuccess("");
 
     if (!draftItems.length) {
-      setError("Add at least one product from the Catalog before requesting a quote.");
+      setError(
+        "Add at least one product from the Catalog before requesting a quote.",
+      );
       return;
     }
 
@@ -171,10 +188,14 @@ const RequestQuote = () => {
       dispatch(clearDraft());
       setBuyer(initialBuyer);
       setTouched({});
-      setSuccess("Quote request submitted. We'll notify you once it's reviewed.");
+      setSuccess(
+        "Quote request submitted. We'll notify you once it's reviewed.",
+      );
       loadQuotes();
     } catch (err) {
-      setError(err.response?.data?.message || "Unable to submit quote request.");
+      setError(
+        err.response?.data?.message || "Unable to submit quote request.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -190,15 +211,27 @@ const RequestQuote = () => {
           Request Quote
         </h1>
         <p className="mt-1 text-sm text-gray-500">
-          Review the products you've added from the Catalog, add buyer details, and
-          submit for admin approval.
+          Review the products you've added from the Catalog, add buyer details,
+          and submit for admin approval.
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <StatCard icon={<FiFileText size={20} />} label="Draft items" value={draftItems.length} />
-        <StatCard icon={<FiClock size={20} />} label="Awaiting review" value={pendingCount} />
-        <StatCard icon={<FiCheckCircle size={20} />} label="Approved" value={approvedCount} />
+        <StatCard
+          icon={<FiFileText size={20} />}
+          label="Draft items"
+          value={draftItems.length}
+        />
+        <StatCard
+          icon={<FiClock size={20} />}
+          label="Awaiting review"
+          value={pendingCount}
+        />
+        <StatCard
+          icon={<FiCheckCircle size={20} />}
+          label="Approved"
+          value={approvedCount}
+        />
       </div>
 
       <div className="rounded-2xl border border-gray-100 bg-white p-4 sm:p-6">
@@ -206,22 +239,31 @@ const RequestQuote = () => {
 
         {draftItems.length === 0 ? (
           <p className="mt-4 text-sm text-gray-500">
-            No products added yet. Go to the Catalog to add products at your proposed
-            bulk price.
+            No products added yet. Go to the Catalog to add products at your
+            proposed bulk price.
           </p>
         ) : (
           <div className="mt-4 divide-y divide-gray-50">
             {draftItems.map((item) => (
-              <div key={item.id} className="flex flex-wrap items-center gap-3 py-3">
+              <div
+                key={item.id}
+                className="flex flex-wrap items-center gap-3 py-3"
+              >
                 <span className="flex-1 text-sm font-medium text-[#202020]">
-                  {item.name} <span className="text-gray-400">({item.variantLabel})</span>
+                  {item.name}{" "}
+                  <span className="text-gray-400">({item.variantLabel})</span>
                 </span>
                 <input
                   type="number"
                   min={MIN_BULK_QUANTITY}
                   value={item.quantity}
                   onChange={(e) =>
-                    dispatch(updateDraftItem({ id: item.id, quantity: Number(e.target.value) }))
+                    dispatch(
+                      updateDraftItem({
+                        id: item.id,
+                        quantity: Number(e.target.value),
+                      }),
+                    )
                   }
                   className="w-24 rounded-lg border border-gray-200 px-2 py-1.5 text-sm outline-none focus:border-[#047B22]"
                 />
@@ -231,7 +273,12 @@ const RequestQuote = () => {
                   max={item.listedPrice}
                   value={item.proposedPrice}
                   onChange={(e) =>
-                    dispatch(updateDraftItem({ id: item.id, proposedPrice: Number(e.target.value) }))
+                    dispatch(
+                      updateDraftItem({
+                        id: item.id,
+                        proposedPrice: Number(e.target.value),
+                      }),
+                    )
                   }
                   className="w-24 rounded-lg border border-gray-200 px-2 py-1.5 text-sm outline-none focus:border-[#047B22]"
                 />
@@ -257,10 +304,14 @@ const RequestQuote = () => {
         onSubmit={handleSubmit}
         className="space-y-4 rounded-2xl border border-gray-100 bg-white p-4 sm:p-6"
       >
-        <h2 className="text-lg font-semibold text-[#202020]">Buyer & delivery details</h2>
+        <h2 className="text-lg font-semibold text-[#202020]">
+          Buyer & delivery details
+        </h2>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-gray-500">Business name</label>
+          <label className="text-xs font-medium text-gray-500">
+            Business name
+          </label>
           <input
             name="buyerBusinessName"
             value={buyer.buyerBusinessName}
@@ -270,13 +321,17 @@ const RequestQuote = () => {
             className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#047B22] focus:ring-2 focus:ring-[#047B22]/10"
           />
           {fieldErrors.buyerBusinessName && (
-            <p className="text-xs text-red-600">{fieldErrors.buyerBusinessName}</p>
+            <p className="text-xs text-red-600">
+              {fieldErrors.buyerBusinessName}
+            </p>
           )}
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-gray-500">Contact name</label>
+            <label className="text-xs font-medium text-gray-500">
+              Contact name
+            </label>
             <input
               name="name"
               value={buyer.name}
@@ -284,10 +339,14 @@ const RequestQuote = () => {
               onBlur={handleBlur}
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#047B22] focus:ring-2 focus:ring-[#047B22]/10"
             />
-            {fieldErrors.name && <p className="text-xs text-red-600">{fieldErrors.name}</p>}
+            {fieldErrors.name && (
+              <p className="text-xs text-red-600">{fieldErrors.name}</p>
+            )}
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-gray-500">Phone number</label>
+            <label className="text-xs font-medium text-gray-500">
+              Phone number
+            </label>
             <input
               name="phone"
               value={buyer.phone}
@@ -296,14 +355,18 @@ const RequestQuote = () => {
               maxLength={10}
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#047B22] focus:ring-2 focus:ring-[#047B22]/10"
             />
-            {fieldErrors.phone && <p className="text-xs text-red-600">{fieldErrors.phone}</p>}
+            {fieldErrors.phone && (
+              <p className="text-xs text-red-600">{fieldErrors.phone}</p>
+            )}
           </div>
         </div>
 
         <AddressMapPicker onAddressChange={handleMapAddressChange} />
 
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-gray-500">Address line 1</label>
+          <label className="text-xs font-medium text-gray-500">
+            Address line 1
+          </label>
           <input
             name="line1"
             value={buyer.line1}
@@ -311,11 +374,15 @@ const RequestQuote = () => {
             onBlur={handleBlur}
             className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#047B22] focus:ring-2 focus:ring-[#047B22]/10"
           />
-          {fieldErrors.line1 && <p className="text-xs text-red-600">{fieldErrors.line1}</p>}
+          {fieldErrors.line1 && (
+            <p className="text-xs text-red-600">{fieldErrors.line1}</p>
+          )}
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-gray-500">Address line 2 (optional)</label>
+          <label className="text-xs font-medium text-gray-500">
+            Address line 2 (optional)
+          </label>
           <input
             name="line2"
             value={buyer.line2}
@@ -334,7 +401,9 @@ const RequestQuote = () => {
               onBlur={handleBlur}
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#047B22] focus:ring-2 focus:ring-[#047B22]/10"
             />
-            {fieldErrors.city && <p className="text-xs text-red-600">{fieldErrors.city}</p>}
+            {fieldErrors.city && (
+              <p className="text-xs text-red-600">{fieldErrors.city}</p>
+            )}
           </div>
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-gray-500">State</label>
@@ -345,7 +414,9 @@ const RequestQuote = () => {
               onBlur={handleBlur}
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#047B22] focus:ring-2 focus:ring-[#047B22]/10"
             />
-            {fieldErrors.state && <p className="text-xs text-red-600">{fieldErrors.state}</p>}
+            {fieldErrors.state && (
+              <p className="text-xs text-red-600">{fieldErrors.state}</p>
+            )}
           </div>
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-gray-500">Pincode</label>
@@ -357,13 +428,21 @@ const RequestQuote = () => {
               maxLength={6}
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#047B22] focus:ring-2 focus:ring-[#047B22]/10"
             />
-            {fieldErrors.pincode && <p className="text-xs text-red-600">{fieldErrors.pincode}</p>}
+            {fieldErrors.pincode && (
+              <p className="text-xs text-red-600">{fieldErrors.pincode}</p>
+            )}
           </div>
         </div>
 
-        {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
+        {error && (
+          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+            {error}
+          </p>
+        )}
         {success && (
-          <p className="rounded-lg bg-green-50 px-3 py-2 text-sm text-[#0F6B3E]">{success}</p>
+          <p className="rounded-lg bg-green-50 px-3 py-2 text-sm text-[#0F6B3E]">
+            {success}
+          </p>
         )}
 
         <div className="flex justify-end">
@@ -378,7 +457,9 @@ const RequestQuote = () => {
       </form>
 
       <div className="rounded-2xl border border-gray-100 bg-white p-4 sm:p-6">
-        <h2 className="mb-4 text-lg font-semibold text-[#202020]">Your quote requests</h2>
+        <h2 className="mb-4 text-lg font-semibold text-[#202020]">
+          Your quote requests
+        </h2>
         {loadingQuotes ? (
           <p className="py-10 text-center text-gray-500">Loading quotes...</p>
         ) : (
@@ -386,6 +467,7 @@ const RequestQuote = () => {
             data={quotes}
             columns={columns}
             rowKey={(q) => q._id}
+            searchKeys={["productsText"]}
             filters={[
               {
                 field: "status",

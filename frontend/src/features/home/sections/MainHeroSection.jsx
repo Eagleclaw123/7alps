@@ -277,6 +277,7 @@
 
 // export default HeroSection;
 
+import { useNavigate } from "react-router-dom";
 import { PiPlantLight } from "react-icons/pi";
 import { MdVerified } from "react-icons/md";
 import { GiFarmer } from "react-icons/gi";
@@ -284,10 +285,13 @@ import { CiGlobe } from "react-icons/ci";
 import HeroSection from "../../../shared/components/hero/HeroSection";
 
 const MainHeroSection = () => {
+  const navigate = useNavigate();
+
   const buttons = [
     {
-      label: "Explore",
+      label: "Explore Products",
       variant: "secondary",
+      onClick: () => navigate("/products"),
     },
   ];
 

@@ -34,7 +34,7 @@ const cardVariants = {
 };
 
 const Products = () => {
-  const productsPerPage = 9;
+  const productsPerPage = 15;
   const [productsData, setProductsData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -108,6 +108,10 @@ const Products = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, selectedCategories, maxPrice, ratingSort]);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [currentPage]);
 
   const toggleCategory = (category) => {
     if (category === "All") {

@@ -1,4 +1,3 @@
-import CartBanner from "../components/CartBanner";
 import CartFooter from "../components/CartFooter";
 import CartList from "../components/CartList";
 import OrderSummary from "../components/OrderSummary";
@@ -45,7 +44,7 @@ const CartPage = () => {
   };
 
   return (
-    <>
+    <div>
       {/* ── Hero banner ──────────────────────────────────────────── */}
       <HeroBanner
         eyebrow="Cart"
@@ -54,7 +53,7 @@ const CartPage = () => {
         image="https://res.cloudinary.com/dasvdkncm/image/upload/v1784788176/ChatGPT_Image_Jul_23_2026_11_57_14_AM_gbwvsk.png"
       />
       <div className="py-8 px-6 xl:px-0">
-        <div className="mx-auto max-w-7xl overflow-hidden rounded-sm">
+        <div className="mx-auto max-w-7xl border border-[#E3DFD2] bg-white">
           <div>
             <OrderSummary itemCount={itemCount} />
             <CartList
@@ -68,11 +67,11 @@ const CartPage = () => {
                 navigate(customer ? "/checkout" : "/customer/login")
               }
             />
-            <NewsletterBanner />
           </div>
         </div>
       </div>
-    </>
+      <NewsletterBanner />
+    </div>
   );
 };
 

@@ -1,14 +1,11 @@
+import HeroBanner from "../../../shared/components/ui/HeroBanner";
 import ContactInfoCard from "../components/ContactInfoCard";
 import ContactForm from "../components/ContactForm";
 
-import { contactInfoData } from "../data/contactInfoData";
-import { Leaf } from "lucide-react";
-import { motion } from "framer-motion";
-import HeroBanner from "../../../shared/components/ui/HeroBanner";
-
 const ContactSection = () => {
   return (
-    <>
+    // <div className="bg-[#FBF8F2]">
+    <div>
       {/* ── Hero banner ──────────────────────────────────────────── */}
       <HeroBanner
         eyebrow="Contact"
@@ -28,7 +25,7 @@ const ContactSection = () => {
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 };
 

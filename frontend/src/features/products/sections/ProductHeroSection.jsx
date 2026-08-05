@@ -28,12 +28,12 @@ const highlights = [
 ];
 
 const ProductHeroSection = () => {
-  const buttons = [
-    {
-      label: "Explore",
-      variant: "secondary",
-    },
-  ];
+  // const buttons = [
+  //   {
+  //     label: "Explore",
+  //     variant: "secondary",
+  //   },
+  // ];
 
   return (
     <HeroSection
@@ -43,7 +43,7 @@ const ProductHeroSection = () => {
       heading="Premium"
       headingHighlight="Herbal Ingredients for Natural Wellness"
       description="Premium herbal ingredients and wellness solutions sourced directly from farmers and delivered to consumers, businesses, and global partners."
-      buttons={buttons}
+      // buttons={buttons}
       highlights={highlights}
       containerHeight="h-[100vh] md:h-[60vh] xl:h-screen"
       textColor="text-white"

@@ -15,13 +15,13 @@ const CartFooter = ({ subtotal, onCheckout }) => {
       <div className="flex items-center gap-4 sm:gap-6">
         <button
           onClick={() => navigate("/products")}
-          className="text-xs font-semibold uppercase tracking-wide text-gray-700 underline underline-offset-2 hover:text-black"
+          className="text-xs font-semibold uppercase tracking-wide text-gray-700 underline underline-offset-2 hover:text-black whitespace-nowrap"
         >
           Continue Shipping
         </button>
         <button
           onClick={onCheckout}
-          className="rounded-md bg-[#0F6B3E] px-6 py-3 text-xs font-bold uppercase tracking-wide text-white"
+          className="rounded-md bg-[#0F6B3E] px-6 py-3 text-xs font-bold uppercase tracking-wide text-white whitespace-nowrap"
         >
           Go To Checkout
         </button>

@@ -1,48 +1,27 @@
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { FiShoppingCart, FiArrowRight } from "react-icons/fi";
+import { Leaf } from "lucide-react";
 
-import Button from "../../../shared/components/ui/Button";
-
+/**
+ * NOTE: this file wasn't part of the code you shared — reconstructed since
+ * CartList referenced it but its source wasn't provided. If your real
+ * EmptyCart has different copy or behavior, send it over.
+ */
 const EmptyCart = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="flex items-center justify-center px-6">
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-lg rounded-3xl text-center"
+    <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
+      <Leaf className="h-6 w-6 text-[#B8B2A0]" />
+      <p className="text-sm text-[#86806F]">
+        Your cart is empty. Add some herbal blends to get started.
+      </p>
+      <button
+        onClick={() => navigate("/products")}
+        className="mt-2 rounded-full bg-[#16442C] px-6 py-2.5 text-xs font-semibold uppercase tracking-wide text-white hover:bg-[#0E3220]"
       >
-        {/* Icon */}
-        <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-full bg-[#F4FBF6]">
-          <FiShoppingCart size={52} className="text-[#047B22]" />
-        </div>
-
-        {/* Title */}
-        <h2 className="mt-4 text-3xl font-semibold text-[#202020]">
-          Your Cart is Empty
-        </h2>
-
-        {/* Description */}
-        <p className="mx-auto mt-4 max-w-sm leading-7 text-gray-500">
-          Looks like you haven't added any herbal products yet. Explore our
-          collections and discover natural wellness.
-        </p>
-
-        {/* CTA */}
-        <Button
-          variant="primary"
-          size="lg"
-          className="mt-5 inline-flex items-center gap-2"
-          onClick={() => navigate("/products")}
-        >
-          Continue Shopping
-          <FiArrowRight />
-        </Button>
-      </motion.div>
-    </section>
+        Shop Products
+      </button>
+    </div>
   );
 };
 

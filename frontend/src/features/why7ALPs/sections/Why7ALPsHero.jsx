@@ -21,7 +21,7 @@ const Why7ALPsHero = () => {
       // headingHighlight="We make them."
       description="Bring 7ALP's traceable, small-batch formulas to your shelves. Honest wholesale margins, a low first-order minimum, and the same root-to-bottle story your customers can trust."
       values={values}
-      containerHeight="h-[100vh] md:h-[60vh] xl:h-screen"
+      // containerHeight="h-[80vh] md:h-[60vh] xl:h-screen"
       textColor="text-white"
       overlayColor="bg-black/20"
     />

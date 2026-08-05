@@ -1,8 +1,9 @@
 import { GoArrowRight } from "react-icons/go";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const ProductBanner = () => {
+  const navigate = useNavigate();
   return (
     <section
       style={{
@@ -46,12 +47,13 @@ const ProductBanner = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.4 }}
         >
-          <Link to="/products">
-            <button className="inline-flex items-center gap-2 rounded-lg bg-[#0F6B3E] px-7 py-3 font-medium text-white transition hover:bg-[#0b5b35]">
-              Enquire Now
-              <GoArrowRight size={18} />
-            </button>
-          </Link>
+          <button
+            className="inline-flex items-center gap-2 rounded-lg bg-[#0F6B3E] px-7 py-3 font-medium text-white transition hover:bg-[#0b5b35]"
+            onClick={() => navigate("/contact")}
+          >
+            Enquire Now
+            <GoArrowRight size={18} />
+          </button>
         </motion.div>
       </div>
     </section>

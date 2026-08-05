@@ -1,6 +1,7 @@
 import { FiShield, FiCheckCircle } from "react-icons/fi";
 import { GoArrowRight, GoArrowUpRight } from "react-icons/go";
 import { FaLeaf } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const features = [
   {
@@ -24,6 +25,7 @@ const features = [
 ];
 
 const QualityAssuranceSection = () => {
+  const navigate = useNavigate();
   return (
     <section className="px-6 xl:px-0 mt-16 py-16 bg-gray-100/30">
       <div className="mx-auto max-w-7xl">
@@ -49,8 +51,11 @@ const QualityAssuranceSection = () => {
               and tested to ensure purity, safety, and consistent quality for
             </p>
 
-            <button className="flex w-full mt-8 items-center justify-center gap-2 rounded-lg bg-[#008521] px-6 py-3 text-white transition hover:bg-[#047B22] sm:w-fit lg:mb-4">
-              Browse All
+            <button
+              className="flex w-full mt-8 items-center justify-center gap-2 rounded-lg bg-[#008521] px-6 py-3 text-white transition hover:bg-[#047B22] sm:w-fit lg:mb-4"
+              onClick={() => navigate("/products")}
+            >
+              Explore Products
               <GoArrowRight className="text-lg" />
             </button>
           </div>

@@ -69,6 +69,31 @@ const validators = {
   },
 };
 
+/* Dashed "perforation" strip — the seed-packet detail used across the site */
+const Perforation = () => (
+  <div
+    className="h-px w-full"
+    style={{
+      backgroundImage:
+        "repeating-linear-gradient(to right, #C9C2AE 0, #C9C2AE 6px, transparent 6px, transparent 13px)",
+    }}
+  />
+);
+
+/* Tracked-out field label, matches the profile/contact/cart label system */
+const FieldLabel = ({ children }) => (
+  <label className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#86806F]">
+    {children}
+  </label>
+);
+
+const underlineInput = (hasError) =>
+  `w-full border-0 border-b bg-transparent px-0 py-2 text-[15px] text-[#201F1B] outline-none transition-colors placeholder:text-[#B8B2A0] ${
+    hasError
+      ? "border-red-400 focus:border-red-500"
+      : "border-[#E3DFD2] focus:border-[#16442C]"
+  }`;
+
 const CheckoutPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -164,7 +189,7 @@ const CheckoutPage = () => {
         name: "7ALP's",
         description: "Order payment",
         prefill: { name: address.name, contact: address.phone },
-        theme: { color: "#0F6B3E" },
+        theme: { color: "#16442C" },
         handler: async (response) => {
           settled = true;
           try {
@@ -258,14 +283,15 @@ const CheckoutPage = () => {
 
   if (cartStatus !== "succeeded" && cartItems.length === 0) {
     return (
-      <p className="py-20 text-center text-gray-500">Loading your cart...</p>
+      <p className="py-20 text-center text-[#86806F]">Loading your cart...</p>
     );
   }
 
   if (cartItems.length === 0) return null;
 
   return (
-    <>
+    // <div className="bg-[#FBF8F2]">
+    <div>
       {/* ── Hero banner ──────────────────────────────────────────── */}
 
       <HeroBanner
@@ -281,24 +307,26 @@ const CheckoutPage = () => {
               id="checkout-form"
               onSubmit={handleSubmit}
               noValidate
-              className="space-y-5 rounded-2xl border border-gray-100 bg-white p-6"
+              className="space-y-6 border border-[#E3DFD2] bg-white p-8"
             >
-              <div className="flex items-center justify-between border-b border-gray-100 pb-4">
-                <h2 className="text-lg font-semibold text-[#202020]">
-                  Shipping Address
-                </h2>
-                <span className="text-xs font-medium uppercase tracking-wide text-gray-400">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Leaf size={16} className="text-[#16442C]" />
+                  <h2 className="font-medium text-xl text-[#201F1B]">
+                    Shipping Address
+                  </h2>
+                </div>
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-[#B4652F]">
                   Required
                 </span>
               </div>
+              <Perforation />
 
               <AddressMapPicker onAddressChange={handleMapAddressChange} />
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-6 sm:grid-cols-2">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-gray-500">
-                    Full Name
-                  </label>
+                  <FieldLabel>Full Name</FieldLabel>
                   <input
                     name="name"
                     value={address.name}
@@ -306,20 +334,14 @@ const CheckoutPage = () => {
                     onBlur={handleBlur}
                     placeholder="e.g. Priya Sharma"
                     required
-                    className={`w-full rounded-lg border px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:ring-2 ${
-                      fieldErrors.name
-                        ? "border-red-400 focus:border-red-400 focus:ring-red-100"
-                        : "border-gray-300 focus:border-[#0F6B3E] focus:ring-[#0F6B3E]/10"
-                    }`}
+                    className={underlineInput(fieldErrors.name)}
                   />
                   {fieldErrors.name ? (
                     <p className="text-xs text-red-600">{fieldErrors.name}</p>
                   ) : null}
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-gray-500">
-                    Phone Number
-                  </label>
+                  <FieldLabel>Phone Number</FieldLabel>
                   <input
                     name="phone"
                     value={address.phone}
@@ -329,11 +351,7 @@ const CheckoutPage = () => {
                     required
                     inputMode="numeric"
                     maxLength={10}
-                    className={`w-full rounded-lg border px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:ring-2 ${
-                      fieldErrors.phone
-                        ? "border-red-400 focus:border-red-400 focus:ring-red-100"
-                        : "border-gray-300 focus:border-[#0F6B3E] focus:ring-[#0F6B3E]/10"
-                    }`}
+                    className={underlineInput(fieldErrors.phone)}
                   />
                   {fieldErrors.phone ? (
                     <p className="text-xs text-red-600">{fieldErrors.phone}</p>
@@ -342,9 +360,7 @@ const CheckoutPage = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-gray-500">
-                  Address Line 1
-                </label>
+                <FieldLabel>Address Line 1</FieldLabel>
                 <input
                   name="line1"
                   value={address.line1}
@@ -352,11 +368,7 @@ const CheckoutPage = () => {
                   onBlur={handleBlur}
                   placeholder="House no., street, area"
                   required
-                  className={`w-full rounded-lg border px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:ring-2 ${
-                    fieldErrors.line1
-                      ? "border-red-400 focus:border-red-400 focus:ring-red-100"
-                      : "border-gray-300 focus:border-[#0F6B3E] focus:ring-[#0F6B3E]/10"
-                  }`}
+                  className={underlineInput(fieldErrors.line1)}
                 />
                 {fieldErrors.line1 ? (
                   <p className="text-xs text-red-600">{fieldErrors.line1}</p>
@@ -364,24 +376,20 @@ const CheckoutPage = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-gray-500">
-                  Address Line 2 (optional)
-                </label>
+                <FieldLabel>Address Line 2 (optional)</FieldLabel>
                 <input
                   name="line2"
                   value={address.line2}
                   onChange={handleChange}
                   onBlur={handleBlur}
                   placeholder="Landmark, apartment, etc."
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:border-[#0F6B3E] focus:ring-2 focus:ring-[#0F6B3E]/10"
+                  className={underlineInput(false)}
                 />
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-3">
+              <div className="grid gap-6 sm:grid-cols-3">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-gray-500">
-                    City
-                  </label>
+                  <FieldLabel>City</FieldLabel>
                   <input
                     name="city"
                     value={address.city}
@@ -389,20 +397,14 @@ const CheckoutPage = () => {
                     onBlur={handleBlur}
                     placeholder="City"
                     required
-                    className={`w-full rounded-lg border px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:ring-2 ${
-                      fieldErrors.city
-                        ? "border-red-400 focus:border-red-400 focus:ring-red-100"
-                        : "border-gray-300 focus:border-[#0F6B3E] focus:ring-[#0F6B3E]/10"
-                    }`}
+                    className={underlineInput(fieldErrors.city)}
                   />
                   {fieldErrors.city ? (
                     <p className="text-xs text-red-600">{fieldErrors.city}</p>
                   ) : null}
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-gray-500">
-                    State
-                  </label>
+                  <FieldLabel>State</FieldLabel>
                   <input
                     name="state"
                     value={address.state}
@@ -410,20 +412,14 @@ const CheckoutPage = () => {
                     onBlur={handleBlur}
                     placeholder="State"
                     required
-                    className={`w-full rounded-lg border px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:ring-2 ${
-                      fieldErrors.state
-                        ? "border-red-400 focus:border-red-400 focus:ring-red-100"
-                        : "border-gray-300 focus:border-[#0F6B3E] focus:ring-[#0F6B3E]/10"
-                    }`}
+                    className={underlineInput(fieldErrors.state)}
                   />
                   {fieldErrors.state ? (
                     <p className="text-xs text-red-600">{fieldErrors.state}</p>
                   ) : null}
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-gray-500">
-                    Pincode
-                  </label>
+                  <FieldLabel>Pincode</FieldLabel>
                   <input
                     name="pincode"
                     value={address.pincode}
@@ -433,11 +429,7 @@ const CheckoutPage = () => {
                     required
                     inputMode="numeric"
                     maxLength={6}
-                    className={`w-full rounded-lg border px-3 py-2.5 text-sm text-[#202020] outline-none transition-colors focus:ring-2 ${
-                      fieldErrors.pincode
-                        ? "border-red-400 focus:border-red-400 focus:ring-red-100"
-                        : "border-gray-300 focus:border-[#0F6B3E] focus:ring-[#0F6B3E]/10"
-                    }`}
+                    className={underlineInput(fieldErrors.pincode)}
                   />
                   {fieldErrors.pincode ? (
                     <p className="text-xs text-red-600">
@@ -447,16 +439,20 @@ const CheckoutPage = () => {
                 </div>
               </div>
 
-              <div className="space-y-2 border-t border-gray-100 pt-4">
-                <h2 className="text-lg font-semibold text-[#202020]">
-                  Payment Method
-                </h2>
+              <div className="space-y-3 pt-2">
+                <Perforation />
+                <div className="flex items-center gap-2 pt-2">
+                  <Leaf size={16} className="text-[#16442C]" />
+                  <h2 className="font-medium text-xl text-[#201F1B]">
+                    Payment Method
+                  </h2>
+                </div>
 
                 <label
-                  className={`flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 text-sm transition-colors ${
+                  className={`flex cursor-pointer items-center gap-3 border px-4 py-3.5 text-sm transition-colors ${
                     paymentMethod === "COD"
-                      ? "border-[#0F6B3E] bg-[#F4F9F6]"
-                      : "border-gray-200 hover:bg-gray-50"
+                      ? "border-[#16442C] bg-[#EEF1E6]"
+                      : "border-[#E3DFD2] hover:border-[#B8B2A0]"
                   }`}
                 >
                   <input
@@ -465,18 +461,18 @@ const CheckoutPage = () => {
                     value="COD"
                     checked={paymentMethod === "COD"}
                     onChange={() => setPaymentMethod("COD")}
-                    className="accent-[#0F6B3E]"
+                    className="accent-[#16442C]"
                   />
-                  <span className="font-medium text-[#202020]">
+                  <span className="font-medium text-[#201F1B]">
                     Cash on Delivery
                   </span>
                 </label>
 
                 <label
-                  className={`flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 text-sm transition-colors ${
+                  className={`flex cursor-pointer items-center gap-3 border px-4 py-3.5 text-sm transition-colors ${
                     paymentMethod === "Razorpay"
-                      ? "border-[#0F6B3E] bg-[#F4F9F6]"
-                      : "border-gray-200 hover:bg-gray-50"
+                      ? "border-[#16442C] bg-[#EEF1E6]"
+                      : "border-[#E3DFD2] hover:border-[#B8B2A0]"
                   }`}
                 >
                   <input
@@ -485,58 +481,62 @@ const CheckoutPage = () => {
                     value="Razorpay"
                     checked={paymentMethod === "Razorpay"}
                     onChange={() => setPaymentMethod("Razorpay")}
-                    className="accent-[#0F6B3E]"
+                    className="accent-[#16442C]"
                   />
-                  <span className="font-medium text-[#202020]">Pay Online</span>
-                  <span className="text-xs text-gray-400">
+                  <span className="font-medium text-[#201F1B]">Pay Online</span>
+                  <span className="text-xs text-[#86806F]">
                     Cards, UPI, Netbanking &amp; more
                   </span>
                 </label>
               </div>
 
               {error ? (
-                <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+                <p className="border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
                   {error}
                 </p>
               ) : null}
             </form>
 
-            <aside className="h-fit space-y-4 rounded-2xl border border-gray-100 bg-white p-6 lg:top-24">
-              <h2 className="text-lg font-semibold text-[#202020]">
-                Order Summary
-              </h2>
+            <aside className="h-fit space-y-5 border border-[#E3DFD2] bg-white p-7 lg:top-24">
+              <div className="flex items-center gap-2">
+                <Leaf size={16} className="text-[#16442C]" />
+                <h2 className="font-medium text-xl text-[#201F1B]">
+                  Order Summary
+                </h2>
+              </div>
+              <Perforation />
 
               <div className="max-h-64 space-y-3 overflow-y-auto pr-1 text-sm">
                 {cartItems.map((item) => (
                   <div
                     key={item.id}
-                    className="flex justify-between gap-3 text-gray-600"
+                    className="flex justify-between gap-3 text-[#5B564A]"
                   >
                     <span className="leading-snug">
                       {item.name}{" "}
-                      <span className="text-gray-400">
+                      <span className="text-[#86806F]">
                         ({item.variantLabel}) × {item.quantity}
                       </span>
                     </span>
-                    <span className="whitespace-nowrap font-medium text-[#202020]">
+                    <span className="whitespace-nowrap font-medium text-[#201F1B]">
                       ₹{(item.price * item.quantity).toLocaleString()}
                     </span>
                   </div>
                 ))}
               </div>
 
-              <hr className="border-gray-100" />
+              <Perforation />
 
               <div className="space-y-2">
-                <div className="flex justify-between text-sm text-gray-600">
+                <div className="flex justify-between text-sm text-[#5B564A]">
                   <span>Subtotal</span>
                   <span>₹{subtotal.toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between text-sm text-gray-600">
+                <div className="flex justify-between text-sm text-[#5B564A]">
                   <span>Shipping</span>
                   <span
                     className={
-                      shipping === 0 ? "font-medium text-[#0F6B3E]" : ""
+                      shipping === 0 ? "font-medium text-[#16442C]" : ""
                     }
                   >
                     {shipping === 0 ? "FREE" : `₹${shipping}`}
@@ -544,11 +544,11 @@ const CheckoutPage = () => {
                 </div>
               </div>
 
-              <hr className="border-gray-100" />
+              <Perforation />
 
-              <div className="flex justify-between text-lg font-semibold text-[#202020]">
+              <div className="flex justify-between font-medium text-lg text-[#201F1B]">
                 <span>Total</span>
-                <span className="text-[#047B22]">
+                <span className="text-[#16442C]">
                   ₹{total.toLocaleString()}
                 </span>
               </div>
@@ -557,7 +557,7 @@ const CheckoutPage = () => {
                 type="submit"
                 form="checkout-form"
                 disabled={submitting}
-                className="w-full rounded-xl bg-[#0F6B3E] px-6 py-3.5 font-semibold text-white transition-colors hover:bg-[#0d5c34] disabled:cursor-not-allowed disabled:opacity-60"
+                className="w-full rounded-full bg-[#16442C] px-6 py-3.5 text-sm font-semibold uppercase tracking-wide text-white transition-colors hover:bg-[#0E3220] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {submitting
                   ? "Processing..."
@@ -566,14 +566,14 @@ const CheckoutPage = () => {
                     : `Place Order — ₹${total.toLocaleString()}`}
               </button>
 
-              <p className="text-center text-xs text-gray-400">
+              <p className="text-center text-xs text-[#86806F]">
                 By placing this order you agree to our terms of service.
               </p>
             </aside>
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 };
 

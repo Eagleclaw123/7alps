@@ -41,13 +41,13 @@ const GlobalTrade = () => {
           transition={{ duration: 0.8 }}
         >
           <div className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-[#047B22]" />
-            <p className="font-ibm-mono text-[14px] font-semibold text-[#047B22] sm:text-[16px] md:text-[18px]">
+            <div className="h-2 w-2 rounded-full bg-[#16442C]" />
+            <p className="font-ibm-mono text-[14px] font-semibold text-[#16442C] sm:text-[16px] md:text-[18px]">
               Global trade, in brief
             </p>
           </div>
 
-          <h2 className="text-[24px] font-semibold leading-tight text-black sm:text-[30px] md:text-[38px] xl:text-[42px]">
+          <h2 className="font-medium text-[26px] leading-tight text-[#201F1B] sm:text-[32px] md:text-[42px] xl:text-[46px]">
             We partner with businesses worldwide to meet the rising demand for
             natural and sustainable wellness solutions.
           </h2>
@@ -62,26 +62,26 @@ const GlobalTrade = () => {
               return (
                 <motion.div
                   key={card.number}
-                  className="flex flex-col justify-between rounded-xl border border-gray-200 bg-white p-5 sm:p-6"
+                  className="flex flex-col justify-between border border-[#E3DFD2] bg-white p-5 transition-colors hover:border-[#16442C] sm:p-6"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.6, delay: i * 0.1 }}
                 >
                   <div>
-                    <p className="font-ibm-mono text-sm font-semibold text-[#047B22]">
+                    <p className="font-ibm-mono text-sm font-semibold text-[#16442C]">
                       {card.number}
                     </p>
                   </div>
 
                   <div className="mt-6 space-y-2">
-                    <div className="mt-4 flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-gray-50">
-                      <Icon className="h-5 w-5 text-gray-400" />
+                    <div className="mt-4 flex h-10 w-10 items-center justify-center border border-[#E3DFD2] bg-[#EEF1E6]">
+                      <Icon className="h-5 w-5 text-[#16442C]" />
                     </div>
-                    <h3 className="text-base font-semibold text-black sm:text-lg">
+                    <h3 className="font-medium text-base text-[#201F1B] sm:text-lg">
                       {card.title}
                     </h3>
-                    <p className="text-sm leading-5 text-gray-600">
+                    <p className="text-sm leading-5 text-[#86806F]">
                       {card.description}
                     </p>
                   </div>
@@ -92,7 +92,7 @@ const GlobalTrade = () => {
 
           {/* Image with caption */}
           <motion.div
-            className="relative overflow-hidden rounded-xl"
+            className="relative overflow-hidden border border-[#E3DFD2]"
             initial={{ opacity: 0, scale: 0.97 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
@@ -105,8 +105,8 @@ const GlobalTrade = () => {
             />
 
             {/* Caption overlay */}
-            <div className="absolute bottom-5 left-5 right-5 rounded-xl bg-white/90 p-4 backdrop-blur-sm sm:bottom-6 sm:left-6 sm:right-6 sm:p-5">
-              <p className="text-base font-semibold leading-snug text-black sm:text-lg">
+            <div className="absolute bottom-5 left-5 right-5 border border-[#E3DFD2] bg-white/90 p-4 backdrop-blur-sm sm:bottom-6 sm:left-6 sm:right-6 sm:p-5">
+              <p className="font-medium text-base leading-snug text-[#201F1B] sm:text-lg">
                 We've built 7ALP for borders from day one — single-origin
                 sourcing, lab-tested batches.
               </p>

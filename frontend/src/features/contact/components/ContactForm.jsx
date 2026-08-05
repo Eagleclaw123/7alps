@@ -1,9 +1,6 @@
 import { useState } from "react";
-import ContactButton from "./ContactButton";
-import ContactInput from "./ContactInput";
-import ContactTextArea from "./ContactTextArea";
-import { FiPhone } from "react-icons/fi";
-import { CiMail } from "react-icons/ci";
+import { FiCheckCircle } from "react-icons/fi";
+import { Leaf } from "lucide-react";
 import { motion } from "framer-motion";
 
 const initialFormData = {
@@ -16,6 +13,9 @@ const initialFormData = {
   message: "",
 };
 
+// Only fullName and phone are mandatory now. Every other field is optional —
+// but if the person does fill one in (e.g. email), it's still validated for
+// a sensible format rather than accepted as-is.
 const validators = {
   fullName: (value) => {
     if (!value.trim()) return "Full name is required.";
@@ -25,7 +25,7 @@ const validators = {
     return "";
   },
   email: (value) => {
-    if (!value.trim()) return "Email is required.";
+    if (!value.trim()) return "";
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()))
       return "Enter a valid email address.";
     return "";
@@ -37,17 +37,10 @@ const validators = {
     return "";
   },
   companyName: () => "",
-  productInterest: (value) => {
-    if (!value.trim())
-      return "Please tell us what product you're interested in.";
-    return "";
-  },
-  quantityRequirement: (value) => {
-    if (!value.trim()) return "Please share your quantity requirement.";
-    return "";
-  },
+  productInterest: () => "",
+  quantityRequirement: () => "",
   message: (value) => {
-    if (!value.trim()) return "Message is required.";
+    if (!value.trim()) return "";
     if (value.trim().length < 10)
       return "Message should be at least 10 characters.";
     return "";
@@ -55,17 +48,34 @@ const validators = {
 };
 
 const FIELD_CONFIG = [
-  { name: "fullName", label: "Full Name", type: "text" },
-  { name: "email", label: "Email", type: "email" },
-  { name: "phone", label: "Phone Number", type: "text" },
-  { name: "companyName", label: "Company Name", type: "text" },
-  { name: "productInterest", label: "Product Interest", type: "text" },
+  { name: "fullName", label: "Full Name", type: "text", required: true },
+  { name: "email", label: "Email", type: "email", required: false },
+  { name: "phone", label: "Phone Number", type: "text", required: true },
+  { name: "companyName", label: "Company Name", type: "text", required: false },
+  {
+    name: "productInterest",
+    label: "Product Interest",
+    type: "text",
+    required: false,
+  },
   {
     name: "quantityRequirement",
     label: "Quantity Requirement",
     type: "text",
+    required: false,
   },
 ];
+
+/* Tracked-out field label, matches the profile page's label system */
+const FieldLabel = ({ required, children }) => (
+  <label className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#86806F] mb-1.5">
+    {children}
+    {required ? <span className="text-[#B4652F]"> *</span> : null}
+  </label>
+);
+
+const underlineInput =
+  "border-b bg-transparent py-2 text-[15px] text-[#201F1B] outline-none transition-colors focus:border-[#16442C] placeholder:text-[#B8B2A0]";
 
 const ContactForm = () => {
   const [formData, setFormData] = useState(initialFormData);
@@ -150,7 +160,7 @@ const ContactForm = () => {
 
   return (
     <motion.form
-      className="mt-12"
+      className="mt-12 border border-[#E3DFD2] bg-white p-8"
       variants={containerVariants}
       initial="hidden"
       whileInView="visible"
@@ -158,23 +168,34 @@ const ContactForm = () => {
       onSubmit={handleSubmit}
       noValidate
     >
-      {" "}
+      <div className="mb-6 flex items-center gap-2">
+        <Leaf size={16} className="text-[#16442C]" />
+        <h4 className="font-medium text-xl text-[#201F1B]">Request a Quote</h4>
+      </div>
+      <div
+        className="mb-8 h-px w-full"
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(to right, #C9C2AE 0, #C9C2AE 6px, transparent 6px, transparent 13px)",
+        }}
+      />
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {FIELD_CONFIG.map(({ name, label, type }) => (
+        {FIELD_CONFIG.map(({ name, label, type, required }) => (
           <motion.div
             className="flex flex-col"
             variants={itemVariants}
             key={name}
           >
-            <label className="text-md mb-1">{label}</label>
+            <FieldLabel required={required}>{label}</FieldLabel>
             <input
               type={type}
               name={name}
               value={formData[name]}
               onChange={handleChange}
               onBlur={handleBlur}
-              className={`border-b focus:outline-none py-2 ${
-                fieldErrors[name] ? "border-red-500" : "border-gray-500"
+              className={`${underlineInput} ${
+                fieldErrors[name] ? "border-red-500" : "border-[#E3DFD2]"
               }`}
             />
             {fieldErrors[name] ? (
@@ -189,15 +210,15 @@ const ContactForm = () => {
           className="flex flex-col sm:col-span-2"
           variants={itemVariants}
         >
-          <label className="text-md mb-1">Message</label>
+          <FieldLabel required={false}>Message</FieldLabel>
           <input
             type="text"
             name="message"
             value={formData.message}
             onChange={handleChange}
             onBlur={handleBlur}
-            className={`border-b focus:outline-none py-2 ${
-              fieldErrors.message ? "border-red-500" : "border-gray-500"
+            className={`${underlineInput} ${
+              fieldErrors.message ? "border-red-500" : "border-[#E3DFD2]"
             }`}
           />
           {fieldErrors.message ? (
@@ -207,15 +228,18 @@ const ContactForm = () => {
           ) : null}
         </motion.div>
       </div>
+
       {submitted ? (
-        <p className="mt-6 text-sm text-[#1C6A00]">
+        <p className="mt-6 flex items-center gap-2 text-sm font-medium text-[#16442C]">
+          <FiCheckCircle size={16} />
           Thanks! Your quote request has been submitted.
         </p>
       ) : null}
+
       <div className="mt-12 flex">
         <button
           type="submit"
-          className="bg-[#1C6A00] text-white px-8 py-3 rounded"
+          className="bg-[#16442C] text-white px-8 py-3 text-sm font-semibold uppercase tracking-wide transition-colors hover:bg-[#0E3220]"
         >
           Submit Quote
         </button>
