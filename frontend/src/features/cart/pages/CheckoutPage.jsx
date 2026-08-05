@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import {
   clearCart,
@@ -10,6 +10,7 @@ import {
   selectSubtotal,
   selectTotal,
 } from "../../../store/slices/cartSlice";
+import { selectCustomer } from "../../../store/slices/authSlice";
 import { createOrder } from "../../../shared/services/order.service";
 import {
   createRazorpayOrder,
@@ -87,6 +88,12 @@ const FieldLabel = ({ children }) => (
   </label>
 );
 
+// Mirrors the backend's free-shipping rule (orderController.js) — used only
+// to display the Buy Now summary, since the backend always recomputes the
+// authoritative charge itself and never trusts a client-supplied amount.
+const FREE_SHIPPING_THRESHOLD = 999;
+const SHIPPING_FEE = 99;
+
 const underlineInput = (hasError) =>
   `w-full border-0 border-b bg-transparent px-0 py-2 text-[15px] text-[#201F1B] outline-none transition-colors placeholder:text-[#B8B2A0] ${
     hasError
@@ -97,11 +104,32 @@ const underlineInput = (hasError) =>
 const CheckoutPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+  const customer = useSelector(selectCustomer);
+
+  // Buy Now arrives via navigation state with exactly one item and never
+  // touches the persisted cart — checkout operates entirely on that item
+  // instead of the cart whenever it's present.
+  const buyNowItems = location.state?.buyNow?.items || null;
+  const isBuyNow = Boolean(buyNowItems);
+
   const cartItems = useSelector(selectCartItems);
   const cartStatus = useSelector(selectCartStatus);
-  const subtotal = useSelector(selectSubtotal);
-  const shipping = useSelector(selectShipping);
-  const total = useSelector(selectTotal);
+  const cartSubtotal = useSelector(selectSubtotal);
+  const cartShipping = useSelector(selectShipping);
+  const cartTotal = useSelector(selectTotal);
+
+  const displayItems = isBuyNow ? buyNowItems : cartItems;
+  const subtotal = isBuyNow
+    ? buyNowItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    : cartSubtotal;
+  const shipping = isBuyNow
+    ? subtotal > 0 && subtotal <= FREE_SHIPPING_THRESHOLD
+      ? SHIPPING_FEE
+      : 0
+    : cartShipping;
+  const total = isBuyNow ? subtotal + shipping : cartTotal;
+
   const [address, setAddress] = useState(initialAddress);
   const [paymentMethod, setPaymentMethod] = useState("COD");
   const [submitting, setSubmitting] = useState(false);
@@ -112,6 +140,30 @@ const CheckoutPage = () => {
   // it immediately — a state flag wouldn't apply until the next render, by
   // which point the effect may already have fired once more with stale info.
   const orderJustPlacedRef = useRef(false);
+  // Only auto-fill once — a later, unrelated re-render with a fresh `customer`
+  // reference shouldn't clobber address edits the customer has already made.
+  const addressPrefilledRef = useRef(false);
+
+  // Pre-fills the form from the customer's saved default address (falling
+  // back to their first address) the first time it's available.
+  useEffect(() => {
+    if (addressPrefilledRef.current || !customer?.addresses?.length) return;
+
+    const defaultAddress =
+      customer.addresses.find((a) => a.isDefault) || customer.addresses[0];
+
+    addressPrefilledRef.current = true;
+    setAddress((prev) => ({
+      ...prev,
+      name: customer.name || prev.name,
+      phone: defaultAddress.phone || customer.mobile || prev.phone,
+      line1: defaultAddress.line1 || prev.line1,
+      line2: defaultAddress.line2 || prev.line2,
+      city: defaultAddress.city || prev.city,
+      state: defaultAddress.state || prev.state,
+      pincode: defaultAddress.pincode || prev.pincode,
+    }));
+  }, [customer]);
 
   const handleChange = ({ target: { name, value } }) => {
     setAddress((prev) => ({ ...prev, [name]: value }));
@@ -167,7 +219,9 @@ const CheckoutPage = () => {
   };
 
   const payWithRazorpay = async () => {
-    const { data: orderData } = await createRazorpayOrder();
+    const { data: orderData } = await createRazorpayOrder(
+      isBuyNow ? buyNowItems : undefined,
+    );
     const { razorpayOrderId, amount, currency, keyId } = orderData.data;
 
     const Razorpay = await loadRazorpayScript();
@@ -198,6 +252,7 @@ const CheckoutPage = () => {
               razorpayPaymentId: response.razorpay_payment_id,
               razorpaySignature: response.razorpay_signature,
               shippingAddress: address,
+              ...(isBuyNow ? { items: buyNowItems } : {}),
             });
             resolve(verifyData);
           } catch (err) {
@@ -237,7 +292,7 @@ const CheckoutPage = () => {
       if (paymentMethod === "Razorpay") {
         await payWithRazorpay();
       } else {
-        await createOrder(address);
+        await createOrder(address, isBuyNow ? buyNowItems : undefined);
       }
 
       // Set before navigating/clearing: React can batch the route change and
@@ -249,10 +304,14 @@ const CheckoutPage = () => {
 
       navigate("/customer/orders", { state: { justPlaced: true } });
 
-      // The backend already cleared the cart as part of placing the order —
-      // sync local state to match so the header badge doesn't show stale items
-      // until a hard refresh.
-      dispatch(clearCart());
+      // Buy Now never touched the cart, so there's nothing to sync — clearing
+      // it here would wipe out whatever the customer actually has in their
+      // cart. For a real cart checkout, the backend already cleared the
+      // server-side cart as part of placing the order; sync local state to
+      // match so the header badge doesn't show stale items until a refresh.
+      if (!isBuyNow) {
+        dispatch(clearCart());
+      }
     } catch (err) {
       if (err.message === "Payment cancelled") {
         setError("Payment was cancelled.");
@@ -269,6 +328,10 @@ const CheckoutPage = () => {
   };
 
   useEffect(() => {
+    // Buy Now doesn't care about cart state at all — this guard exists purely
+    // for the "arrived at /checkout with nothing to check out" cart case.
+    if (isBuyNow) return;
+
     // Skip if we just placed an order — the cart is legitimately empty now
     // because of that, not because the user has nothing to check out.
     if (orderJustPlacedRef.current) return;
@@ -279,15 +342,19 @@ const CheckoutPage = () => {
     if (cartStatus === "succeeded" && cartItems.length === 0) {
       navigate("/cart", { replace: true });
     }
-  }, [cartItems.length, cartStatus, navigate]);
+  }, [isBuyNow, cartItems.length, cartStatus, navigate]);
 
-  if (cartStatus !== "succeeded" && cartItems.length === 0) {
-    return (
-      <p className="py-20 text-center text-[#86806F]">Loading your cart...</p>
-    );
+  if (!isBuyNow) {
+    if (cartStatus !== "succeeded" && cartItems.length === 0) {
+      return (
+        <p className="py-20 text-center text-[#86806F]">
+          Loading your cart...
+        </p>
+      );
+    }
+
+    if (cartItems.length === 0) return null;
   }
-
-  if (cartItems.length === 0) return null;
 
   return (
     // <div className="bg-[#FBF8F2]">
@@ -498,16 +565,23 @@ const CheckoutPage = () => {
             </form>
 
             <aside className="h-fit space-y-5 border border-[#E3DFD2] bg-white p-7 lg:top-24">
-              <div className="flex items-center gap-2">
-                <Leaf size={16} className="text-[#16442C]" />
-                <h2 className="font-medium text-xl text-[#201F1B]">
-                  Order Summary
-                </h2>
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Leaf size={16} className="text-[#16442C]" />
+                  <h2 className="font-medium text-xl text-[#201F1B]">
+                    Order Summary
+                  </h2>
+                </div>
+                {isBuyNow ? (
+                  <span className="rounded-full bg-[#EEF1E6] px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-[#16442C]">
+                    Buy Now
+                  </span>
+                ) : null}
               </div>
               <Perforation />
 
               <div className="max-h-64 space-y-3 overflow-y-auto pr-1 text-sm">
-                {cartItems.map((item) => (
+                {displayItems.map((item) => (
                   <div
                     key={item.id}
                     className="flex justify-between gap-3 text-[#5B564A]"

@@ -5,6 +5,9 @@ const orderController = require('../controllers/orderController');
 const b2bController = require('../controllers/b2bController');
 const quoteController = require('../controllers/quoteController');
 const reviewController = require('../controllers/reviewController');
+const settingsController = require('../controllers/settingsController');
+const contactController = require('../controllers/contactController');
+const newsletterController = require('../controllers/newsletterController');
 
 const router = express.Router();
 
@@ -12,6 +15,11 @@ router.use(authController.protect);
 router.use(authController.restrictTo('Admin', 'SuperAdmin'));
 
 router.get('/dashboard/stats', adminController.getDashboardStats);
+
+router
+  .route('/settings')
+  .get(settingsController.getSettings)
+  .patch(settingsController.updateSettings);
 
 router.get('/orders', orderController.getAllOrders);
 router.get('/orders/:id', orderController.getOrder);
@@ -33,7 +41,13 @@ router.get('/reviews', reviewController.getAllReviews);
 router.patch('/reviews/:id/status', reviewController.updateReviewStatus);
 router.delete('/reviews/:id', reviewController.deleteReview);
 
+router.get('/contacts', contactController.getAllContacts);
+router.patch('/contacts/:id/status', contactController.updateContactStatus);
+router.delete('/contacts/:id', contactController.deleteContact);
+
 router.get('/customers', adminController.getAllCustomers);
+
+router.get('/newsletter', newsletterController.getAllSubscribers);
 
 router.get('/', adminController.getAllAdmins);
 router.get('/:id', adminController.getAdmin);

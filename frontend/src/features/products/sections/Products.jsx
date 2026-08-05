@@ -91,11 +91,13 @@ const Products = () => {
       return matchesSearch && matchesCategory && matchesPrice;
     })
     .sort((a, b) => {
+      // ProductRating is always a number (normalizeProduct defaults to 0), so
+      // this is a plain numeric sort — no more NaN from products with no rating yet.
       if (ratingSort === "asc") {
-        return parseFloat(a.ProductRating) - parseFloat(b.ProductRating);
+        return a.ProductRating - b.ProductRating;
       }
       if (ratingSort === "desc") {
-        return parseFloat(b.ProductRating) - parseFloat(a.ProductRating);
+        return b.ProductRating - a.ProductRating;
       }
       return 0;
     });

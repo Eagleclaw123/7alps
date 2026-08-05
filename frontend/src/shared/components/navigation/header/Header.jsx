@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { fetchCart, selectCartItems } from "../../../../store/slices/cartSlice";
 import { fetchCustomerStatus } from "../../../../store/slices/authSlice";
+import { fetchWishlist } from "../../../../store/slices/wishlistSlice";
 import DesktopNav from "../components/DesktopNav";
 import MobileSidebar from "../components/MobileSidebar";
 import MobileToggle from "../components/MobileToggle";
@@ -17,6 +18,7 @@ const Header = () => {
   useEffect(() => {
     dispatch(fetchCart());
     dispatch(fetchCustomerStatus());
+    dispatch(fetchWishlist());
   }, [dispatch]);
 
   return (

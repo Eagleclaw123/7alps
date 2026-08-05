@@ -245,7 +245,14 @@ const OrderBuilder = () => {
               allows today
             </div>
 
-            <button className="mt-5 w-full rounded-full bg-[#0E2C16] py-3 text-sm font-semibold text-white transition hover:bg-[#163b1f] sm:text-base">
+            <button
+              onClick={() =>
+                document
+                  .getElementById("b2b-contact")
+                  ?.scrollIntoView({ behavior: "smooth" })
+              }
+              className="mt-5 w-full rounded-full bg-[#0E2C16] py-3 text-sm font-semibold text-white transition hover:bg-[#163b1f] sm:text-base"
+            >
               Request a quote
             </button>
           </div>

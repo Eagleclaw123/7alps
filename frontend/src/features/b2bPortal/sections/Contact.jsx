@@ -3,6 +3,8 @@ import { FiPhone } from "react-icons/fi";
 import { CiMail } from "react-icons/ci";
 import { motion } from "framer-motion";
 
+import { submitContactForm } from "../../../shared/services/contact.service";
+
 const containerVariants = {
   hidden: {},
   visible: {
@@ -93,6 +95,8 @@ const Contact = () => {
   const [fieldErrors, setFieldErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const handleChange = ({ target: { name, value } }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -128,24 +132,34 @@ const Contact = () => {
     return Object.values(nextErrors).every((msg) => !msg);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitted(false);
+    setSubmitError("");
 
     if (!validateAll()) {
       return;
     }
 
-    // TODO: API Integration
-    console.log("Form Submitted", formData);
-    setSubmitted(true);
-    setFormData(initialFormData);
-    setTouched({});
-    setFieldErrors({});
+    setSubmitting(true);
+    try {
+      await submitContactForm(formData);
+      setSubmitted(true);
+      setFormData(initialFormData);
+      setTouched({});
+      setFieldErrors({});
+    } catch (err) {
+      setSubmitError(
+        err?.response?.data?.message ||
+          "Something went wrong submitting your request. Please try again.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <section className="px-6 xl:px-0 my-16">
+    <section id="b2b-contact" className="px-6 xl:px-0 my-16 scroll-mt-24">
       <div className="container max-w-7xl mx-auto">
         <motion.div
           className="flex flex-col xl:flex-row justify-between xl:items-end gap-8"
@@ -243,12 +257,18 @@ const Contact = () => {
               Thanks! Your quote request has been submitted.
             </p>
           ) : null}
+          {submitError ? (
+            <p className="mt-6 text-center text-sm text-red-600">
+              {submitError}
+            </p>
+          ) : null}
           <div className="mt-12 flex justify-center">
             <button
               type="submit"
-              className="bg-[#1C6A00] text-white px-8 py-3 rounded"
+              disabled={submitting}
+              className="bg-[#1C6A00] text-white px-8 py-3 rounded disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Submit Quote
+              {submitting ? "Submitting..." : "Submit Quote"}
             </button>
           </div>
         </motion.form>

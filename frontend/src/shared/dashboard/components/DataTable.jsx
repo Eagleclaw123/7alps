@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { CiSearch } from "react-icons/ci";
-import { FiChevronDown } from "react-icons/fi";
+import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 import Pagination from "../../components/ui/Pagination";
 
 /**
@@ -9,13 +9,17 @@ import Pagination from "../../components/ui/Pagination";
  * (search by text, filter by one field like status/category/type, paginate the rest).
  *
  * @param {object[]} data - Full row data (unfiltered).
- * @param {object[]} columns - [{ key, header, render?: (row) => node, className? }]
+ * @param {object[]} columns - [{ key, header, render?: (row) => node, className?,
+ *   sortable?: boolean, sortValue?: (row) => string|number }]
  *   `render` is optional; if omitted, `row[key]` is shown as-is.
+ *   `sortable` opts a column into click-to-sort headers; `sortValue` (defaults to
+ *   `row[key]`) supplies the value actually compared, useful when `render` returns JSX.
  * @param {(row: object) => string|number} rowKey - Returns a unique key for a row.
  * @param {string[]} [searchKeys] - Row fields to match against the search box (case-insensitive substring).
  * @param {string} [searchPlaceholder="Search"]
  * @param {object[]} [filters] - Optional dropdown filters:
  *   [{ field, label, options: string[] (first should be "All" or equivalent) }]
+ * @param {{ key: string, dir: "asc"|"desc" }} [defaultSort] - Initial sort, if any sortable column is set.
  * @param {number} [pageSize=5]
  * @param {string} [emptyMessage="No results match this filter."]
  * @param {boolean} [showResultsCount=true] - Show "Showing X-Y of Z results" in the pagination bar.
@@ -27,6 +31,7 @@ const DataTable = ({
   searchKeys = [],
   searchPlaceholder = "Search",
   filters = [],
+  defaultSort = null,
   pageSize = 5,
   emptyMessage = "No results match this filter.",
   showResultsCount = true,
@@ -36,6 +41,7 @@ const DataTable = ({
     Object.fromEntries(filters.map((f) => [f.field, f.options[0]])),
   );
   const [openFilterField, setOpenFilterField] = useState(null);
+  const [sort, setSort] = useState(defaultSort);
   const [page, setPage] = useState(1);
 
   const filtered = useMemo(() => {
@@ -58,14 +64,38 @@ const DataTable = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, search, filterValues, searchKeys, filters]);
 
-  // Jump back to page 1 whenever search or any filter changes the result set.
+  const sorted = useMemo(() => {
+    if (!sort) return filtered;
+
+    const column = columns.find((c) => c.key === sort.key);
+    const getValue = column?.sortValue || ((row) => row[sort.key]);
+
+    return [...filtered].sort((a, b) => {
+      const av = getValue(a);
+      const bv = getValue(b);
+      if (av === bv) return 0;
+      const result = av > bv ? 1 : -1;
+      return sort.dir === "asc" ? result : -result;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filtered, sort, columns]);
+
+  const toggleSort = (key) => {
+    setSort((prev) => {
+      if (!prev || prev.key !== key) return { key, dir: "desc" };
+      if (prev.dir === "desc") return { key, dir: "asc" };
+      return null;
+    });
+  };
+
+  // Jump back to page 1 whenever search, a filter, or the sort changes the result set/order.
   useEffect(() => {
     setPage(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, JSON.stringify(filterValues)]);
+  }, [search, JSON.stringify(filterValues), sort?.key, sort?.dir]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-  const pagedRows = filtered.slice((page - 1) * pageSize, page * pageSize);
+  const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
+  const pagedRows = sorted.slice((page - 1) * pageSize, page * pageSize);
 
   return (
     <div>
@@ -134,8 +164,8 @@ const DataTable = ({
         </div>
       )}
 
-      {/* Table */}
-      <div className="mt-5 overflow-x-auto">
+      {/* Table — desktop/tablet */}
+      <div className="mt-5 hidden overflow-x-auto md:block">
         <table className="w-full min-w-[680px] border-collapse text-sm">
           <thead>
             <tr className="border-b border-gray-100 text-left text-gray-400">
@@ -144,7 +174,28 @@ const DataTable = ({
                   key={col.key}
                   className={`py-3 pr-4 font-medium ${col.className || ""}`}
                 >
-                  {col.header}
+                  {col.sortable ? (
+                    <button
+                      type="button"
+                      onClick={() => toggleSort(col.key)}
+                      className={`flex items-center gap-1 transition hover:text-gray-600 ${
+                        sort?.key === col.key ? "text-[#047B22]" : ""
+                      }`}
+                    >
+                      {col.header}
+                      {sort?.key === col.key ? (
+                        sort.dir === "asc" ? (
+                          <FiChevronUp size={14} />
+                        ) : (
+                          <FiChevronDown size={14} />
+                        )
+                      ) : (
+                        <FiChevronDown size={14} className="text-gray-300" />
+                      )}
+                    </button>
+                  ) : (
+                    col.header
+                  )}
                 </th>
               ))}
             </tr>
@@ -166,7 +217,7 @@ const DataTable = ({
               </tr>
             ))}
 
-            {filtered.length === 0 && (
+            {sorted.length === 0 && (
               <tr>
                 <td
                   colSpan={columns.length}
@@ -180,12 +231,53 @@ const DataTable = ({
         </table>
       </div>
 
-      {filtered.length > 0 && (
+      {/* Cards — mobile. First column is the card's title; the rest render as
+          label/value rows so nothing gets cut off or needs horizontal scroll. */}
+      <div className="mt-5 space-y-3 md:hidden">
+        {pagedRows.length === 0 ? (
+          <p className="py-10 text-center text-gray-400">{emptyMessage}</p>
+        ) : (
+          pagedRows.map((row) => {
+            const [titleCol, ...restCols] = columns;
+            return (
+              <div
+                key={rowKey(row)}
+                className="rounded-xl border border-gray-100 p-4"
+              >
+                <div className="mb-1 text-sm font-semibold text-[#202020]">
+                  {titleCol.render ? titleCol.render(row) : row[titleCol.key]}
+                </div>
+                <div className="divide-y divide-gray-50">
+                  {restCols.map((col) => (
+                    <div
+                      key={col.key}
+                      className="flex items-center justify-between gap-3 py-2 text-sm"
+                    >
+                      {col.header ? (
+                        <span className="flex-shrink-0 text-gray-400">
+                          {col.header}
+                        </span>
+                      ) : null}
+                      <span
+                        className={`font-medium text-[#202020] ${col.header ? "text-right" : "w-full"}`}
+                      >
+                        {col.render ? col.render(row) : row[col.key]}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {sorted.length > 0 && (
         <Pagination
           currentPage={page}
           totalPages={totalPages}
           onPageChange={setPage}
-          totalResults={showResultsCount ? filtered.length : undefined}
+          totalResults={showResultsCount ? sorted.length : undefined}
           perPage={pageSize}
         />
       )}

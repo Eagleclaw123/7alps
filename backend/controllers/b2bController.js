@@ -4,9 +4,21 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 
 // Builds a Map of b2bMember id -> { totalOrders, totalSales } from non-cancelled B2B orders.
-const getStatsByMember = async () => {
+// `totalSales` is each member's "earnings" — it's only ever non-zero from Orders,
+// and an Order only exists once admin has approved that member's quote, so a
+// quote's value is attributed to its member automatically at approval time.
+// Optionally scoped to a period (e.g. one month) via dateFrom/dateTo.
+const getStatsByMember = async ({ dateFrom, dateTo } = {}) => {
+  const match = { source: 'B2B', status: { $ne: 'Cancelled' } };
+
+  if (dateFrom || dateTo) {
+    match.createdAt = {};
+    if (dateFrom) match.createdAt.$gte = new Date(dateFrom);
+    if (dateTo) match.createdAt.$lte = new Date(dateTo);
+  }
+
   const stats = await Order.aggregate([
-    { $match: { source: 'B2B', status: { $ne: 'Cancelled' } } },
+    { $match: match },
     {
       $group: {
         _id: '$b2bMember',
@@ -42,9 +54,12 @@ exports.createB2BMember = catchAsync(async (req, res, next) => {
 });
 
 // GET /api/v1/admin/b2b
+// Supports ?dateFrom=2026-08-01&dateTo=2026-08-31 to scope each member's
+// order count and earnings to a specific period (e.g. one month).
 exports.getAllB2BMembers = catchAsync(async (req, res, next) => {
+  const { dateFrom, dateTo } = req.query;
   const members = await B2BMember.find().select('+active').sort('-createdAt');
-  const statsByMember = await getStatsByMember();
+  const statsByMember = await getStatsByMember({ dateFrom, dateTo });
 
   const membersWithStats = members.map((member) => {
     const stats = statsByMember.get(member._id.toString()) || { totalOrders: 0, totalSales: 0 };

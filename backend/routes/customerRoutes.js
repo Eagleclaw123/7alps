@@ -4,6 +4,7 @@ const cartController = require('../controllers/cartController');
 const orderController = require('../controllers/orderController');
 const reviewController = require('../controllers/reviewController');
 const paymentController = require('../controllers/paymentController');
+const wishlistController = require('../controllers/wishlistController');
 
 const router = express.Router();
 
@@ -31,6 +32,11 @@ router.get('/orders/:id', orderController.getMyOrder);
 
 // Reviews
 router.route('/reviews').get(reviewController.getMyReviews).post(reviewController.createReview);
+
+// Wishlist
+router.get('/wishlist', wishlistController.getWishlist);
+router.post('/wishlist/:productId', wishlistController.addToWishlist);
+router.delete('/wishlist/:productId', wishlistController.removeFromWishlist);
 
 // Payments (Razorpay)
 router.post('/payments/razorpay-order', paymentController.createRazorpayOrder);

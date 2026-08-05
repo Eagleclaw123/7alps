@@ -41,6 +41,24 @@ const initialMemberForm = {
 
 const PAGE_SIZE = 10;
 
+// "2026-08" -> the first millisecond of Aug 1 through the last millisecond of Aug 31.
+const monthToDateRange = (monthStr) => {
+  if (!monthStr) return {};
+  const [year, month] = monthStr.split("-").map(Number);
+  const dateFrom = new Date(year, month - 1, 1);
+  const dateTo = new Date(year, month, 0, 23, 59, 59, 999);
+  return { dateFrom: dateFrom.toISOString(), dateTo: dateTo.toISOString() };
+};
+
+const formatMonthLabel = (monthStr) => {
+  if (!monthStr) return null;
+  const [year, month] = monthStr.split("-").map(Number);
+  return new Date(year, month - 1, 1).toLocaleDateString("en-IN", {
+    month: "short",
+    year: "numeric",
+  });
+};
+
 const MembersTab = () => {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -48,17 +66,19 @@ const MembersTab = () => {
   const [formData, setFormData] = useState(initialMemberForm);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [monthFilter, setMonthFilter] = useState(""); // "" = all-time
 
   const loadMembers = () => {
     setLoading(true);
-    getB2BMembers()
+    getB2BMembers(monthToDateRange(monthFilter))
       .then(({ data }) => setMembers(data?.data?.members || []))
       .finally(() => setLoading(false));
   };
 
   useEffect(() => {
     loadMembers();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [monthFilter]);
 
   const handleChange = ({ target: { name, value } }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -102,11 +122,19 @@ const MembersTab = () => {
       header: "Business",
       render: (m) => m.businessName || "—",
     },
-    { key: "totalOrders", header: "Orders", render: (m) => m.totalOrders || 0 },
+    {
+      key: "totalOrders",
+      header: "Orders",
+      render: (m) => m.totalOrders || 0,
+      sortable: true,
+      sortValue: (m) => m.totalOrders || 0,
+    },
     {
       key: "totalSales",
-      header: "Total Sales",
+      header: "Earnings",
       render: (m) => `₹${(m.totalSales || 0).toLocaleString()}`,
+      sortable: true,
+      sortValue: (m) => m.totalSales || 0,
     },
     {
       key: "active",
@@ -132,26 +160,60 @@ const MembersTab = () => {
         />
         <StatCard
           icon={<FiFileText size={20} />}
-          label="Total Bulk Orders"
+          label={
+            monthFilter
+              ? `Bulk Orders — ${formatMonthLabel(monthFilter)}`
+              : "Total Bulk Orders"
+          }
           value={totalOrders}
         />
         <StatCard
           icon={<FiDollarSign size={20} />}
-          label="Total B2B Sales"
+          label={
+            monthFilter
+              ? `Earnings — ${formatMonthLabel(monthFilter)}`
+              : "Total B2B Earnings"
+          }
           value={`₹${totalSales.toLocaleString()}`}
         />
       </div>
 
       <div className="rounded-2xl border border-gray-100 bg-white p-4 sm:p-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-lg font-semibold text-[#202020]">B2B Members</h2>
-          <button
-            onClick={() => setFormOpen((v) => !v)}
-            className="flex items-center gap-2 rounded-lg bg-[#047B22] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#03641c]"
-          >
-            <FiPlus size={16} />
-            Add member
-          </button>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="flex flex-wrap items-center gap-2">
+              <label
+                htmlFor="member-month-filter"
+                className="text-sm text-gray-500"
+              >
+                Earnings for
+              </label>
+              <input
+                id="member-month-filter"
+                type="month"
+                value={monthFilter}
+                onChange={(e) => setMonthFilter(e.target.value)}
+                className="rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#047B22]"
+              />
+              {monthFilter && (
+                <button
+                  type="button"
+                  onClick={() => setMonthFilter("")}
+                  className="text-xs font-medium text-gray-500 underline hover:text-gray-700"
+                >
+                  All time
+                </button>
+              )}
+            </div>
+            <button
+              onClick={() => setFormOpen((v) => !v)}
+              className="flex items-center justify-center gap-2 rounded-lg bg-[#047B22] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#03641c]"
+            >
+              <FiPlus size={16} />
+              Add member
+            </button>
+          </div>
         </div>
 
         {formOpen && (
@@ -247,6 +309,7 @@ const MembersTab = () => {
               rowKey={(m) => m._id}
               searchKeys={["name", "email", "businessName"]}
               searchPlaceholder="Search members"
+              defaultSort={{ key: "totalSales", dir: "desc" }}
               pageSize={PAGE_SIZE}
               emptyMessage="No B2B members yet."
             />
@@ -332,6 +395,18 @@ const QuotesTab = () => {
     }
   };
 
+  // DataTable's search only matches against literal row fields, so the
+  // searchable member/business/product text has to be computed onto each
+  // row up front — the quotes returned by the API don't carry it as-is.
+  const quotesWithSearchFields = quotes.map((q) => ({
+    ...q,
+    memberText: [q.b2bMember?.name, q.b2bMember?.email, q.b2bMember?.businessName]
+      .filter(Boolean)
+      .join(" "),
+    buyerBusinessText: q.buyerBusinessName || "",
+    productsText: q.items.map((i) => `${i.name} (${i.variantLabel})`).join(", "),
+  }));
+
   const columns = [
     {
       key: "member",
@@ -385,10 +460,11 @@ const QuotesTab = () => {
             <p className="py-10 text-center text-gray-500">Loading quotes...</p>
           ) : (
             <DataTable
-              data={quotes}
+              data={quotesWithSearchFields}
               columns={columns}
               rowKey={(q) => q._id}
-              searchKeys={["productsText"]}
+              searchKeys={["memberText", "buyerBusinessText", "productsText"]}
+              searchPlaceholder="Search member, business, or product"
               filters={[
                 {
                   field: "status",

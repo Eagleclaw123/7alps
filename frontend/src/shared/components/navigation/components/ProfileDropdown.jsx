@@ -89,6 +89,14 @@ const ProfileDropdown = () => {
             Orders
           </Link>
 
+          <Link
+            to="/customer/wishlist"
+            className="block px-5 py-3 transition hover:bg-[#FAF6EF]"
+            onClick={() => setIsOpen(false)}
+          >
+            Wishlist
+          </Link>
+
           <button
             onClick={handleLogout}
             className="block w-full cursor-pointer px-5 py-3 text-left text-[#C0503A] transition hover:bg-[#C0503A]/10"

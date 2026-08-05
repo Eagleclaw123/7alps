@@ -8,6 +8,7 @@ import {
 import StatCard from "../../../shared/dashboard/components/StatCard";
 import { getDashboardStats } from "../../../shared/services/admin.service";
 import AdminDashboardVisuals from "../components/AdminDashboardVisuals";
+import DeliverySettings from "../components/DeliverySettings";
 
 const initialStats = {
   totalCustomers: 0,
@@ -50,6 +51,7 @@ const Dashboard = () => {
           value={loading ? "..." : `₹${stats.totalRevenue.toLocaleString()}`}
         />
       </div>
+      <DeliverySettings />
       {!loading && <AdminDashboardVisuals stats={stats} />}
     </section>
   );

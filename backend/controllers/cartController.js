@@ -122,7 +122,15 @@ exports.updateItemQuantity = catchAsync(async (req, res, next) => {
     }
     item.quantity += 1;
   } else if (type === 'decrease') {
-    item.quantity = Math.max(1, item.quantity - 1);
+    // Decreasing past 1 removes the item — matches the explicit remove
+    // button rather than silently clamping at 1 with no visible effect.
+    if (item.quantity <= 1) {
+      cart.items = cart.items.filter(
+        (i) => !(i.product.toString() === productId && i.variantLabel === variantLabel),
+      );
+    } else {
+      item.quantity -= 1;
+    }
   } else {
     return next(new AppError('type must be "increase" or "decrease"', 400));
   }

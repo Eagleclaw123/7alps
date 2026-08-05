@@ -89,6 +89,11 @@ const orderSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    // Snapshotted at creation time from the admin-configured Settings.expectedDeliveryDays —
+    // deliberately not recomputed later, so changing the setting doesn't rewrite past orders.
+    expectedDeliveryDate: {
+      type: Date,
+    },
   },
   { timestamps: true },
 );

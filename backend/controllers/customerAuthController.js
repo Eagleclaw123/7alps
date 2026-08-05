@@ -157,6 +157,13 @@ exports.updateAddresses = catchAsync(async (req, res, next) => {
     return next(new AppError('Please provide an addresses array', 400));
   }
 
+  // Always guarantee exactly one default once at least one address exists —
+  // covers both "this is the only address" and "somehow none got marked
+  // default" (checkout relies on there being a sensible one to pre-fill from).
+  if (addresses.length && !addresses.some((a) => a.isDefault)) {
+    addresses[0].isDefault = true;
+  }
+
   const customer = await Customer.findByIdAndUpdate(
     req.customer._id,
     { addresses },

@@ -83,6 +83,21 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    // Admin-entered display rating — NOT computed from Review documents (yet).
+    // Storefront-facing "X.X stars from Y people" until real review aggregation
+    // is built later; kept independent of the Review collection for now.
+    ratingsAverage: {
+      type: Number,
+      default: 0,
+      min: [0, 'Rating must be at least 0'],
+      max: [5, 'Rating cannot exceed 5'],
+      set: (val) => Math.round(val * 10) / 10,
+    },
+    ratingsCount: {
+      type: Number,
+      default: 0,
+      min: [0, 'Ratings count cannot be negative'],
+    },
   },
   {
     timestamps: true,

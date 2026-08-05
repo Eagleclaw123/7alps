@@ -16,7 +16,8 @@ const ProductInfo = ({ product }) => {
 
   const [isAdded, setIsAdded] = useState(false);
 
-  const rating = Number(5);
+  const rating = Number(product.ProductRating) || 0;
+  const ratingCount = Number(product.ProductRatingCount) || 0;
 
   const fullStars = Math.floor(rating);
   const hasHalfStar = rating % 1 >= 0.5;
@@ -35,18 +36,29 @@ const ProductInfo = ({ product }) => {
     setIsAdded(true);
   };
 
-  const handleBuyNow = async () => {
+  // Buy Now never touches the cart — it takes the customer straight to
+  // checkout with just this one item, via navigation state, so an existing
+  // cart (or one they build up later) is completely unaffected.
+  const handleBuyNow = () => {
     if (!selectedVariant) return;
 
-    await dispatch(
-      addToCart({
-        productId: product.id,
-        variantLabel: selectedVariant.label,
-        quantity,
-      }),
-    );
-
-    navigate("/checkout");
+    navigate("/checkout", {
+      state: {
+        buyNow: {
+          items: [
+            {
+              id: `${product.id}::${selectedVariant.label}`,
+              productId: product.id,
+              variantLabel: selectedVariant.label,
+              quantity,
+              name: product.ProductName,
+              image: product.ProductImage,
+              price: selectedVariant.price,
+            },
+          ],
+        },
+      },
+    });
   };
 
   const formatWeight = (grams) => {
@@ -72,21 +84,29 @@ const ProductInfo = ({ product }) => {
         <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
           {/* Rating */}
           <div className="flex items-center gap-2">
-            <div className="flex items-center text-[#E6A43A]">
-              {[...Array(fullStars)].map((_, index) => (
-                <IoIosStar key={`full-${index}`} />
-              ))}
+            {ratingCount > 0 ? (
+              <>
+                <div className="flex items-center text-[#E6A43A]">
+                  {[...Array(fullStars)].map((_, index) => (
+                    <IoIosStar key={`full-${index}`} />
+                  ))}
 
-              {hasHalfStar && <IoIosStarHalf />}
+                  {hasHalfStar && <IoIosStarHalf />}
 
-              {[...Array(emptyStars)].map((_, index) => (
-                <IoIosStarOutline key={`empty-${index}`} />
-              ))}
-            </div>
+                  {[...Array(emptyStars)].map((_, index) => (
+                    <IoIosStarOutline key={`empty-${index}`} />
+                  ))}
+                </div>
 
-            <span className="font-medium text-[#2C2C2C]">
-              {product.ProductRating}
-            </span>
+                <span className="font-medium text-[#2C2C2C]">
+                  {rating.toFixed(1)} ({ratingCount})
+                </span>
+              </>
+            ) : (
+              <span className="rounded-full bg-[#F3F8F2] px-3 py-1 text-xs font-medium text-[#0F6B3E]">
+                New
+              </span>
+            )}
           </div>
 
           {/* Divider */}

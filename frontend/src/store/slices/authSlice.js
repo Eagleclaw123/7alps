@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { clearCart } from "./cartSlice";
+import { clearWishlist } from "./wishlistSlice";
 
 import {
   getCustomerStatus,
@@ -26,6 +27,7 @@ export const logoutCustomerThunk = createAsyncThunk(
     localStorage.removeItem("user");
     localStorage.removeItem("7alps-cart"); // clear guest cart storage
     dispatch(clearCart()); // clear redux cart state
+    dispatch(clearWishlist()); // clear redux wishlist state
     return null;
   },
 );

@@ -33,7 +33,10 @@ export const normalizeProduct = (product) => {
     ProductName: product.name,
     ProductDescription: product.shortDescription || product.description || "",
     ProductCategory: decodeHtmlEntities(product.category),
-    ProductRating: product.ratingsAverage || "New",
+    // Always numeric (defaults to 0) so sorting/comparisons never hit NaN —
+    // components decide when to show a "New" badge based on ProductRatingCount.
+    ProductRating: Number(product.ratingsAverage) || 0,
+    ProductRatingCount: Number(product.ratingsCount) || 0,
     ProductPrice: defaultVariant?.price ?? 0,
     ProductImages: images,
     ProductImage: getProductImageUrl(images[0]),

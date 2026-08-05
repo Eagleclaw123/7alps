@@ -363,6 +363,49 @@ const ProductForm = forwardRef(
             </div>
           </div>
 
+          <div className="mt-4 border-t border-gray-100 pt-4">
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              Rating (shown to customers)
+            </label>
+            <p className="mb-2 text-xs text-gray-500">
+              Set manually for now — we&apos;ll switch to real customer
+              reviews once there&apos;s enough review data.
+            </p>
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label className="mb-1 block text-xs text-gray-500">
+                  Average rating (0–5)
+                </label>
+                <input
+                  type="number"
+                  name="ratingsAverage"
+                  min="0"
+                  max="5"
+                  step="0.1"
+                  value={formData.ratingsAverage}
+                  onChange={handleChange}
+                  placeholder="e.g. 4.5"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#0F6B3E]"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="mb-1 block text-xs text-gray-500">
+                  Number of ratings
+                </label>
+                <input
+                  type="number"
+                  name="ratingsCount"
+                  min="0"
+                  step="1"
+                  value={formData.ratingsCount}
+                  onChange={handleChange}
+                  placeholder="e.g. 120"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#0F6B3E]"
+                />
+              </div>
+            </div>
+          </div>
+
           <div className="mt-4 flex items-center gap-6 pt-1">
             <label className="flex items-center gap-2 text-sm text-gray-700">
               <input

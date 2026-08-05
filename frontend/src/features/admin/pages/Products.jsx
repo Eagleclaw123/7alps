@@ -35,6 +35,8 @@ const initialFormData = {
   description: "",
   storageInstructions: "",
   active: true,
+  ratingsAverage: "",
+  ratingsCount: "",
 };
 
 const initialLists = {
@@ -180,6 +182,8 @@ const Products = () => {
       description: product.description || "",
       storageInstructions: product.storageInstructions || "",
       active: product.active ?? true,
+      ratingsAverage: product.ratingsAverage ?? "",
+      ratingsCount: product.ratingsCount ?? "",
     });
     setVariants(
       Array.isArray(product.variants) && product.variants.length

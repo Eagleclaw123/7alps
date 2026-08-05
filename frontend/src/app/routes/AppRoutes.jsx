@@ -43,6 +43,9 @@ const CustomerOrders = lazy(
 const CustomerProfile = lazy(
   () => import("../../features/customer/pages/CustomerProfile"),
 );
+const CustomerWishlist = lazy(
+  () => import("../../features/customer/pages/CustomerWishlist"),
+);
 const PageNotFound = lazy(() => import("../../features/notFound/PageNotFound"));
 
 // ── Auth pages ───────────────────────────────────────────────
@@ -92,6 +95,7 @@ const Customers = lazy(() => import("../../features/admin/pages/Customers"));
 const Categories = lazy(() => import("../../features/admin/pages/Categories"));
 const Reviews = lazy(() => import("../../features/admin/pages/Reviews"));
 const B2BTeam = lazy(() => import("../../features/admin/pages/B2BTeam"));
+const Contacts = lazy(() => import("../../features/admin/pages/Contacts"));
 
 const AppRoutes = () => {
   return (
@@ -134,6 +138,15 @@ const AppRoutes = () => {
               </ProtectedRoute>
             }
           />
+
+          <Route
+            path="/customer/wishlist"
+            element={
+              <ProtectedRoute role="customer">
+                <CustomerWishlist />
+              </ProtectedRoute>
+            }
+          />
         </Route>
 
         <Route
@@ -165,6 +178,7 @@ const AppRoutes = () => {
           <Route path="categories" element={<Categories />} />
           <Route path="reviews" element={<Reviews />} />
           <Route path="b2b" element={<B2BTeam />} />
+          <Route path="contacts" element={<Contacts />} />
           {/* Add more admin routes here */}
         </Route>
 

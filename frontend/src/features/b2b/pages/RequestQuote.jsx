@@ -204,6 +204,13 @@ const RequestQuote = () => {
   const pendingCount = quotes.filter((q) => q.status === "Pending").length;
   const approvedCount = quotes.filter((q) => q.status === "Approved").length;
 
+  // DataTable's search only matches against literal row fields, so the
+  // searchable product text has to be computed onto each row up front.
+  const quotesWithSearchFields = quotes.map((q) => ({
+    ...q,
+    productsText: q.items.map((i) => `${i.name} (${i.variantLabel})`).join(", "),
+  }));
+
   return (
     <div className="space-y-6">
       <div>
@@ -464,10 +471,11 @@ const RequestQuote = () => {
           <p className="py-10 text-center text-gray-500">Loading quotes...</p>
         ) : (
           <DataTable
-            data={quotes}
+            data={quotesWithSearchFields}
             columns={columns}
             rowKey={(q) => q._id}
             searchKeys={["productsText"]}
+            searchPlaceholder="Search by product"
             filters={[
               {
                 field: "status",

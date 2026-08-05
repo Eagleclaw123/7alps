@@ -3,6 +3,8 @@ import { FiCheckCircle } from "react-icons/fi";
 import { Leaf } from "lucide-react";
 import { motion } from "framer-motion";
 
+import { submitContactForm } from "../../../shared/services/contact.service";
+
 const initialFormData = {
   fullName: "",
   email: "",
@@ -82,6 +84,8 @@ const ContactForm = () => {
   const [fieldErrors, setFieldErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const handleChange = ({ target: { name, value } }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -117,21 +121,30 @@ const ContactForm = () => {
     return Object.values(nextErrors).every((msg) => !msg);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitted(false);
+    setSubmitError("");
 
     if (!validateAll()) {
       return;
     }
 
-    // TODO:
-    // API Integration
-    console.log("Form Submitted", formData);
-    setSubmitted(true);
-    setFormData(initialFormData);
-    setTouched({});
-    setFieldErrors({});
+    setSubmitting(true);
+    try {
+      await submitContactForm(formData);
+      setSubmitted(true);
+      setFormData(initialFormData);
+      setTouched({});
+      setFieldErrors({});
+    } catch (err) {
+      setSubmitError(
+        err?.response?.data?.message ||
+          "Something went wrong submitting your request. Please try again.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const containerVariants = {
@@ -236,12 +249,17 @@ const ContactForm = () => {
         </p>
       ) : null}
 
+      {submitError ? (
+        <p className="mt-6 text-sm font-medium text-red-600">{submitError}</p>
+      ) : null}
+
       <div className="mt-12 flex">
         <button
           type="submit"
-          className="bg-[#16442C] text-white px-8 py-3 text-sm font-semibold uppercase tracking-wide transition-colors hover:bg-[#0E3220]"
+          disabled={submitting}
+          className="bg-[#16442C] text-white px-8 py-3 text-sm font-semibold uppercase tracking-wide transition-colors hover:bg-[#0E3220] disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Submit Quote
+          {submitting ? "Submitting..." : "Submit Quote"}
         </button>
       </div>
     </motion.form>

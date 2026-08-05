@@ -1,5 +1,11 @@
 import { motion } from "framer-motion";
 
+// Every tier CTA leads to the same place — the Contact form further down
+// this page, which is the only lead-capture point on this marketing page.
+const scrollToContact = () => {
+  document.getElementById("b2b-contact")?.scrollIntoView({ behavior: "smooth" });
+};
+
 const tiers = [
   {
     tier: "Tier 01 — Stockist",
@@ -141,6 +147,7 @@ const WholesaleTiers = () => {
               </ul>
 
               <button
+                onClick={scrollToContact}
                 className={`mt-7 w-full rounded-full py-3 text-sm font-semibold transition sm:text-base ${
                   t.highlighted
                     ? "bg-[#C9821E] text-white hover:bg-[#b3741a]"

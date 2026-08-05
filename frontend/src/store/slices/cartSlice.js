@@ -123,17 +123,25 @@ export const updateQuantity = createAsyncThunk(
     }
 
     const id = makeItemId(productId, variantLabel);
-    let items = getState().cart.items.map((item) =>
-      item.id === id
-        ? {
-            ...item,
-            quantity:
-              type === "increase"
-                ? item.quantity + 1
-                : Math.max(1, item.quantity - 1),
-          }
-        : item,
-    );
+    const current = getState().cart.items.find((item) => item.id === id);
+
+    // Decreasing past 1 removes the item — matches the explicit remove
+    // button rather than silently clamping at 1 with no visible effect.
+    let items;
+    if (type === "decrease" && current && current.quantity <= 1) {
+      items = getState().cart.items.filter((item) => item.id !== id);
+    } else {
+      items = getState().cart.items.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              quantity:
+                type === "increase" ? item.quantity + 1 : item.quantity - 1,
+            }
+          : item,
+      );
+    }
+
     persistGuestCart(items);
     return items;
   },

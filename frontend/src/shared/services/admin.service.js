@@ -1,9 +1,15 @@
 import api from "./api";
 
+// ── Public ────────────────────────────────────────────────────────────────────
+
+export const getPublicDeliverySettings = () => {
+  return api.get("/settings/public");
+};
+
 // ── B2B members ───────────────────────────────────────────────────────────────
 
-export const getB2BMembers = () => {
-  return api.get("/admin/b2b");
+export const getB2BMembers = (params) => {
+  return api.get("/admin/b2b", { params });
 };
 
 export const createB2BMember = (payload) => {
@@ -44,8 +50,8 @@ export const getDashboardStats = () => {
 
 // ── Orders ────────────────────────────────────────────────────────────────────
 
-export const getAllOrders = () => {
-  return api.get("/admin/orders");
+export const getAllOrders = (params) => {
+  return api.get("/admin/orders", { params });
 };
 
 export const getOrder = (id) => {
@@ -60,6 +66,16 @@ export const updateOrderStatus = (id, status) => {
 
 export const getCustomers = () => {
   return api.get("/admin/customers");
+};
+
+// ── Settings ──────────────────────────────────────────────────────────────────
+
+export const getSettings = () => {
+  return api.get("/admin/settings");
+};
+
+export const updateSettings = (payload) => {
+  return api.patch("/admin/settings", payload);
 };
 
 export const adminForgotPassword = (email) => {

@@ -5,6 +5,7 @@ const Product = require('../models/productModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const { decrementVariantStock } = require('./productController');
+const { getExpectedDeliveryDate } = require('./orderController');
 
 const MIN_BULK_QUANTITY = Quote.MIN_BULK_QUANTITY;
 const REQUIRED_ADDRESS_FIELDS = ['name', 'phone', 'line1', 'city', 'state', 'pincode'];
@@ -202,6 +203,7 @@ exports.approveQuote = catchAsync(async (req, res, next) => {
   }
 
   const itemsTotal = finalItems.reduce((sum, item) => sum + item.subtotal, 0);
+  const expectedDeliveryDate = await getExpectedDeliveryDate();
 
   const session = await mongoose.startSession();
   let order;
@@ -234,6 +236,7 @@ exports.approveQuote = catchAsync(async (req, res, next) => {
             itemsTotal,
             shippingFee: 0,
             totalAmount: itemsTotal,
+            expectedDeliveryDate,
           },
         ],
         { session },

@@ -1,4 +1,5 @@
 import { CiHeart } from "react-icons/ci";
+import { FaHeart } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -11,16 +12,18 @@ import {
   removeCartItemAsync,
   selectCartItems,
 } from "../../../store/slices/cartSlice";
+import {
+  toggleWishlistItem,
+  selectIsWishlisted,
+} from "../../../store/slices/wishlistSlice";
+import { selectIsCustomerLoggedIn } from "../../../store/slices/authSlice";
 
-const ProductCard = ({
-  product,
-  variants,
-  onFavoriteClick,
-  className = "",
-}) => {
+const ProductCard = ({ product, variants, className = "" }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const cartItems = useSelector(selectCartItems);
+  const isLoggedIn = useSelector(selectIsCustomerLoggedIn);
+  const isWishlisted = useSelector(selectIsWishlisted(product.id));
 
   const defaultVariant =
     product.variants?.find((v) => v.isDefault) || product.variants?.[0];
@@ -65,6 +68,15 @@ const ProductCard = ({
     handleAddToCart(e);
   };
 
+  const handleToggleWishlist = (e) => {
+    e.stopPropagation();
+    if (!isLoggedIn) {
+      navigate("/customer/login");
+      return;
+    }
+    dispatch(toggleWishlistItem(product.id));
+  };
+
   const handleDecrease = (e) => {
     e.stopPropagation();
     if (!defaultVariant) return;
@@ -107,12 +119,16 @@ const ProductCard = ({
         <div className="absolute top-4 right-4 opacity-100 xl:opacity-0 xl:group-hover:opacity-100 transition-all duration-300">
           <button
             className="bg-white w-10 h-10 rounded-lg flex items-center justify-center shadow-md hover:shadow-lg hover:scale-110 transition-all cursor-pointer"
-            onClick={(e) => {
-              e.stopPropagation();
-              onFavoriteClick?.(product);
-            }}
+            onClick={handleToggleWishlist}
+            aria-label={
+              isWishlisted ? "Remove from wishlist" : "Add to wishlist"
+            }
           >
-            <CiHeart size={22} />
+            {isWishlisted ? (
+              <FaHeart size={19} className="text-[#C0503A]" />
+            ) : (
+              <CiHeart size={22} />
+            )}
           </button>
         </div>
 
@@ -122,12 +138,12 @@ const ProductCard = ({
           </div>
         )} */}
 
-        {/* <div className="absolute bottom-4 right-4 bg-white px-3 py-1 rounded-full shadow-md text-sm font-medium">
-          ⭐ {product.ProductRating}
-        </div> */}
-
         <div className="absolute bottom-4 right-4 bg-white px-3 py-1 rounded-full shadow-md text-sm font-medium">
-          ⭐ {product.ProductRating}
+          {product.ProductRatingCount > 0 ? (
+            <>⭐ {product.ProductRating.toFixed(1)}</>
+          ) : (
+            "New"
+          )}
         </div>
       </div>
 

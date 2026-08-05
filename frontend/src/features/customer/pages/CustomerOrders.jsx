@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { motion } from "framer-motion";
 import {
   Search,
@@ -12,15 +13,22 @@ import {
   Truck,
   Home,
   X,
+  Star,
 } from "lucide-react";
 import { LiaUndoAltSolid } from "react-icons/lia";
 
 import { getMyOrders } from "../../../shared/services/order.service";
 import { getPublicProducts } from "../../../shared/services/product.service";
+import {
+  getMyReviews,
+  createReview,
+} from "../../../shared/services/review.service";
+import { addToCart } from "../../../store/slices/cartSlice";
 import { normalizeProducts } from "../../products/utils/normalizeProduct";
 import AnimatedPage from "../../../shared/components/ui/AnimatedPage";
 import Pagination from "../../products/components/ProductPagination";
 import HeroBanner from "../../../shared/components/ui/HeroBanner";
+import ReviewModal from "../../products/components/ReviewModal";
 
 const TABS = [
   "All Orders",
@@ -132,7 +140,7 @@ const OrderTrackingBar = ({ order }) => {
             key={step.key}
             className="flex flex-1 items-start last:flex-none min-w-0"
           >
-            <div className="flex flex-col items-center flex-shrink-0 w-9">
+            <div className="flex flex-col items-center flex-shrink-0 w-12 sm:w-14">
               <span
                 className={`flex h-8 w-8 items-center justify-center rounded-full border transition-colors ${
                   isComplete
@@ -143,7 +151,7 @@ const OrderTrackingBar = ({ order }) => {
                 <StepIcon className="h-3.5 w-3.5" />
               </span>
               <span
-                className={`mt-2 text-[11px] font-semibold uppercase tracking-wide text-center whitespace-nowrap ${
+                className={`mt-2 hidden text-center text-[11px] font-semibold uppercase tracking-wide sm:block ${
                   isComplete ? "text-[#16442C]" : "text-[#B8B2A0]"
                 }`}
               >
@@ -173,20 +181,88 @@ const OrderTrackingBar = ({ order }) => {
 const CustomerOrders = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("All Orders");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [reorderingId, setReorderingId] = useState(null);
+  const [reorderMessage, setReorderMessage] = useState(null);
 
   const [recommended, setRecommended] = useState([]);
+
+  // Product IDs the customer has already reviewed — hides "Rate this
+  // product" on items they've already rated instead of letting them hit the
+  // backend's one-review-per-product error.
+  const [reviewedProductIds, setReviewedProductIds] = useState(new Set());
+  const [reviewTarget, setReviewTarget] = useState(null); // { productId, name } | null
+
+  // Re-adds every item from a past order to the cart, then goes to /cart.
+  // Items whose product/variant no longer exists (deleted, discontinued,
+  // out of stock) are skipped individually rather than failing the whole
+  // action — the customer still gets everything that's still available.
+  const handleOrderAgain = async (order) => {
+    setReorderingId(order._id);
+    setReorderMessage(null);
+
+    const failed = [];
+    for (const item of order.items) {
+      try {
+        await dispatch(
+          addToCart({
+            productId: item.product,
+            variantLabel: item.variantLabel,
+            quantity: item.quantity,
+            name: item.name,
+            image: item.image,
+            price: item.price,
+          }),
+        ).unwrap();
+      } catch {
+        failed.push(item.name);
+      }
+    }
+
+    setReorderingId(null);
+
+    if (failed.length) {
+      setReorderMessage({
+        orderId: order._id,
+        text: `${failed.length === order.items.length ? "These items are" : "Some items are"} no longer available: ${failed.join(", ")}.`,
+      });
+    } else {
+      navigate("/cart");
+    }
+  };
 
   useEffect(() => {
     getMyOrders()
       .then(({ data }) => setOrders(data?.data?.orders || []))
       .finally(() => setLoading(false));
+
+    getMyReviews()
+      .then(({ data }) => {
+        const ids = (data?.data?.reviews || []).map(
+          (r) => r.product?._id || r.product,
+        );
+        setReviewedProductIds(new Set(ids));
+      })
+      .catch(() => {});
   }, []);
+
+  const handleSubmitReview = async ({ rating, comment }) => {
+    await createReview({
+      productId: reviewTarget.productId,
+      rating,
+      comment,
+    });
+    setReviewedProductIds(
+      (prev) => new Set([...prev, reviewTarget.productId]),
+    );
+    setReviewTarget(null);
+  };
 
   // Cross-sell strip — reuses the same public products endpoint the
   // storefront already uses, just capped to a handful of items.
@@ -207,16 +283,43 @@ const CustomerOrders = () => {
   }, []);
 
   const filteredOrders = useMemo(() => {
-    return orders.filter((order) => {
-      const idMatch = order._id
-        .slice(-8)
-        .toUpperCase()
-        .includes(search.trim().toUpperCase());
+    const term = search.trim().toLowerCase();
 
+    return orders.filter((order) => {
       const tabMatch =
         activeTab === "All Orders" ? true : order.status === activeTab;
 
-      return idMatch && tabMatch;
+      if (!tabMatch) return false;
+      if (!term) return true;
+
+      const address = order.shippingAddress || {};
+
+      const haystack = [
+        order._id.slice(-8),
+        order.status,
+        order.paymentMethod,
+        order.paymentStatus,
+        order.source,
+        order.buyerBusinessName,
+        String(order.totalAmount ?? ""),
+        new Date(order.placedAt).toLocaleDateString("en-IN", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        }),
+        address.name,
+        address.line1,
+        address.line2,
+        address.city,
+        address.state,
+        address.pincode,
+        ...order.items.flatMap((item) => [item.name, item.variantLabel]),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return haystack.includes(term);
     });
   }, [orders, activeTab, search]);
 
@@ -230,6 +333,10 @@ const CustomerOrders = () => {
     setActiveTab(tab);
     setPage(1);
   };
+
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -262,7 +369,7 @@ const CustomerOrders = () => {
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search your orders by ID..."
+                  placeholder="Search by order ID, product, status, address..."
                   className="w-full rounded-full border border-[#E3DFD2] bg-white py-2.5 pl-10 pr-4 text-sm text-[#201F1B] outline-none focus:border-[#16442C]"
                 />
               </div>
@@ -365,6 +472,27 @@ const CustomerOrders = () => {
                                   <p className="text-xs text-[#86806F]">
                                     {item.variantLabel} · Qty {item.quantity}
                                   </p>
+                                  {order.status === "Delivered" ? (
+                                    reviewedProductIds.has(item.product) ? (
+                                      <span className="mt-1 flex items-center gap-1 text-xs text-[#16442C]">
+                                        <Star className="h-3 w-3 fill-[#16442C]" />
+                                        Reviewed
+                                      </span>
+                                    ) : (
+                                      <button
+                                        onClick={() =>
+                                          setReviewTarget({
+                                            productId: item.product,
+                                            name: item.name,
+                                          })
+                                        }
+                                        className="mt-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[#16442C] underline hover:text-[#0E3220]"
+                                      >
+                                        <Star className="h-3 w-3" />
+                                        Rate this product
+                                      </button>
+                                    )
+                                  ) : null}
                                 </div>
                                 <span className="text-sm font-medium text-[#201F1B]">
                                   ₹{item.subtotal}
@@ -373,10 +501,21 @@ const CustomerOrders = () => {
                             ))}
                           </div>
 
-                          <button className="mt-4 flex items-center gap-1.5 rounded-full border border-[#16442C] px-4 py-2 text-xs font-semibold uppercase tracking-wide text-[#16442C] hover:bg-[#16442C] hover:text-white">
-                            Order Again
+                          <button
+                            onClick={() => handleOrderAgain(order)}
+                            disabled={reorderingId === order._id}
+                            className="mt-4 flex items-center gap-1.5 rounded-full border border-[#16442C] px-4 py-2 text-xs font-semibold uppercase tracking-wide text-[#16442C] hover:bg-[#16442C] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            {reorderingId === order._id
+                              ? "Adding to cart..."
+                              : "Order Again"}
                             <LiaUndoAltSolid className="h-3.5 w-3.5" />
                           </button>
+                          {reorderMessage?.orderId === order._id ? (
+                            <p className="mt-2 text-xs text-[#B4652F]">
+                              {reorderMessage.text}
+                            </p>
+                          ) : null}
                         </div>
 
                         {/* Summary */}
@@ -405,6 +544,24 @@ const CustomerOrders = () => {
                                 {order.paymentMethod}
                               </span>
                             </div>
+
+                            {!isCancelled && order.expectedDeliveryDate ? (
+                              <div className="flex items-start justify-between gap-3">
+                                <span className="flex items-center gap-2 text-[#86806F]">
+                                  <Truck className="h-4 w-4" />
+                                  Expected Delivery
+                                </span>
+                                <span className="font-medium text-[#201F1B]">
+                                  {new Date(
+                                    order.expectedDeliveryDate,
+                                  ).toLocaleDateString("en-IN", {
+                                    day: "2-digit",
+                                    month: "short",
+                                    year: "numeric",
+                                  })}
+                                </span>
+                              </div>
+                            ) : null}
 
                             <div className="flex items-start justify-between gap-3">
                               <span className="flex items-center gap-2 text-[#86806F]">
@@ -519,6 +676,13 @@ const CustomerOrders = () => {
           </div>
         </div>
       </div>
+
+      {reviewTarget ? (
+        <ReviewModal
+          onClose={() => setReviewTarget(null)}
+          onSubmit={handleSubmitReview}
+        />
+      ) : null}
     </AnimatedPage>
   );
 };

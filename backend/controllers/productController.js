@@ -63,17 +63,24 @@ const applyBodyFields = (data) => {
 
   if (data.active !== undefined) data.active = data.active === 'true' || data.active === true;
 
+  // Admin product form submits via FormData, so numeric fields arrive as strings.
+  if (data.ratingsAverage !== undefined) data.ratingsAverage = Number(data.ratingsAverage);
+  if (data.ratingsCount !== undefined) data.ratingsCount = Number(data.ratingsCount);
+
   return data;
 };
 
 // ─── PUBLIC ──────────────────────────────────────────────────────────────────
 
 // GET /api/v1/products/public
+// Supports ?sort=-ratingsAverage / ?sort=ratingsAverage (or any Mongoose sort
+// string, e.g. "-createdAt") alongside the existing ?category filter.
 exports.getPublicProducts = catchAsync(async (req, res, next) => {
   const filter = { active: true };
   if (req.query.category) filter.category = req.query.category;
 
-  const products = await Product.find(filter).sort('-createdAt');
+  const sortBy = req.query.sort ? req.query.sort.split(',').join(' ') : '-createdAt';
+  const products = await Product.find(filter).sort(sortBy);
 
   res.status(200).json({
     status: 'success',

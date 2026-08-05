@@ -33,6 +33,12 @@ const customerSchema = new mongoose.Schema(
       trim: true,
     },
     addresses: [addressSchema],
+    wishlist: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'Product',
+      },
+    ],
     active: {
       type: Boolean,
       default: true,
