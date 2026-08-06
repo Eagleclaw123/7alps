@@ -9,6 +9,7 @@ import {
   FiBriefcase,
   FiSettings,
   FiMail,
+  FiHeadphones,
   FiLogOut,
 } from "react-icons/fi";
 
@@ -61,6 +62,12 @@ const adminMenu = [
     icon: FiMail,
     path: "/admin/contacts",
   },
+  {
+    id: 9,
+    title: "Support Tickets",
+    icon: FiHeadphones,
+    path: "/admin/support-tickets",
+  },
   // {
   //   id: 10,
   //   title: "Settings",
@@ -68,7 +75,7 @@ const adminMenu = [
   //   path: "/admin/settings",
   // },
   {
-    id: 9,
+    id: 10,
     title: "Logout",
     icon: FiLogOut,
     path: "/logout",

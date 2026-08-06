@@ -31,10 +31,8 @@ app.use(
   }),
 );
 
-// Morgan logger
-if (process.env.NODE_ENV === 'development') {
-  app.use(morgan('dev'));
-}
+// Morgan logger — concise colored format in dev, standard Apache-style in prod
+app.use(morgan(process.env.NODE_ENV === 'development' ? 'dev' : 'combined'));
 
 // Rate limiting
 const limiter = rateLimit({

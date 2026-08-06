@@ -151,7 +151,7 @@
   <div class="eyebrow">Platform Documentation</div>
   <h1>7ALP's</h1>
   <p class="lead">A complete walkthrough of the storefront, admin console, and B2B wholesale portal — every login, route, and feature, as currently implemented.</p>
-  <div class="meta">Updated 2026-08-05 &middot; Frontend: React 19 + Vite + Redux Toolkit + Tailwind 4 &middot; Backend: Node.js + Express 5 + MongoDB (Mongoose)</div>
+  <div class="meta">Updated 2026-08-06 &middot; Frontend: React 19 + Vite + Redux Toolkit + Tailwind 4 &middot; Backend: Node.js + Express 5 + MongoDB (Mongoose)</div>
 </section>
 
 <h2 class="section">1. Architecture Overview</h2>
@@ -199,7 +199,7 @@
   <tr><td>Login route</td><td><code>/admin/login</code></td></tr>
   <tr><td>Session</td><td>JWT in httpOnly cookie <code>adminToken</code></td></tr>
   <tr><td>Seeded account</td><td><code>7alpsadmin@7alps.com</code> / <code>7alps123</code> (run <code>npm run seed</code> in <code>backend/</code>... see note below)</td></tr>
-  <tr><td>Forgot password<span class="badge-fixed">fully wired</span></td><td>OTP email flow &mdash; <code>POST /api/v1/auth/forgotPassword</code> &rarr; <code>verifyOTP</code> &rarr; <code>resetPasswordAfterOTP</code>, delivered via Resend. The <code>/admin/forgot-password</code> page now calls these endpoints end to end (email &rarr; OTP &rarr; new password) via a shared <code>ForgotPasswordFlow</code> component.</td></tr>
+  <tr><td>Forgot password<span class="badge-fixed">fixed</span></td><td>OTP email flow &mdash; <code>POST /api/v1/auth/forgotPassword</code> &rarr; <code>verifyOTP</code> &rarr; <code>resetPasswordAfterOTP</code>, delivered via Resend. Verified genuinely end to end this round: the final reset-password step was previously a disconnected form component that silently reloaded the page instead of submitting (no validation, backend never called); it's now properly wired, and the backend also re-checks the OTP at that final step instead of only checking that the reset window hadn't expired.</td></tr>
 </table>
 
 <div class="callout warn">
@@ -214,7 +214,7 @@
   <tr><td>Session</td><td>JWT in httpOnly cookie <code>b2bToken</code></td></tr>
   <tr><td>Account creation</td><td>Admin &rarr; B2B Team &rarr; Add member</td></tr>
   <tr><td>Seeded account</td><td><code>b2bpartner@7alps.com</code> / <code>7alps123</code> (<code>npm run seed:b2b</code>)</td></tr>
-  <tr><td>Forgot password<span class="badge-fixed">fully wired</span></td><td>Same OTP flow as Admin &mdash; <code>POST /api/v1/b2b/forgotPassword</code> &rarr; <code>verifyOTP</code> &rarr; <code>resetPasswordAfterOTP</code>, delivered via Resend. The <code>/b2b/forgot-password</code> page is fully wired end to end.</td></tr>
+  <tr><td>Forgot password<span class="badge-fixed">fixed</span></td><td>Same OTP flow as Admin &mdash; <code>POST /api/v1/b2b/forgotPassword</code> &rarr; <code>verifyOTP</code> &rarr; <code>resetPasswordAfterOTP</code>, delivered via Resend. Two bugs fixed this round: the frontend was calling this endpoint without its <code>/b2b</code> URL prefix, so every request 404'd before reaching the backend at all; and the same broken final reset-password step described in the Admin row above. Both are now fixed and verified end to end from the actual login page.</td></tr>
 </table>
 
 <h2 class="section">3. Route Map</h2>
@@ -254,12 +254,13 @@
   <tr><td><code>/admin/reviews</code></td><td>Review moderation (genuine customer reviews, prompted after delivery)</td></tr>
   <tr><td><code>/admin/b2b</code></td><td>B2B Team — members with sortable, month-filterable earnings<span class="badge-new">new</span>; quote approval with working search<span class="badge-fixed">fixed</span></td></tr>
   <tr><td><code>/admin/contacts</code></td><td>Contact form submissions — view, mark New/Read/Resolved, delete<span class="badge-new">new</span></td></tr>
+  <tr><td><code>/admin/support-tickets</code></td><td>B2B "Contact Support" submissions<span class="badge-new">new</span> — server-side paginated and searchable (subject/message/member), status workflow, delete. See Section 4.</td></tr>
 </table>
 
 <h3>B2B (requires B2B login)</h3>
 <table>
   <tr><th>Route</th><th>Page</th></tr>
-  <tr><td><code>/b2b</code></td><td>Dashboard — quotes, orders, sales stats</td></tr>
+  <tr><td><code>/b2b</code></td><td>Dashboard — quotes, orders, sales stats. The "Contact Support" button in the sidebar now actually saves a ticket for admin<span class="badge-fixed">fixed</span> instead of just faking a "sent" state locally.</td></tr>
   <tr><td><code>/b2b/catalog</code></td><td>Browse products, propose bulk price/qty</td></tr>
   <tr><td><code>/b2b/request-quote</code></td><td>Buyer details (with map picker) + submit + quote history, search now working<span class="badge-fixed">fixed</span></td></tr>
   <tr><td><code>/b2b/orders</code></td><td>Orders created from approved quotes, searchable by order ID or product</td></tr>
@@ -288,6 +289,7 @@
   <li><b>Customers</b> — every registered customer with their order count and lifetime spend.</li>
   <li><b>Reviews</b> — moderate: publish, flag, or delete any submitted review.</li>
   <li><b>Contact Submissions<span class="badge-new">new</span></b> — every Contact Us / quote-request form submission, with New/Read/Resolved status and search.</li>
+  <li><b>Support Tickets<span class="badge-new">new</span></b> — every message a B2B member sends via the "Contact Support" button on their dashboard (previously not saved anywhere at all — the form faked a success message and discarded the input). Server-side paginated and searchable by subject, message, or the submitting member's name/email/business, with the same New/Read/Resolved workflow as Contact Submissions.</li>
   <li><b>B2B Team</b> — create marketing-team logins; each member's bulk orders and earnings, now sortable and filterable by month<span class="badge-new">new</span> ("earnings" = value of orders created once their quotes are approved — see the Earnings note below); review a pending quote (adjust quantity/price if needed), approve it — which atomically decrements stock and creates a real order — or reject it with a reason. Quote search now actually works<span class="badge-fixed">fixed</span> (was previously silently broken — it searched a field that was never populated).</li>
 </ul>
 
@@ -296,7 +298,7 @@
   <li><b>Catalog</b> — the same live product catalog; the member picks a variant, a bulk quantity (10+ units), and proposes their own discounted unit price (capped at the listed retail price).</li>
   <li><b>Request Quote</b> — the products picked in Catalog collect into a draft; the member adds the buyer's business name and delivery address (map picker included) and submits it for admin approval. Past quotes and their status are listed below the form, with working search<span class="badge-fixed">fixed</span>.</li>
   <li><b>Orders</b> — once admin approves a quote, it becomes a real order here; searchable by order ID or product name, alongside the existing status filter.</li>
-  <li><b>Dashboard</b> — quote counts by status, total orders, total sales.</li>
+  <li><b>Dashboard</b> — quote counts by status, total orders, total sales. Its "Contact Support" button/modal now actually submits to the admin's new Support Tickets page<span class="badge-fixed">fixed</span> instead of silently discarding the message.</li>
 </ul>
 
 <h2 class="section">5. Product Ratings<span class="badge-new">new</span></h2>
@@ -317,7 +319,7 @@
 <table>
   <tr><th>Field</th><th>Detail</th></tr>
   <tr><td>Config</td><td><code>RESEND_API_KEY</code> + <code>RESEND_FROM_EMAIL</code> in <code>backend/.env</code></td></tr>
-  <tr><td>Sender address</td><td><code>7Alps &lt;7alps@lanvaus.com&gt;</code> — <code>lanvaus.com</code> is verified with Resend; a dedicated 7alps domain is expected soon and this address can move to it with a one-line <code>.env</code> change</td></tr>
+  <tr><td>Sender address</td><td><code>7Alps &lt;support@7alpsglobal.com&gt;</code> — <code>7alpsglobal.com</code> is verified with Resend, so email delivers to any recipient (earlier in setup, this pointed at a malformed address and OTP emails failed to send outright; fixed this round)</td></tr>
   <tr><td>Contact form notification</td><td>Optional — if <code>CONTACT_NOTIFY_EMAIL</code> is set in <code>backend/.env</code>, admin gets an email on every new Contact Us submission; unset by default so it's silently skipped until a real address is configured.</td></tr>
 </table>
 
@@ -327,7 +329,7 @@
   <b>Deliberately minimal.</b> There's no admin UI page for this yet (only <code>GET /api/v1/admin/newsletter</code> to list subscribers, callable but not wired to any screen), no unsubscribe flow, and no actual campaign-sending capability — this is capture-only for now, matching the "minimal" scope this was built to.
 </div>
 <div class="callout info">
-  <b>Domain verified — sandbox restriction lifted.</b> With <code>lanvaus.com</code> verified, OTP emails send to any recipient. When the dedicated 7alps domain is ready, update <code>RESEND_FROM_EMAIL</code> to use it instead.
+  <b>Domain verified — sandbox restriction lifted.</b> With <code>7alpsglobal.com</code> verified, OTP and notification emails send to any recipient, not just the Resend account owner's own inbox (Resend's default sandbox behavior for unverified senders).
 </div>
 
 <h2 class="section">8. Testing Reference</h2>
@@ -338,7 +340,7 @@
   <tr><td>Customer login</td><td>Any 10-digit mobile number, OTP <code>123456</code></td></tr>
   <tr><td>Razorpay test card (recommended)</td><td><code>5267 3181 8797 5449</code> (Mastercard) — any future expiry, any 3-digit CVV</td></tr>
   <tr><td>Razorpay test OTP</td><td>Any 4-10 digit number (e.g. <code>1234</code>) — it's a test-mode simulation, not a fixed code</td></tr>
-  <tr><td>Password-reset OTP (Admin/B2B)</td><td>Emailed via Resend from <code>7alps@lanvaus.com</code>, delivered to the real account email — now testable end to end from the actual login page (Section 2)</td></tr>
+  <tr><td>Password-reset OTP (Admin/B2B)</td><td>Emailed via Resend from <code>support@7alpsglobal.com</code>, delivered to the real account email — now testable end to end from the actual login page (Section 2), including the final "set new password" step</td></tr>
 </table>
 <div class="callout warn">
   <b>Avoid the generic <code>4111 1111 1111 1111</code> Visa test card</b> — Razorpay's test environment treats it as a foreign-issued card, and most test accounts (this one included) have international card acceptance disabled by default, so it fails with <code>international_transaction_not_allowed</code>. The Mastercard number above is domestic and works reliably.
@@ -350,14 +352,17 @@
   <li><b>SMS OTP delivery is not wired up</b> — OTPs are logged to the server console in development, and <code>123456</code> is always accepted as a fallback until a real SMS provider (e.g. MSG91, Twilio) is integrated.</li>
   <li><b>The home page's decorative "Shop by category" tiles are static content</b> (curated imagery in a fixed 3-tile layout), separate from the real, admin-managed Category system used everywhere else (product forms, filters, B2B catalog).</li>
   <li><b>No order/quote-status confirmation emails</b> — order placement, quote approval/rejection, etc. remain visible in-app only; Resend is currently used only for OTP flows and the optional contact-form admin notification.</li>
-  <li><b>Email sender is on a shared parent-company domain</b> — transactional email currently sends from <code>7alps@lanvaus.com</code>. A dedicated 7alps domain is expected soon; once verified with Resend, update <code>RESEND_FROM_EMAIL</code> in <code>backend/.env</code> to move onto it.</li>
   <li><b>Product ratings are admin-entered, not computed from real reviews</b> — a deliberate interim state for launch (see Section 5), not a bug; genuine review collection is running in parallel for a future switch-over.</li>
   <li><b>Newsletter subscription is capture-only</b> — no admin page to view/export subscribers (the data and a listing endpoint exist, just no screen for it yet), no unsubscribe flow, no campaign sending.</li>
   <li><b>B2B member deletion has no admin UI</b> — the backend supports actually deleting a B2B member (<code>DELETE /api/v1/admin/b2b/:id</code>), but the B2B Team admin page only offers toggling a member active/inactive. Worth confirming whether soft-delete-only is the intended policy.</li>
 </ul>
 
 <div class="callout info">
-  <b>Full audit pass (this round).</b> A systematic sweep checked every search/filter config, interactive element, and hardcoded value across the app for the same "looks wired up but isn't" pattern that produced several of the fixes above. Beyond what's listed as fixed in this document, a handful of harmless items were found and intentionally left alone (not asked for, not affecting any live feature): a leftover debug <code>console.log</code> on the homepage, a few unused Redux cart reducers superseded by the async thunks actually in use, two components with dead buttons that aren't rendered anywhere in the app, and some stale commented-out code in <code>userRoutes.js</code>/<code>Footer.jsx</code>. None of these are live bugs.
+  <b>Full audit pass (2026-08-05).</b> A systematic sweep checked every search/filter config, interactive element, and hardcoded value across the app for the same "looks wired up but isn't" pattern that produced several of the fixes above. Beyond what's listed as fixed in this document, a handful of harmless items were found and intentionally left alone (not asked for, not affecting any live feature): a leftover debug <code>console.log</code> on the homepage, a few unused Redux cart reducers superseded by the async thunks actually in use, two components with dead buttons that aren't rendered anywhere in the app, and some stale commented-out code in <code>userRoutes.js</code>/<code>Footer.jsx</code>. None of these are live bugs.
+</div>
+
+<div class="callout info">
+  <b>Backend error-handling &amp; auth hardening (2026-08-06).</b> A second pass, triggered by a raw MongoDB error message (<code>E11000 duplicate key...</code>) leaking straight to the admin UI on a duplicate B2B email. Root cause: the global error handler only produced friendly messages in production — in development it returned the raw driver error unmodified. Fixed app-wide, so every duplicate-key and validation error now returns a clear, human-readable message (e.g. <i>"This email address is already in use"</i>) regardless of environment, not just for B2B. While auditing the rest of the error-handling and auth code, two more real issues turned up and were fixed: the Admin/B2B "reset password after OTP" endpoint accepted the request without re-checking the OTP (only the expiry window), and request logging (<code>morgan</code>) was silently disabled outside development, so a production-run server produced zero access logs.
 </div>
 
 <p class="footer-note">7ALP's Platform Documentation — generated automatically from the current codebase.</p>

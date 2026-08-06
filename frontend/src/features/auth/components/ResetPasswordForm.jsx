@@ -5,7 +5,23 @@ import AuthCard from "./AuthCard";
 import AuthHeader from "./AuthHeader";
 import PasswordInput from "./PasswordInput";
 
-const ResetPasswordForm = ({ title, subtitle, loginPath }) => {
+const ResetPasswordForm = ({
+  title,
+  subtitle,
+  loginPath,
+  password,
+  onPasswordChange,
+  confirmPassword,
+  onConfirmPasswordChange,
+  onSubmit,
+  loading,
+  error,
+}) => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit?.();
+  };
+
   return (
     <AuthCard>
       <div className="mb-8">
@@ -18,18 +34,26 @@ const ResetPasswordForm = ({ title, subtitle, loginPath }) => {
 
       <AuthHeader title={title} subtitle={subtitle} />
 
-      <form className="space-y-6">
+      <form className="space-y-6" onSubmit={handleSubmit}>
         <PasswordInput
           label="New Password"
           placeholder="Enter your new password"
+          value={password}
+          onChange={(e) => onPasswordChange(e.target.value)}
         />
 
         <PasswordInput
           label="Confirm Password"
           placeholder="Confirm your new password"
+          value={confirmPassword}
+          onChange={(e) => onConfirmPasswordChange(e.target.value)}
         />
 
-        <AuthButton type="submit">Reset Password</AuthButton>
+        {error && <p className="text-sm text-red-600">{error}</p>}
+
+        <AuthButton type="submit" disabled={loading}>
+          {loading ? "Resetting..." : "Reset Password"}
+        </AuthButton>
 
         <p className="text-center text-sm text-gray-600">
           Remember your password?{" "}

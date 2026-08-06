@@ -44,14 +44,20 @@ export const getMyB2BOrder = (id) => {
   return api.get(`/b2b/orders/${id}`);
 };
 
+// ── Support ───────────────────────────────────────────────────────────────────
+
+export const createSupportTicket = (payload) => {
+  return api.post("/b2b/support-tickets", payload);
+};
+
 // b2b service file — add these
 
 export const b2bForgotPassword = (email) => {
-  return api.post("/forgotPassword", { email });
+  return api.post("/b2b/forgotPassword", { email });
 };
 
 export const b2bVerifyOTP = (email, otp) => {
-  return api.post("/verifyOTP", { email, otp });
+  return api.post("/b2b/verifyOTP", { email, otp });
 };
 
 export const b2bResetPasswordAfterOTP = (
@@ -60,7 +66,7 @@ export const b2bResetPasswordAfterOTP = (
   password,
   passwordConfirm,
 ) => {
-  return api.post("/resetPasswordAfterOTP", {
+  return api.post("/b2b/resetPasswordAfterOTP", {
     email,
     otp,
     password,

@@ -5,11 +5,30 @@ const handleCastErrorDB = (err) => {
   return new AppError(message, 400);
 };
 
+// MongoDB unique-index field names -> user-facing labels
+const FRIENDLY_FIELD_NAMES = {
+  email: 'email address',
+  phone: 'phone number',
+  name: 'name',
+  slug: 'name',
+  sku: 'SKU',
+};
+
 const handleDuplicateFieldsDB = (err) => {
-  // MongoDB driver 6+ uses err.keyValue; older used err.errmsg
-  const field = err.keyValue ? Object.keys(err.keyValue)[0] : 'field';
-  const value = err.keyValue ? err.keyValue[field] : '';
-  const message = `Duplicate value "${value}" for field "${field}". Please use another value.`;
+  const keyValue = err.keyValue || {};
+  const fields = Object.keys(keyValue);
+
+  // Only known compound-unique index in the app: one review per customer per product.
+  if (fields.length > 1 && fields.includes('product') && fields.includes('customer')) {
+    return new AppError('You have already reviewed this product.', 400);
+  }
+
+  const field = fields[0] || 'field';
+  const value = keyValue[field] ?? '';
+  const label = FRIENDLY_FIELD_NAMES[field] || field;
+  const message = `This ${label}${
+    value ? ` ("${value}")` : ''
+  } is already in use. Please use a different ${label}.`;
   return new AppError(message, 400);
 };
 
@@ -53,19 +72,19 @@ module.exports = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
 
-  if (process.env.NODE_ENV === 'development') {
-    sendErrorDev(err, res);
-  } else {
-    let error = Object.assign(Object.create(Object.getPrototypeOf(err)), err, {
-      message: err.message,
-    });
-    if (error.name === 'CastError') error = handleCastErrorDB(error);
-    if (error.code === 11000) error = handleDuplicateFieldsDB(error);
-    if (error.name === 'ValidationError')
-      error = handleValidationErrorDB(error);
-    if (error.name === 'JsonWebTokenError') error = handleJWTError();
-    if (error.name === 'TokenExpiredError') error = handleJWTExpiredError();
+  let error = Object.assign(Object.create(Object.getPrototypeOf(err)), err, {
+    message: err.message,
+  });
+  if (error.name === 'CastError') error = handleCastErrorDB(error);
+  if (error.code === 11000) error = handleDuplicateFieldsDB(error);
+  if (error.name === 'ValidationError')
+    error = handleValidationErrorDB(error);
+  if (error.name === 'JsonWebTokenError') error = handleJWTError();
+  if (error.name === 'TokenExpiredError') error = handleJWTExpiredError();
 
+  if (process.env.NODE_ENV === 'development') {
+    sendErrorDev(error, res);
+  } else {
     sendErrorProd(error, res);
   }
 };

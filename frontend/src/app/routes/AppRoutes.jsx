@@ -96,6 +96,9 @@ const Categories = lazy(() => import("../../features/admin/pages/Categories"));
 const Reviews = lazy(() => import("../../features/admin/pages/Reviews"));
 const B2BTeam = lazy(() => import("../../features/admin/pages/B2BTeam"));
 const Contacts = lazy(() => import("../../features/admin/pages/Contacts"));
+const SupportTickets = lazy(
+  () => import("../../features/admin/pages/SupportTickets"),
+);
 
 const AppRoutes = () => {
   return (
@@ -179,6 +182,7 @@ const AppRoutes = () => {
           <Route path="reviews" element={<Reviews />} />
           <Route path="b2b" element={<B2BTeam />} />
           <Route path="contacts" element={<Contacts />} />
+          <Route path="support-tickets" element={<SupportTickets />} />
           {/* Add more admin routes here */}
         </Route>
 

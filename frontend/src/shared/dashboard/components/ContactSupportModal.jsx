@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FiPhone, FiMail, FiMessageCircle, FiX, FiSend } from "react-icons/fi";
+import { createSupportTicket } from "../../services/b2b.service";
 
 // Matches the dashboard's theme:
 // - Gradient: from-[#0F6B3E] to-[#1A8F55]
@@ -8,19 +9,32 @@ import { FiPhone, FiMail, FiMessageCircle, FiX, FiSend } from "react-icons/fi";
 const ContactSupportModal = ({ isOpen, onClose }) => {
   const [form, setForm] = useState({ subject: "", message: "" });
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e) =>
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Replace with actual API call, e.g. POST /api/support/tickets
-    setSent(true);
-    setTimeout(() => {
-      setSent(false);
-      setForm({ subject: "", message: "" });
-      onClose();
-    }, 1500);
+    setError("");
+    setSubmitting(true);
+    try {
+      await createSupportTicket(form);
+      setSent(true);
+      setTimeout(() => {
+        setSent(false);
+        setForm({ subject: "", message: "" });
+        onClose();
+      }, 1500);
+    } catch (err) {
+      setError(
+        err?.response?.data?.message ||
+          "Couldn't send your message. Please try again.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const channels = [
@@ -132,13 +146,17 @@ const ContactSupportModal = ({ isOpen, onClose }) => {
             />
           </div>
 
+          {error && <p className="text-xs text-red-600">{error}</p>}
+
           <button
             type="submit"
-            disabled={sent}
+            disabled={sent || submitting}
             className="w-full flex items-center justify-center gap-2 rounded-lg bg-emerald-800 hover:bg-emerald-900 disabled:opacity-70 text-white text-sm font-medium py-2.5 transition-colors"
           >
             {sent ? (
               "Message sent"
+            ) : submitting ? (
+              "Sending..."
             ) : (
               <>
                 <FiSend size={15} />

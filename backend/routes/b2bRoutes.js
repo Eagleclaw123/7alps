@@ -2,6 +2,7 @@ const express = require('express');
 const b2bAuthController = require('../controllers/b2bAuthController');
 const quoteController = require('../controllers/quoteController');
 const orderController = require('../controllers/orderController');
+const supportTicketController = require('../controllers/supportTicketController');
 
 const router = express.Router();
 
@@ -27,5 +28,7 @@ router.get('/quotes/:id', quoteController.getMyQuote);
 
 router.get('/orders', orderController.getMyB2BOrders);
 router.get('/orders/:id', orderController.getMyB2BOrder);
+
+router.post('/support-tickets', supportTicketController.createSupportTicket);
 
 module.exports = router;

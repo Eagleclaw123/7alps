@@ -68,6 +68,20 @@ export const getCustomers = () => {
   return api.get("/admin/customers");
 };
 
+// ── Support tickets ───────────────────────────────────────────────────────────
+
+export const getSupportTickets = (params) => {
+  return api.get("/admin/support-tickets", { params });
+};
+
+export const updateSupportTicketStatus = (id, status) => {
+  return api.patch(`/admin/support-tickets/${id}/status`, { status });
+};
+
+export const deleteSupportTicket = (id) => {
+  return api.delete(`/admin/support-tickets/${id}`);
+};
+
 // ── Settings ──────────────────────────────────────────────────────────────────
 
 export const getSettings = () => {

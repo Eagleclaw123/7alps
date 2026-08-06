@@ -135,15 +135,22 @@ exports.verifyOTP = catchAsync(async (req, res, next) => {
 
 // POST /api/v1/b2b/resetPasswordAfterOTP
 exports.resetPasswordAfterOTP = catchAsync(async (req, res, next) => {
-  const { email, password, passwordConfirm } = req.body;
+  const { email, otp, password, passwordConfirm } = req.body;
+
+  if (!email || !otp || !password || !passwordConfirm) {
+    return next(new AppError('Please provide email, OTP, password, and password confirmation', 400));
+  }
+
+  const hashedOTP = crypto.createHash('sha256').update(otp).digest('hex');
 
   const member = await B2BMember.findOne({
     email: email?.toLowerCase(),
+    passwordResetToken: hashedOTP,
     passwordResetExpires: { $gt: Date.now() },
   });
 
   if (!member) {
-    return next(new AppError('Session expired, please try again', 400));
+    return next(new AppError('Invalid or expired OTP. Please start the reset process again.', 400));
   }
 
   member.password = password;

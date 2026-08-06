@@ -8,6 +8,7 @@ const reviewController = require('../controllers/reviewController');
 const settingsController = require('../controllers/settingsController');
 const contactController = require('../controllers/contactController');
 const newsletterController = require('../controllers/newsletterController');
+const supportTicketController = require('../controllers/supportTicketController');
 
 const router = express.Router();
 
@@ -48,6 +49,10 @@ router.delete('/contacts/:id', contactController.deleteContact);
 router.get('/customers', adminController.getAllCustomers);
 
 router.get('/newsletter', newsletterController.getAllSubscribers);
+
+router.get('/support-tickets', supportTicketController.getAllSupportTickets);
+router.patch('/support-tickets/:id/status', supportTicketController.updateSupportTicketStatus);
+router.delete('/support-tickets/:id', supportTicketController.deleteSupportTicket);
 
 router.get('/', adminController.getAllAdmins);
 router.get('/:id', adminController.getAdmin);

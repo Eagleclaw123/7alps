@@ -309,15 +309,22 @@ exports.verifyOTP = catchAsync(async (req, res, next) => {
 
 // Reset password after OTP verification
 exports.resetPasswordAfterOTP = catchAsync(async (req, res, next) => {
-  const { email, password, passwordConfirm } = req.body;
+  const { email, otp, password, passwordConfirm } = req.body;
+
+  if (!email || !otp || !password || !passwordConfirm) {
+    return next(new AppError('Please provide email, OTP, password, and password confirmation', 400));
+  }
+
+  const hashedOTP = crypto.createHash('sha256').update(otp).digest('hex');
 
   const user = await Admin.findOne({
     Email: email,
+    passwordResetToken: hashedOTP,
     passwordResetExpires: { $gt: Date.now() },
   });
 
   if (!user) {
-    return next(new AppError('Session expired, please try again', 400));
+    return next(new AppError('Invalid or expired OTP. Please start the reset process again.', 400));
   }
 
   user.password = password;
