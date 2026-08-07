@@ -12,22 +12,6 @@ import {
 import AddressMapPicker from "../../../shared/components/map/AddressMapPicker";
 import HeroBanner from "../../../shared/components/ui/HeroBanner";
 
-/**
- * DESIGN TOKENS (make sure these exist wherever the rest of the app
- * pulls its type scale from — tailwind.config.js or an @font-face block):
- *
- *   font-serif  -> "Fraunces", serif      (display / names / section titles)
- *   font-sans   -> "Inter", sans-serif    (body / inputs / buttons)
- *
- * Google Fonts import, if not already present:
- *   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
- *
- * Palette used throughout:
- *   canvas  #FBF8F2   ink     #201F1B   forest      #16442C
- *   forest-deep #0E3220   clay #B4652F   sage #EEF1E6
- *   stone   #86806F   line    #E3DFD2
- */
-
 const initialProfile = {
   name: "",
   email: "",
@@ -44,7 +28,6 @@ const emptyAddressForm = {
   isDefault: false,
 };
 
-/* Dashed "perforation" strip used on address tags — the page's signature detail */
 const Perforation = () => (
   <div
     className="h-px w-full"
@@ -55,16 +38,21 @@ const Perforation = () => (
   />
 );
 
-/* Small tracked-out field label, apothecary-tag style */
 const FieldLabel = ({ children }) => (
   <label className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#86806F]">
     {children}
   </label>
 );
 
-/* Underline input — replaces the boxed input with a label-style field */
+/* Small inline error message shown under a field */
+const FieldError = ({ children }) =>
+  children ? <p className="pt-1 text-xs text-red-600">{children}</p> : null;
+
 const underlineInput =
   "w-full border-0 border-b border-[#E3DFD2] bg-transparent px-0 py-2 text-[15px] text-[#201F1B] outline-none transition-colors focus:border-[#16442C] disabled:text-[#86806F] placeholder:text-[#B8B2A0]";
+
+// Adds a red bottom-border variant when a field has an error
+const errorBorder = "border-b-red-500 focus:border-red-500";
 
 const CustomerProfile = () => {
   const dispatch = useDispatch();
@@ -73,12 +61,14 @@ const CustomerProfile = () => {
   const [profile, setProfile] = useState(initialProfile);
   const [editingProfile, setEditingProfile] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
-  const [profileError, setProfileError] = useState("");
+  const [profileErrors, setProfileErrors] = useState({});
+  const [profileFormError, setProfileFormError] = useState(""); // for server/API-level errors
 
   const [addressForm, setAddressForm] = useState(emptyAddressForm);
-  const [editingAddressIndex, setEditingAddressIndex] = useState(null); // null = closed, -1 = new, N = editing index N
+  const [editingAddressIndex, setEditingAddressIndex] = useState(null);
   const [savingAddress, setSavingAddress] = useState(false);
-  const [addressError, setAddressError] = useState("");
+  const [addressErrors, setAddressErrors] = useState({});
+  const [addressFormError, setAddressFormError] = useState(""); // for server/API-level errors
 
   useEffect(() => {
     if (!customer) return;
@@ -87,16 +77,31 @@ const CustomerProfile = () => {
 
   const handleProfileChange = ({ target: { name, value } }) => {
     setProfile((prev) => ({ ...prev, [name]: value }));
+    // clear the field's error as soon as the user edits it
+    setProfileErrors((prev) => (prev[name] ? { ...prev, [name]: "" } : prev));
+  };
+
+  const validateProfile = () => {
+    const errors = {};
+
+    if (!profile.name.trim()) {
+      errors.name = "Name is required.";
+    }
+
+    if (profile.email.trim() && !/^\S+@\S+\.\S+$/.test(profile.email.trim())) {
+      errors.email = "Enter a valid email address.";
+    }
+
+    return errors;
   };
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
-    setProfileError("");
+    setProfileFormError("");
 
-    if (!profile.name.trim()) {
-      setProfileError("Name is required.");
-      return;
-    }
+    const errors = validateProfile();
+    setProfileErrors(errors);
+    if (Object.keys(errors).length > 0) return;
 
     try {
       setSavingProfile(true);
@@ -104,7 +109,9 @@ const CustomerProfile = () => {
       dispatch(setCustomer(data.data.customer));
       setEditingProfile(false);
     } catch (err) {
-      setProfileError(err.response?.data?.message || "Unable to save profile.");
+      setProfileFormError(
+        err.response?.data?.message || "Unable to save profile.",
+      );
     } finally {
       setSavingProfile(false);
     }
@@ -115,19 +122,22 @@ const CustomerProfile = () => {
   const openNewAddressForm = () => {
     setAddressForm(emptyAddressForm);
     setEditingAddressIndex(-1);
-    setAddressError("");
+    setAddressErrors({});
+    setAddressFormError("");
   };
 
   const openEditAddressForm = (index) => {
     setAddressForm({ ...emptyAddressForm, ...addresses[index] });
     setEditingAddressIndex(index);
-    setAddressError("");
+    setAddressErrors({});
+    setAddressFormError("");
   };
 
   const closeAddressForm = () => {
     setEditingAddressIndex(null);
     setAddressForm(emptyAddressForm);
-    setAddressError("");
+    setAddressErrors({});
+    setAddressFormError("");
   };
 
   const handleAddressFieldChange = ({
@@ -137,6 +147,8 @@ const CustomerProfile = () => {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+    // clear the field's error as soon as the user edits it
+    setAddressErrors((prev) => (prev[name] ? { ...prev, [name]: "" } : prev));
   };
 
   const handleMapAddressChange = (parsed) => {
@@ -147,6 +159,13 @@ const CustomerProfile = () => {
       state: parsed.state || prev.state,
       pincode: parsed.pincode || prev.pincode,
     }));
+    setAddressErrors((prev) => ({
+      ...prev,
+      line1: "",
+      city: "",
+      state: "",
+      pincode: "",
+    }));
   };
 
   const persistAddresses = async (nextAddresses) => {
@@ -154,23 +173,36 @@ const CustomerProfile = () => {
     dispatch(setCustomer(data.data.customer));
   };
 
-  const handleSaveAddress = async (e) => {
-    e.preventDefault();
-    setAddressError("");
+  const validateAddress = () => {
+    const errors = {};
+
+    if (!addressForm.line1.trim()) errors.line1 = "Address line 1 is required.";
+    if (!addressForm.city.trim()) errors.city = "City is required.";
+    if (!addressForm.state.trim()) errors.state = "State is required.";
+
+    if (!addressForm.pincode.trim()) {
+      errors.pincode = "Pincode is required.";
+    } else if (!/^\d{6}$/.test(addressForm.pincode.trim())) {
+      errors.pincode = "Enter a valid 6-digit pincode.";
+    }
 
     if (
-      !addressForm.line1.trim() ||
-      !addressForm.city.trim() ||
-      !addressForm.state.trim() ||
-      !addressForm.pincode.trim()
+      addressForm.phone.trim() &&
+      !/^\d{10}$/.test(addressForm.phone.trim())
     ) {
-      setAddressError("Address line 1, city, state, and pincode are required.");
-      return;
+      errors.phone = "Enter a valid 10-digit phone number.";
     }
-    if (!/^\d{6}$/.test(addressForm.pincode.trim())) {
-      setAddressError("Enter a valid 6-digit pincode.");
-      return;
-    }
+
+    return errors;
+  };
+
+  const handleSaveAddress = async (e) => {
+    e.preventDefault();
+    setAddressFormError("");
+
+    const errors = validateAddress();
+    setAddressErrors(errors);
+    if (Object.keys(errors).length > 0) return;
 
     let nextAddresses = [...addresses];
 
@@ -189,7 +221,9 @@ const CustomerProfile = () => {
       await persistAddresses(nextAddresses);
       closeAddressForm();
     } catch (err) {
-      setAddressError(err.response?.data?.message || "Unable to save address.");
+      setAddressFormError(
+        err.response?.data?.message || "Unable to save address.",
+      );
     } finally {
       setSavingAddress(false);
     }
@@ -226,9 +260,7 @@ const CustomerProfile = () => {
   }
 
   return (
-    // <div className="bg-[#FBF8F2]">
     <div>
-      {/* ── Hero banner ──────────────────────────────────────────── */}
       <HeroBanner
         eyebrow="Profile"
         title="Your Profile"
@@ -280,6 +312,7 @@ const CustomerProfile = () => {
             transition={{ duration: 0.4, delay: 0.05 }}
             onSubmit={handleSaveProfile}
             className="space-y-6 border border-[#E3DFD2] bg-white p-8"
+            noValidate
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -309,8 +342,11 @@ const CustomerProfile = () => {
                   onChange={handleProfileChange}
                   disabled={!editingProfile}
                   placeholder="e.g. Priya Sharma"
-                  className={underlineInput}
+                  className={`${underlineInput} ${
+                    profileErrors.name ? errorBorder : ""
+                  }`}
                 />
+                <FieldError>{profileErrors.name}</FieldError>
               </div>
               <div className="space-y-1.5">
                 <FieldLabel>Email</FieldLabel>
@@ -321,8 +357,11 @@ const CustomerProfile = () => {
                   onChange={handleProfileChange}
                   disabled={!editingProfile}
                   placeholder="you@example.com"
-                  className={underlineInput}
+                  className={`${underlineInput} ${
+                    profileErrors.email ? errorBorder : ""
+                  }`}
                 />
+                <FieldError>{profileErrors.email}</FieldError>
               </div>
             </div>
 
@@ -335,8 +374,8 @@ const CustomerProfile = () => {
               />
             </div>
 
-            {profileError ? (
-              <p className="text-sm text-red-600">{profileError}</p>
+            {profileFormError ? (
+              <p className="text-sm text-red-600">{profileFormError}</p>
             ) : null}
 
             {editingProfile ? (
@@ -349,7 +388,8 @@ const CustomerProfile = () => {
                       name: customer.name || "",
                       email: customer.email || "",
                     });
-                    setProfileError("");
+                    setProfileErrors({});
+                    setProfileFormError("");
                   }}
                   className="px-5 py-2.5 text-sm font-medium text-[#86806F] transition-colors hover:text-[#201F1B]"
                 >
@@ -471,6 +511,7 @@ const CustomerProfile = () => {
             <form
               onSubmit={handleSaveAddress}
               className="mt-6 space-y-5 border-t border-[#E3DFD2] pt-6"
+              noValidate
             >
               <AddressMapPicker onAddressChange={handleMapAddressChange} />
 
@@ -492,8 +533,11 @@ const CustomerProfile = () => {
                     value={addressForm.phone}
                     onChange={handleAddressFieldChange}
                     placeholder="10-digit mobile number"
-                    className={underlineInput}
+                    className={`${underlineInput} ${
+                      addressErrors.phone ? errorBorder : ""
+                    }`}
                   />
+                  <FieldError>{addressErrors.phone}</FieldError>
                 </div>
               </div>
 
@@ -504,8 +548,11 @@ const CustomerProfile = () => {
                   value={addressForm.line1}
                   onChange={handleAddressFieldChange}
                   placeholder="House no., street, area"
-                  className={underlineInput}
+                  className={`${underlineInput} ${
+                    addressErrors.line1 ? errorBorder : ""
+                  }`}
                 />
+                <FieldError>{addressErrors.line1}</FieldError>
               </div>
 
               <div className="space-y-1.5">
@@ -526,8 +573,11 @@ const CustomerProfile = () => {
                     name="city"
                     value={addressForm.city}
                     onChange={handleAddressFieldChange}
-                    className={underlineInput}
+                    className={`${underlineInput} ${
+                      addressErrors.city ? errorBorder : ""
+                    }`}
                   />
+                  <FieldError>{addressErrors.city}</FieldError>
                 </div>
                 <div className="space-y-1.5">
                   <FieldLabel>State</FieldLabel>
@@ -535,8 +585,11 @@ const CustomerProfile = () => {
                     name="state"
                     value={addressForm.state}
                     onChange={handleAddressFieldChange}
-                    className={underlineInput}
+                    className={`${underlineInput} ${
+                      addressErrors.state ? errorBorder : ""
+                    }`}
                   />
+                  <FieldError>{addressErrors.state}</FieldError>
                 </div>
                 <div className="space-y-1.5">
                   <FieldLabel>Pincode</FieldLabel>
@@ -545,8 +598,11 @@ const CustomerProfile = () => {
                     value={addressForm.pincode}
                     onChange={handleAddressFieldChange}
                     maxLength={6}
-                    className={underlineInput}
+                    className={`${underlineInput} ${
+                      addressErrors.pincode ? errorBorder : ""
+                    }`}
                   />
+                  <FieldError>{addressErrors.pincode}</FieldError>
                 </div>
               </div>
 
@@ -561,8 +617,8 @@ const CustomerProfile = () => {
                 Set as default address
               </label>
 
-              {addressError ? (
-                <p className="text-sm text-red-600">{addressError}</p>
+              {addressFormError ? (
+                <p className="text-sm text-red-600">{addressFormError}</p>
               ) : null}
 
               <div className="flex justify-end gap-3 border-t border-[#E3DFD2] pt-5">

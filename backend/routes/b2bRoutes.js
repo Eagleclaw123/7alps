@@ -19,7 +19,10 @@ router.post('/logout', b2bAuthController.logout);
 
 router.get('/dashboard/stats', quoteController.getMyDashboardStats);
 
-router.route('/quotes').get(quoteController.getMyQuotes).post(quoteController.createQuote);
+router
+  .route('/quotes')
+  .get(quoteController.getMyQuotes)
+  .post(quoteController.createQuote);
 router.get('/quotes/:id', quoteController.getMyQuote);
 
 router.get('/orders', orderController.getMyB2BOrders);
