@@ -5,6 +5,7 @@ const B2BMember = require('../models/b2bModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const sendEmail = require('../utils/email');
+const { otpEmail } = require('../utils/emailTemplates');
 
 const signToken = (id) =>
   jwt.sign({ id, type: 'b2b' }, process.env.JWT_SECRET, {
@@ -99,10 +100,18 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   await member.save({ validateBeforeSave: false });
 
   try {
+    const { html, text } = otpEmail({
+      heading: 'Reset your password',
+      intro: "Use the code below to reset your 7ALP's B2B account password.",
+      otp,
+      minutes: 5,
+    });
+
     await sendEmail({
       email: member.email,
       subject: 'Your Password Reset OTP (valid for 5 minutes)',
-      message: `Your OTP for password reset is: ${otp}\n\nThis OTP will expire in 5 minutes.`,
+      message: text,
+      html,
     });
 
     res.status(200).json({ status: 'success', message: 'OTP sent to email!' });

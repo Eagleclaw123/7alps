@@ -2,6 +2,7 @@ const Contact = require('../models/contactModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const sendEmail = require('../utils/email');
+const { notificationEmail } = require('../utils/emailTemplates');
 
 // ── Public ────────────────────────────────────────────────────────────────────
 
@@ -38,20 +39,24 @@ exports.createContact = catchAsync(async (req, res, next) => {
   // Best-effort notification — a failed email must never fail the submission itself.
   if (process.env.CONTACT_NOTIFY_EMAIL) {
     try {
+      const { html, text } = notificationEmail({
+        heading: 'New contact form submission',
+        lines: [
+          ['Name', fullName],
+          ['Phone', phone],
+          ['Email', email],
+          ['Company', companyName],
+          ['Product interest', productInterest],
+          ['Quantity requirement', quantityRequirement],
+          ['Message', message],
+        ],
+      });
+
       await sendEmail({
         email: process.env.CONTACT_NOTIFY_EMAIL,
         subject: `New contact form submission from ${fullName}`,
-        message: [
-          `Name: ${fullName}`,
-          `Phone: ${phone}`,
-          email ? `Email: ${email}` : null,
-          companyName ? `Company: ${companyName}` : null,
-          productInterest ? `Product interest: ${productInterest}` : null,
-          quantityRequirement ? `Quantity requirement: ${quantityRequirement}` : null,
-          message ? `Message: ${message}` : null,
-        ]
-          .filter(Boolean)
-          .join('\n'),
+        message: text,
+        html,
       });
     } catch (err) {
       console.error('Failed to send contact notification email:', err.message);

@@ -21,16 +21,25 @@ const customerSchema = new mongoose.Schema(
       required: [true, 'Name is required'],
       trim: true,
     },
+    // Set once, right after mobile-collection completes post-signup — not
+    // required at document-creation time since the account is created at
+    // email-OTP-verify, before the mobile step runs (see
+    // customerAuthController.verifyOTP / completeMobile). `sparse` lets
+    // multiple in-progress signups coexist without colliding on `null`.
     mobile: {
       type: String,
-      required: [true, 'Mobile number is required'],
       unique: true,
+      sparse: true,
       trim: true,
+      match: [/^[6-9]\d{9}$/, 'Please provide a valid Indian mobile number'],
     },
     email: {
       type: String,
+      required: [true, 'Email is required'],
+      unique: true,
       lowercase: true,
       trim: true,
+      match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email address'],
     },
     addresses: [addressSchema],
     wishlist: [

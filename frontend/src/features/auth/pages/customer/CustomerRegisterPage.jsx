@@ -16,11 +16,9 @@ const validators = {
       return "Name can only contain letters and spaces.";
     return "";
   },
-  mobile: (value) => {
-    if (!value) return "Please enter your mobile number.";
-    if (value.length !== 10) return "Mobile number must be exactly 10 digits.";
-    if (!/^[6-9]\d{9}$/.test(value))
-      return "Enter a valid 10-digit mobile number.";
+  email: (value) => {
+    if (!value) return "Please enter your email address.";
+    if (!/^\S+@\S+\.\S+$/.test(value)) return "Enter a valid email address.";
     return "";
   },
 };
@@ -31,22 +29,19 @@ const CustomerRegisterPage = () => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
-    mobile: location.state?.mobile || "",
+    email: location.state?.email || "",
   });
   const [fieldErrors, setFieldErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [formError, setFormError] = useState("");
 
   const handleChange = ({ target: { name, value } }) => {
-    const nextValue =
-      name === "mobile" ? value.replace(/\D/g, "").slice(0, 10) : value;
-
-    setFormData((prev) => ({ ...prev, [name]: nextValue }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
 
     if (touched[name]) {
       setFieldErrors((prev) => ({
         ...prev,
-        [name]: validators[name](nextValue),
+        [name]: validators[name](value),
       }));
     }
   };
@@ -59,10 +54,10 @@ const CustomerRegisterPage = () => {
   const validateAll = () => {
     const nextErrors = {
       name: validators.name(formData.name),
-      mobile: validators.mobile(formData.mobile),
+      email: validators.email(formData.email),
     };
     setFieldErrors(nextErrors);
-    setTouched({ name: true, mobile: true });
+    setTouched({ name: true, email: true });
     return Object.values(nextErrors).every((msg) => !msg);
   };
 
@@ -79,7 +74,7 @@ const CustomerRegisterPage = () => {
       await sendCustomerOTP(formData);
 
       navigate("/customer/verify-otp", {
-        state: { mobile: formData.mobile, from: location.state?.from },
+        state: { email: formData.email, from: location.state?.from },
       });
     } catch (error) {
       setFormError(
@@ -92,7 +87,7 @@ const CustomerRegisterPage = () => {
   };
 
   const isValid =
-    !validators.name(formData.name) && !validators.mobile(formData.mobile);
+    !validators.name(formData.name) && !validators.email(formData.email);
 
   return (
     <AuthLayout>
@@ -123,18 +118,17 @@ const CustomerRegisterPage = () => {
 
           <div>
             <AuthInput
-              name="mobile"
-              label="Mobile Number"
-              type="tel"
-              placeholder="9876543210"
-              value={formData.mobile}
+              name="email"
+              label="Email Address"
+              type="email"
+              placeholder="you@example.com"
+              value={formData.email}
               onChange={handleChange}
               onBlur={handleBlur}
-              maxLength={10}
             />
-            {fieldErrors.mobile ? (
+            {fieldErrors.email ? (
               <p className="mt-1.5 text-sm text-red-600">
-                {fieldErrors.mobile}
+                {fieldErrors.email}
               </p>
             ) : null}
           </div>

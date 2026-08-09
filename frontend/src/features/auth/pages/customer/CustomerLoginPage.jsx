@@ -9,18 +9,15 @@ import AuthLayout from "../../components/AuthLayout";
 import { sendCustomerOTP } from "../../../../shared/services/auth.service";
 
 const initialFormData = {
-  mobile: "",
+  email: "",
 };
 
-const validateMobile = (mobile) => {
-  if (!mobile) {
-    return "Mobile number is required.";
+const validateEmail = (email) => {
+  if (!email) {
+    return "Email address is required.";
   }
-  if (mobile.length !== 10) {
-    return "Mobile number must be exactly 10 digits.";
-  }
-  if (!/^[6-9]\d{9}$/.test(mobile)) {
-    return "Enter a valid Indian mobile number.";
+  if (!/^\S+@\S+\.\S+$/.test(email)) {
+    return "Enter a valid email address.";
   }
   return "";
 };
@@ -35,28 +32,25 @@ const CustomerLoginPage = () => {
   const [error, setError] = useState("");
   const [touched, setTouched] = useState(false);
 
-  const handleChange = ({ target: { name, value } }) => {
-    // Allow only numbers
-    const mobile = value.replace(/\D/g, "").slice(0, 10);
-
+  const handleChange = ({ target: { value } }) => {
     setFormData({
-      mobile,
+      email: value,
     });
 
     if (touched) {
-      setError(validateMobile(mobile));
+      setError(validateEmail(value));
     }
   };
 
   const handleBlur = () => {
     setTouched(true);
-    setError(validateMobile(formData.mobile));
+    setError(validateEmail(formData.email));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const validationError = validateMobile(formData.mobile);
+    const validationError = validateEmail(formData.email);
     setTouched(true);
 
     if (validationError) {
@@ -71,10 +65,10 @@ const CustomerLoginPage = () => {
 
       await sendCustomerOTP(formData);
 
-      // Pass mobile number (and where to return to after login) to the OTP page
+      // Pass email (and where to return to after login) to the OTP page
       navigate("/customer/verify-otp", {
         state: {
-          mobile: formData.mobile,
+          email: formData.email,
           from,
         },
       });
@@ -85,10 +79,10 @@ const CustomerLoginPage = () => {
         err.response?.status === 400 &&
         message?.includes("provide your name")
       ) {
-        // No account exists for this number yet — send them to register instead
+        // No account exists for this email yet — send them to register instead
         // of dead-ending on an error.
         navigate("/customer/register", {
-          state: { mobile: formData.mobile, from },
+          state: { email: formData.email, from },
         });
         return;
       }
@@ -115,20 +109,19 @@ const CustomerLoginPage = () => {
 
         <AuthHeader
           title="Welcome Back"
-          subtitle="Login using your registered mobile number."
+          subtitle="Login using your registered email address."
         />
 
         <form className="space-y-6" onSubmit={handleSubmit} noValidate>
           <div>
             <AuthInput
-              name="mobile"
-              label="Mobile Number"
-              type="tel"
-              placeholder="Enter your mobile number"
-              value={formData.mobile}
+              name="email"
+              label="Email Address"
+              type="email"
+              placeholder="you@example.com"
+              value={formData.email}
               onChange={handleChange}
               onBlur={handleBlur}
-              maxLength={10}
             />
             {error ? (
               <p className="mt-1.5 text-sm text-red-600">{error}</p>
@@ -137,7 +130,7 @@ const CustomerLoginPage = () => {
 
           <AuthButton
             type="submit"
-            disabled={loading || formData.mobile.length !== 10}
+            disabled={loading || !!validateEmail(formData.email)}
           >
             {loading ? "Sending OTP..." : "Send OTP"}
           </AuthButton>

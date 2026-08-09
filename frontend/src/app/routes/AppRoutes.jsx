@@ -58,6 +58,9 @@ const CustomerRegisterPage = lazy(
 const CustomerVerifyOTPPage = lazy(
   () => import("../../features/auth/pages/customer/CustomerVerifyOTPPage"),
 );
+const CustomerAddMobilePage = lazy(
+  () => import("../../features/auth/pages/customer/CustomerAddMobilePage"),
+);
 const B2BLoginPage = lazy(
   () => import("../../features/auth/pages/b2b/B2BLoginPage"),
 );
@@ -192,6 +195,10 @@ const AppRoutes = () => {
           <Route
             path="/customer/verify-otp"
             element={<CustomerVerifyOTPPage />}
+          />
+          <Route
+            path="/customer/add-mobile"
+            element={<CustomerAddMobilePage />}
           />
           <Route
             path="/admin/forgot-password"

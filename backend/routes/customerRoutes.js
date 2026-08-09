@@ -11,6 +11,7 @@ const router = express.Router();
 // ── Auth (no auth required) ───────────────────────────────────────────────────
 router.post('/send-otp', customerAuthController.sendOTP);
 router.post('/verify-otp', customerAuthController.verifyOTP);
+router.post('/complete-mobile', customerAuthController.completeMobile);
 
 // ── Protected ──────────────────────────────────────────────────────────────────
 router.use(customerAuthController.protectCustomer);
