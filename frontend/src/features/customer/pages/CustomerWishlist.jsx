@@ -1,20 +1,75 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Heart } from "lucide-react";
+import EmptyCart from "../../cart/components/EmptyCart";
+import NewsletterBanner from "../../cart/components/NewsletterBanner";
+import CartList from "../../cart/components/CartList";
+import { addToCart } from "../../../store/slices/cartSlice";
 
 import {
   fetchWishlist,
   selectWishlistItems,
+  toggleWishlistItem,
 } from "../../../store/slices/wishlistSlice";
-import ProductCard from "../../products/components/ProductCard";
 import AnimatedPage from "../../../shared/components/ui/AnimatedPage";
 import HeroBanner from "../../../shared/components/ui/HeroBanner";
+import { Leaf } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const CustomerWishlist = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const items = useSelector(selectWishlistItems);
+  const [quantities, setQuantities] = useState({});
+
+  const handleRemove = (id) => {
+    dispatch(toggleWishlistItem(id));
+  };
+
+  const handleWishlistQuantityChange = (id, delta) => {
+    setQuantities((current) => {
+      const existing = current[id] || 1;
+      const next = Math.max(1, existing + delta);
+      return { ...current, [id]: next };
+    });
+  };
+
+  const handleAddToCart = (item) => {
+    // item is the mapped cart-like item we passed into CartList
+    const productId = item.productId || item.id;
+    const variantLabel = item.variantLabel || "";
+    dispatch(
+      addToCart({
+        productId,
+        variantLabel,
+        quantity: item.quantity || 1,
+        name: item.name,
+        image: item.image,
+        category: item.category,
+        price: item.price,
+      }),
+    );
+    // Optionally remove from wishlist after adding to cart
+    dispatch(toggleWishlistItem(productId));
+  };
+
+  // Convert wishlist product shape to the cart item shape expected by CartList/CartItem
+  const wishlistAsCartItems = (products) =>
+    products.map((p) => ({
+      id: p.id,
+      productId: p.id,
+      variantLabel:
+        (p.variants &&
+          (p.variants.find((v) => v.isDefault) || p.variants[0])?.label) ||
+        "",
+      name: p.ProductName || p.name || p.title || "",
+      image:
+        p.ProductImage || (p.ProductImages && p.ProductImages[0]) || p.image,
+      price: p.ProductPrice ?? p.price ?? 0,
+      quantity: quantities[p.id] || 1,
+      weight: p.weight || p.size || "",
+      inStock: typeof p.inStock === "boolean" ? p.inStock : true,
+      category: p.ProductCategory || p.category || "",
+    }));
 
   useEffect(() => {
     dispatch(fetchWishlist());
@@ -32,24 +87,52 @@ const CustomerWishlist = () => {
 
         <div className="px-6 py-10 xl:px-0">
           <div className="mx-auto max-w-7xl">
-            {items.length === 0 ? (
-              <div className="flex flex-col items-center gap-4 border border-[#E3DFD2] bg-white p-16 text-center text-[#86806F]">
-                <Heart className="h-8 w-8 text-[#B8B2A0]" />
-                <p>Nothing in your wishlist yet.</p>
-                <button
-                  onClick={() => navigate("/products")}
-                  className="rounded-full bg-[#16442C] px-5 py-2.5 text-sm font-semibold uppercase tracking-wide text-white hover:bg-[#0E3220]"
-                >
-                  Browse Products
-                </button>
+            <div className="mx-auto max-w-7xl border border-[#E3DFD2] bg-white">
+              <div className="py-6">
+                {items.length === 0 ? (
+                  <EmptyCart
+                    title="Your wishlist is empty"
+                    description="Save products you're curious about and they'll show up here, ready to add to cart whenever you're ready."
+                    buttonText="Browse Products"
+                    buttonHref="/products"
+                  />
+                ) : (
+                  <div>
+                    <div className="px-6">
+                      <p className="flex items-center gap-2 text-sm text-[#5B564A]">
+                        <Leaf className="h-4 w-4 text-[#16442C]" />
+                        You have{" "}
+                        <span className="font-semibold text-[#201F1B]">
+                          {items.length}
+                        </span>{" "}
+                        {items.length === 1 ? "item" : "items"} in your cart
+                      </p>
+                    </div>
+
+                    <CartList
+                      items={wishlistAsCartItems(items)}
+                      onUpdateQuantity={handleWishlistQuantityChange}
+                      onRemove={handleRemove}
+                      onAdd={handleAddToCart}
+                      columns={[
+                        "Product",
+                        "In Stock",
+                        "Price",
+                        "Add to Cart",
+                        "Total",
+                      ]}
+                      emptyState={{
+                        title: "Your wishlist is empty.",
+                        description:
+                          "Save a product to your wishlist and add it to cart later.",
+                        buttonText: "Browse Products",
+                        buttonHref: "/products",
+                      }}
+                    />
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
-                {items.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
-            )}
+            </div>
           </div>
         </div>
       </div>

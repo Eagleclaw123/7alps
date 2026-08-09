@@ -48,12 +48,13 @@ const QuantityStepper = ({ quantity, onIncrease, onDecrease, id }) => (
   </div>
 );
 
-const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
+const CartItem = ({ item, onIncrease, onDecrease, onRemove, onAdd }) => {
   const price = Number(item.price || 0);
   const quantity = Number(item.quantity || 1);
   const total = price * quantity;
   const name = decodeEntities(item.name);
   const category = decodeEntities(item.category);
+  const hasAddAction = Boolean(onAdd);
 
   return (
     <div>
@@ -98,21 +99,34 @@ const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
           <Perforation />
         </div>
 
-        <div className="flex items-center justify-between">
-          <QuantityStepper
-            id={item.id}
-            quantity={quantity}
-            onIncrease={onIncrease}
-            onDecrease={onDecrease}
-          />
-          <div className="text-right">
-            <p className="text-[11px] text-[#86806F]">
-              ₹{price.toFixed(2)} each
-            </p>
-            <p className="font-serif text-lg text-[#16442C]">
-              ₹{total.toFixed(2)}
-            </p>
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-[#86806F]">Qty</span>
+              <QuantityStepper
+                id={item.id}
+                quantity={quantity}
+                onIncrease={onIncrease}
+                onDecrease={onDecrease}
+              />
+            </div>
+            <div className="text-right">
+              <p className="text-[11px] text-[#86806F]">
+                ₹{price.toFixed(2)} each
+              </p>
+              <p className="font-serif text-lg text-[#16442C]">
+                ₹{total.toFixed(2)}
+              </p>
+            </div>
           </div>
+          {onAdd && (
+            <button
+              onClick={() => onAdd(item)}
+              className="w-full rounded-full bg-[#16442C] px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white hover:bg-[#0E3220]"
+            >
+              Add to Cart
+            </button>
+          )}
         </div>
       </div>
 
@@ -163,18 +177,31 @@ const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
           ₹{price.toFixed(2)}
         </span>
 
-        {/* Quantity */}
-        <QuantityStepper
-          id={item.id}
-          quantity={quantity}
-          onIncrease={onIncrease}
-          onDecrease={onDecrease}
-        />
+        {/* Qty / Action */}
+        {onAdd ? (
+          <div className="">
+            <button
+              onClick={() => onAdd(item)}
+              className="rounded-full bg-[#16442C] px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white hover:bg-[#0E3220]"
+            >
+              Add to Cart
+            </button>
+          </div>
+        ) : (
+          <QuantityStepper
+            id={item.id}
+            quantity={quantity}
+            onIncrease={onIncrease}
+            onDecrease={onDecrease}
+          />
+        )}
 
         {/* Total */}
-        <span className="text-[15px] font-medium text-[#16442C]">
-          ₹{total.toFixed(2)}
-        </span>
+        <div className="">
+          <span className="text-[15px] font-medium text-[#16442C]">
+            ₹{total.toFixed(2)}
+          </span>
+        </div>
       </div>
     </div>
   );
