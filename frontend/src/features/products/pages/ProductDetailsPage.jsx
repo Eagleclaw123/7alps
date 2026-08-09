@@ -39,7 +39,7 @@ const ProductDetailsPage = () => {
   }, [id]);
 
   if (loading) {
-    return <div className="py-20 text-center">Loading product...</div>;
+    return <div className="py-20 text-center mt-15">Loading product...</div>;
   }
 
   if (notFound || !product) {

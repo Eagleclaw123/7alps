@@ -253,7 +253,7 @@ const CustomerProfile = () => {
 
   if (!customer) {
     return (
-      <section className="mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8 my-30">
+      <section className="mx-auto text-center max-w-7xl px-4 py-2 sm:px-6 lg:px-8 my-30">
         <p className="text-sm text-[#86806F]">Loading your profile...</p>
       </section>
     );
