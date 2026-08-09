@@ -19,3 +19,11 @@ export const sendCustomerOTP = (data) => {
 export const verifyCustomerOTP = (data) => {
   return api.post("/customer/verify-otp", data);
 };
+
+export const completeCustomerMobile = (pendingToken, mobile) => {
+  return api.post(
+    "/customer/complete-mobile",
+    { mobile },
+    { headers: { Authorization: `Bearer ${pendingToken}` } },
+  );
+};

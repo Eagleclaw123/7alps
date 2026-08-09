@@ -2,8 +2,6 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-import Cookies from "js-cookie";
-
 import AuthLayout from "../../components/AuthLayout";
 import AuthCard from "../../components/AuthCard";
 import AuthHeader from "../../components/AuthHeader";
@@ -20,13 +18,13 @@ const CustomerVerifyOTPPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const mobile = location.state?.mobile;
+  const email = location.state?.email;
   const from = location.state?.from;
 
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
 
-  if (!mobile) {
+  if (!email) {
     return (
       <AuthLayout>
         <AuthCard>
@@ -57,7 +55,16 @@ const CustomerVerifyOTPPage = () => {
     try {
       setLoading(true);
 
-      const { data } = await verifyCustomerOTP({ mobile, otp });
+      const { data } = await verifyCustomerOTP({ email, otp });
+
+      if (data.data.needsMobile) {
+        // Email verified, but no mobile number on file yet — collect and
+        // validate it before a full login session is issued.
+        navigate("/customer/add-mobile", {
+          state: { pendingToken: data.data.pendingToken, from },
+        });
+        return;
+      }
 
       // Store only user details in localStorage
       localStorage.setItem(
@@ -82,7 +89,7 @@ const CustomerVerifyOTPPage = () => {
 
   const handleResend = async () => {
     try {
-      await sendCustomerOTP({ mobile });
+      await sendCustomerOTP({ email });
       alert("A new OTP has been sent.");
     } catch (error) {
       alert(error.response?.data?.message || "Unable to resend OTP.");
@@ -102,20 +109,15 @@ const CustomerVerifyOTPPage = () => {
 
         <AuthHeader
           title="Verify OTP"
-          subtitle="Enter the 6-digit verification code sent to your mobile number."
+          subtitle="Enter the 6-digit verification code sent to your email."
         />
 
         <form onSubmit={handleSubmit} className="space-y-8">
           <p className="text-center text-sm text-gray-500">
             Code sent to
             <span className="ml-1 font-semibold text-[#0F6B3E]">
-              +91 {mobile}
+              {email}
             </span>
-          </p>
-
-          <p className="text-center text-xs text-gray-400">
-            SMS delivery isn't set up yet — use{" "}
-            <span className="font-semibold">123456</span> to continue.
           </p>
 
           <OTPInput onChange={setOtp} />
@@ -139,7 +141,7 @@ const CustomerVerifyOTPPage = () => {
               to="/customer/login"
               className="block font-medium text-[#0F6B3E] transition hover:underline"
             >
-              ← Change Mobile Number
+              ← Change Email Address
             </Link>
           </div>
         </form>

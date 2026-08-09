@@ -151,7 +151,7 @@
   <div class="eyebrow">Platform Documentation</div>
   <h1>7ALP's</h1>
   <p class="lead">A complete walkthrough of the storefront, admin console, and B2B wholesale portal — every login, route, and feature, as currently implemented.</p>
-  <div class="meta">Updated 2026-08-06 &middot; Frontend: React 19 + Vite + Redux Toolkit + Tailwind 4 &middot; Backend: Node.js + Express 5 + MongoDB (Mongoose)</div>
+  <div class="meta">Updated 2026-08-09 &middot; Frontend: React 19 + Vite + Redux Toolkit + Tailwind 4 &middot; Backend: Node.js + Express 5 + MongoDB (Mongoose)</div>
 </section>
 
 <h2 class="section">1. Architecture Overview</h2>
@@ -183,13 +183,15 @@
 
 <h2 class="section">2. Logins</h2>
 
-<h3>Customer</h3>
-<p>Mobile number + OTP, no password. A single flow handles both signup and login — if the number isn't recognized, the customer is asked for a name and an account is created automatically on OTP verification.</p>
+<h3>Customer<span class="badge-fixed">changed</span></h3>
+<p>Email + OTP, no password &mdash; switched this round from mobile-number OTP (which had no real SMS provider behind it; it only ever simulated delivery) to real email delivery via Resend. A single flow handles both signup and login: if the email isn't recognized, the customer is asked for a name and an account is created on OTP verification. New signups &mdash; and any existing account that doesn't have a mobile number on file yet &mdash; are then required to enter and verify an Indian mobile number before a full login session is issued; the account row exists in the database at that point, but no session cookie is granted until this step completes.</p>
 <table>
   <tr><th>Field</th><th>Detail</th></tr>
-  <tr><td>Login route</td><td><code>/customer/login</code> &rarr; <code>/customer/verify-otp</code></td></tr>
-  <tr><td>Session</td><td>JWT in httpOnly cookie <code>customerToken</code></td></tr>
-  <tr><td>Dev fallback OTP</td><td><code>123456</code> always works until a real SMS provider is wired up</td></tr>
+  <tr><td>Login route</td><td><code>/customer/login</code> &rarr; <code>/customer/verify-otp</code> &rarr; <code>/customer/add-mobile</code> (only shown if no mobile is on file yet)</td></tr>
+  <tr><td>Session</td><td>JWT in httpOnly cookie <code>customerToken</code>, issued only once both email and mobile are on file</td></tr>
+  <tr><td>Mobile format</td><td>Indian mobile numbers only &mdash; <code>^[6-9]\d{9}$</code> &mdash; enforced client-side, server-side, and at the database schema level (with a unique index)</td></tr>
+  <tr><td>Mobile-pending token</td><td>A separate, short-lived (15 minute) JWT scoped only to the "add mobile" step &mdash; cannot be used to access any customer data, place orders, or otherwise act as a login session</td></tr>
+  <tr><td>OTP delivery</td><td>Real email via Resend, branded template &mdash; no dev bypass code exists anymore (see Section 7)</td></tr>
 </table>
 
 <h3>Admin</h3>
@@ -276,7 +278,7 @@
   <li><b>Buy Now<span class="badge-fixed">fixed</span></b> — purchasing directly from a product page no longer touches the cart at all; checkout shows only that one item, and the customer's actual cart is left completely untouched.</li>
   <li><b>Checkout</b> — shipping address form with an embedded Google Maps picker, now auto-filled from the customer's default saved address<span class="badge-new">new</span>; choice of <b>Cash on Delivery</b> or <b>Pay Online (Razorpay)</b>.</li>
   <li><b>Orders</b> — history with status, itemized breakdown (product photo + expected delivery date per item), shipping address, broadened search (ID/product/status/address/date), and an "Order Again" button that re-adds every item from a past order to the cart<span class="badge-new">new</span>.</li>
-  <li><b>Profile</b> — editable name/email; a real address book (add/edit/delete/set-default), each entry fillable via the same map picker. The only (or first) saved address is now always guaranteed to be the default<span class="badge-fixed">fixed</span>.</li>
+  <li><b>Profile</b> — editable name only (email is the verified account identity set at signup, and is no longer editable from the profile page<span class="badge-fixed">changed</span>; mobile was already locked); a real address book (add/edit/delete/set-default), each entry fillable via the same map picker. The only (or first) saved address is now always guaranteed to be the default<span class="badge-fixed">fixed</span>.</li>
   <li><b>Reviews</b> — logged-in customers can rate &amp; review a product from the product page, and are now also prompted with a "Rate this product" link on delivered order items<span class="badge-new">new</span> (skipped once already reviewed); reviews are held as <code>Pending</code> until an admin publishes them.</li>
 </ul>
 
@@ -315,11 +317,14 @@
 </div>
 
 <h2 class="section">7. Email (Resend)</h2>
-<p>All transactional email — signup OTPs, and both the Admin and B2B forgot-password OTP flows (now fully wired end to end on the frontend, see Section 2) — sends through Resend instead of the previous Gmail/Nodemailer setup. The change is isolated to <code>backend/utils/email.js</code>, which keeps the same <code>sendEmail({ email, subject, message })</code> signature, so no caller had to change.</p>
+<p>All transactional email — Customer email-OTP login<span class="badge-new">new</span>, Admin signup OTP, both the Admin and B2B forgot-password OTP flows, and the contact-form admin notification — sends through Resend instead of the previous Gmail/Nodemailer setup.</p>
+<div class="callout info">
+  <b>Branded HTML template<span class="badge-new">new</span>.</b> Every one of the emails above previously sent as bare, unstyled plain text (no logo, no color, no layout at all). All six now render through one shared HTML template — <code>backend/utils/emailTemplates.js</code> — using the site's actual brand colors (<code>#0F6B3E</code> primary green, <code>#16442C</code> header, cream background) and the 7ALP's logo, with a plain-text version still sent alongside for email clients that prefer it. <code>backend/utils/email.js</code>'s <code>sendEmail()</code> signature grew one optional field (<code>html</code>) — existing callers that don't pass it are unaffected.
+</div>
 <table>
   <tr><th>Field</th><th>Detail</th></tr>
   <tr><td>Config</td><td><code>RESEND_API_KEY</code> + <code>RESEND_FROM_EMAIL</code> in <code>backend/.env</code></td></tr>
-  <tr><td>Sender address</td><td><code>7Alps &lt;support@7alpsglobal.com&gt;</code> — <code>7alpsglobal.com</code> is verified with Resend, so email delivers to any recipient (earlier in setup, this pointed at a malformed address and OTP emails failed to send outright; fixed this round)</td></tr>
+  <tr><td>Sender address</td><td><code>7Alps &lt;support@7alpsglobal.com&gt;</code> — <code>7alpsglobal.com</code> is verified with Resend, so email delivers to any recipient (earlier in setup, this pointed at a malformed address and OTP emails failed to send outright; fixed previously)</td></tr>
   <tr><td>Contact form notification</td><td>Optional — if <code>CONTACT_NOTIFY_EMAIL</code> is set in <code>backend/.env</code>, admin gets an email on every new Contact Us submission; unset by default so it's silently skipped until a real address is configured.</td></tr>
 </table>
 
@@ -337,7 +342,7 @@
   <tr><th>What</th><th>Value</th></tr>
   <tr><td>Admin login</td><td><code>7alpsadmin@7alps.com</code> / <code>7alps123</code></td></tr>
   <tr><td>B2B login</td><td><code>b2bpartner@7alps.com</code> / <code>7alps123</code></td></tr>
-  <tr><td>Customer login</td><td>Any 10-digit mobile number, OTP <code>123456</code></td></tr>
+  <tr><td>Customer login<span class="badge-fixed">changed</span></td><td>Any real email address — OTP is genuinely emailed via Resend (check the inbox; no dev bypass code exists). A new account must then also enter a valid Indian mobile number (e.g. <code>9876543210</code> — must match <code>^[6-9]\d{9}$</code>) before login completes.</td></tr>
   <tr><td>Razorpay test card (recommended)</td><td><code>5267 3181 8797 5449</code> (Mastercard) — any future expiry, any 3-digit CVV</td></tr>
   <tr><td>Razorpay test OTP</td><td>Any 4-10 digit number (e.g. <code>1234</code>) — it's a test-mode simulation, not a fixed code</td></tr>
   <tr><td>Password-reset OTP (Admin/B2B)</td><td>Emailed via Resend from <code>support@7alpsglobal.com</code>, delivered to the real account email — now testable end to end from the actual login page (Section 2), including the final "set new password" step</td></tr>
@@ -349,7 +354,7 @@
 <h2 class="section">9. Known Limitations</h2>
 <ul>
   <li><b>Admin Quotes tab date-range filtering isn't exposed in the UI</b> — <code>GET /api/v1/admin/quotes</code> accepts <code>dateFrom</code>/<code>dateTo</code> alongside <code>status</code>, but the B2B Team page's Quotes tab UI only exposes a status dropdown (search now works correctly as of this round — that part of the earlier limitation is resolved).</li>
-  <li><b>SMS OTP delivery is not wired up</b> — OTPs are logged to the server console in development, and <code>123456</code> is always accepted as a fallback until a real SMS provider (e.g. MSG91, Twilio) is integrated.</li>
+  <li><b>Mobile number is validated, not OTP-verified</b> — the Indian mobile number collected right after email verification is format- and uniqueness-checked, but (unlike email) no confirmation code is sent to it. This is a deliberate scope choice for this round, not an oversight; adding a second, mobile-based OTP step is a possible future enhancement if it's ever needed.</li>
   <li><b>The home page's decorative "Shop by category" tiles are static content</b> (curated imagery in a fixed 3-tile layout), separate from the real, admin-managed Category system used everywhere else (product forms, filters, B2B catalog).</li>
   <li><b>No order/quote-status confirmation emails</b> — order placement, quote approval/rejection, etc. remain visible in-app only; Resend is currently used only for OTP flows and the optional contact-form admin notification.</li>
   <li><b>Product ratings are admin-entered, not computed from real reviews</b> — a deliberate interim state for launch (see Section 5), not a bug; genuine review collection is running in parallel for a future switch-over.</li>
@@ -363,6 +368,10 @@
 
 <div class="callout info">
   <b>Backend error-handling &amp; auth hardening (2026-08-06).</b> A second pass, triggered by a raw MongoDB error message (<code>E11000 duplicate key...</code>) leaking straight to the admin UI on a duplicate B2B email. Root cause: the global error handler only produced friendly messages in production — in development it returned the raw driver error unmodified. Fixed app-wide, so every duplicate-key and validation error now returns a clear, human-readable message (e.g. <i>"This email address is already in use"</i>) regardless of environment, not just for B2B. While auditing the rest of the error-handling and auth code, two more real issues turned up and were fixed: the Admin/B2B "reset password after OTP" endpoint accepted the request without re-checking the OTP (only the expiry window), and request logging (<code>morgan</code>) was silently disabled outside development, so a production-run server produced zero access logs.
+</div>
+
+<div class="callout info">
+  <b>Customer auth rework &amp; branded email templates (2026-08-09).</b> Customer login/signup moved from mobile-number OTP (which had never had a real SMS provider behind it — it only simulated delivery and accepted a universal <code>123456</code> bypass code) to real email OTP delivery via Resend, per a direct request to drop SMS OTP entirely. A new mandatory step now collects and validates an Indian mobile number right after email verification, before a full login session is granted — see Section 2. Separately, every transactional email the platform sends (not just the new customer flow) was rebuilt from plain unstyled text onto one shared branded HTML template — see Section 7.
 </div>
 
 <p class="footer-note">7ALP's Platform Documentation — generated automatically from the current codebase.</p>

@@ -5,6 +5,7 @@ const Admin = require('../models/adminModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const sendEmail = require('../utils/email');
+const { otpEmail } = require('../utils/emailTemplates');
 const mongoose = require('mongoose');
 
 const signToken = (id) => {
@@ -76,10 +77,18 @@ exports.signupSendOTP = catchAsync(async (req, res, next) => {
   });
 
   try {
+    const { html, text } = otpEmail({
+      heading: 'Verify your email',
+      intro: `Hi ${name}, use the code below to verify your email and finish creating your 7ALP's admin account.`,
+      otp,
+      minutes: 10,
+    });
+
     await sendEmail({
       email,
-      subject: '7Alps - Verify Your Email',
-      message: `Your verification code is: ${otp}\n\nThis code will expire in 10 minutes.`,
+      subject: "7ALP's - Verify Your Email",
+      message: text,
+      html,
     });
 
     res.status(200).json({
@@ -156,10 +165,18 @@ exports.signupResendOTP = catchAsync(async (req, res, next) => {
   });
 
   try {
+    const { html, text } = otpEmail({
+      heading: 'Your new verification code',
+      intro: "Use the code below to verify your email and finish creating your 7ALP's admin account.",
+      otp,
+      minutes: 10,
+    });
+
     await sendEmail({
       email,
-      subject: '7Alps - New Verification Code',
-      message: `Your new verification code is: ${otp}\n\nThis code will expire in 10 minutes.`,
+      subject: "7ALP's - New Verification Code",
+      message: text,
+      html,
     });
 
     res.status(200).json({ status: 'success', message: 'New OTP sent to email.' });
@@ -273,10 +290,18 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   await user.save({ validateBeforeSave: false });
 
   try {
+    const { html, text } = otpEmail({
+      heading: 'Reset your password',
+      intro: "Use the code below to reset your 7ALP's admin account password.",
+      otp,
+      minutes: 5,
+    });
+
     await sendEmail({
       email: user.Email,
       subject: 'Your Password Reset OTP (valid for 5 minutes)',
-      message: `Your OTP for password reset is: ${otp}\n\nThis OTP will expire in 5 minutes.`,
+      message: text,
+      html,
     });
 
     res.status(200).json({ status: 'success', message: 'OTP sent to email!' });
