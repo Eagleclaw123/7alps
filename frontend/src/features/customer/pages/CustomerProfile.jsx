@@ -88,6 +88,10 @@ const CustomerProfile = () => {
       errors.name = "Name is required.";
     }
 
+    if (profile.email.trim() && !/^\S+@\S+\.\S+$/.test(profile.email.trim())) {
+      errors.email = "Enter a valid email address.";
+    }
+
     return errors;
   };
 
@@ -101,7 +105,7 @@ const CustomerProfile = () => {
 
     try {
       setSavingProfile(true);
-      const { data } = await updateCustomerProfile({ name: profile.name });
+      const { data } = await updateCustomerProfile(profile);
       dispatch(setCustomer(data.data.customer));
       setEditingProfile(false);
     } catch (err) {
@@ -249,7 +253,7 @@ const CustomerProfile = () => {
 
   if (!customer) {
     return (
-      <section className="mx-auto text-center max-w-7xl px-4 py-2 sm:px-6 lg:px-8 my-30">
+      <section className="text-center max-w-7xl px-4 py-2 sm:px-6 lg:px-8 my-30">
         <p className="text-sm text-[#86806F]">Loading your profile...</p>
       </section>
     );
@@ -350,10 +354,14 @@ const CustomerProfile = () => {
                   name="email"
                   type="email"
                   value={profile.email}
-                  disabled
+                  onChange={handleProfileChange}
+                  disabled={!editingProfile}
                   placeholder="you@example.com"
-                  className={underlineInput}
+                  className={`${underlineInput} ${
+                    profileErrors.email ? errorBorder : ""
+                  }`}
                 />
+                <FieldError>{profileErrors.email}</FieldError>
               </div>
             </div>
 

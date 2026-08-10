@@ -9,9 +9,16 @@
  */
 const CartTableHeader = ({
   columns = ["Product", "In Stock", "Price", "Quantity", "Total"],
+  showTotal = true,
 }) => {
+  const gridClass = showTotal
+    ? "sm:grid-cols-[2.2fr_1fr_0.8fr_1fr_0.8fr]"
+    : "sm:grid-cols-[2.2fr_1fr_0.8fr_1fr]";
+
   return (
-    <div className="hidden px-6 pb-3 pt-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#86806F] sm:grid sm:grid-cols-[2.2fr_1fr_0.8fr_1fr_0.8fr] sm:items-center sm:gap-4">
+    <div
+      className={`hidden px-6 pb-3 pt-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#86806F] sm:grid ${gridClass} sm:items-center sm:gap-4`}
+    >
       {columns.map((column) => (
         <span key={column}>{column}</span>
       ))}

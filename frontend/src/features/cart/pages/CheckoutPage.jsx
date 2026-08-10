@@ -347,7 +347,7 @@ const CheckoutPage = () => {
   if (!isBuyNow) {
     if (cartStatus !== "succeeded" && cartItems.length === 0) {
       return (
-        <p className="py-20 text-center text-[#86806F]">
+        <p className="py-20 mt-15 text-center text-[#86806F]">
           Loading your cart...
         </p>
       );

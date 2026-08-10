@@ -114,13 +114,8 @@ const CustomerWishlist = () => {
                       onUpdateQuantity={handleWishlistQuantityChange}
                       onRemove={handleRemove}
                       onAdd={handleAddToCart}
-                      columns={[
-                        "Product",
-                        "In Stock",
-                        "Price",
-                        "Add to Cart",
-                        "Total",
-                      ]}
+                      showTotal={false}
+                      columns={["Product", "In Stock", "Price", "Add to Cart"]}
                       emptyState={{
                         title: "Your wishlist is empty.",
                         description:

@@ -9,11 +9,12 @@ const CartList = ({
   onAdd,
   columns,
   emptyState,
+  showTotal = true,
 }) => {
   return (
     <div className="sm:overflow-x-auto">
       <div className="sm:min-w-[720px]">
-        <CartTableHeader columns={columns} />
+        <CartTableHeader columns={columns} showTotal={showTotal} />
 
         {items.length > 0 ? (
           <div className="space-y-3 px-4 py-4 sm:space-y-0 sm:px-0 sm:py-0">
@@ -25,6 +26,7 @@ const CartList = ({
                 onDecrease={(id) => onUpdateQuantity(id, -1)}
                 onRemove={onRemove}
                 onAdd={onAdd}
+                showTotal={showTotal}
               />
             ))}
           </div>

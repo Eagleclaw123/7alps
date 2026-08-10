@@ -48,13 +48,23 @@ const QuantityStepper = ({ quantity, onIncrease, onDecrease, id }) => (
   </div>
 );
 
-const CartItem = ({ item, onIncrease, onDecrease, onRemove, onAdd }) => {
+const CartItem = ({
+  item,
+  onIncrease,
+  onDecrease,
+  onRemove,
+  onAdd,
+  showTotal = true,
+}) => {
   const price = Number(item.price || 0);
   const quantity = Number(item.quantity || 1);
   const total = price * quantity;
   const name = decodeEntities(item.name);
   const category = decodeEntities(item.category);
   const hasAddAction = Boolean(onAdd);
+  const desktopGridClass = showTotal
+    ? "sm:grid-cols-[2.2fr_1fr_0.8fr_1fr_0.8fr]"
+    : "sm:grid-cols-[2.2fr_1fr_0.8fr_1fr]";
 
   return (
     <div>
@@ -114,9 +124,6 @@ const CartItem = ({ item, onIncrease, onDecrease, onRemove, onAdd }) => {
               <p className="text-[11px] text-[#86806F]">
                 ₹{price.toFixed(2)} each
               </p>
-              <p className="font-serif text-lg text-[#16442C]">
-                ₹{total.toFixed(2)}
-              </p>
             </div>
           </div>
           {onAdd && (
@@ -131,7 +138,9 @@ const CartItem = ({ item, onIncrease, onDecrease, onRemove, onAdd }) => {
       </div>
 
       {/* ── Desktop / tablet row (sm and up) ──────────────────────── */}
-      <div className="hidden border-t border-[#F0EEE3] px-6 py-4 sm:grid sm:grid-cols-[2.2fr_1fr_0.8fr_1fr_0.8fr] sm:items-center sm:gap-4">
+      <div
+        className={`hidden border-t border-[#F0EEE3] px-6 py-4 sm:grid ${desktopGridClass} sm:items-center sm:gap-4`}
+      >
         {/* Product */}
         <div className="flex gap-3">
           <div className="relative h-16 w-16 shrink-0 overflow-hidden bg-[#EEF1E6]">
@@ -196,12 +205,13 @@ const CartItem = ({ item, onIncrease, onDecrease, onRemove, onAdd }) => {
           />
         )}
 
-        {/* Total */}
-        <div className="">
-          <span className="text-[15px] font-medium text-[#16442C]">
-            ₹{total.toFixed(2)}
-          </span>
-        </div>
+        {showTotal && (
+          <div className="">
+            <span className="text-[15px] font-medium text-[#16442C]">
+              ₹{total.toFixed(2)}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
