@@ -24,9 +24,18 @@ const app = express();
 app.use(helmet());
 
 // CORS — must be before body parser so preflight OPTIONS requests are handled
+const defaultOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:3000',
+];
+const allowedOrigins = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(',').map((o) => o.trim())
+  : defaultOrigins;
+
 app.use(
   cors({
-    origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'],
+    origin: allowedOrigins,
     credentials: true,
   }),
 );
