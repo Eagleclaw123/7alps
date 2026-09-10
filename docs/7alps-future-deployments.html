@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>7ALP's — Future Deployments Guide</title>
+<link rel="stylesheet" href="_pdf-shared.css" />
+</head>
+<body>
+
+<section class="cover">
+  <div class="eyebrow">Operations Guide</div>
+  <h1>Future Deployments<br/>on the Live Server</h1>
+  <p class="lead">A quick-reference runbook for pushing code changes to the running 7alpsglobal.com server — no re-setup, just the update loop, PM2/nginx cheat sheets, rollback, and troubleshooting.</p>
+  <div class="meta">Applies to the server already deployed and running at 7alpsglobal.com &middot; repo: github.com/Eagleclaw123/7alps &middot; Generated 2026-09-10</div>
+</section>
+
+<h2 class="section">1. The standard update loop</h2>
+<p>Every future code change follows the same four moves: pull, rebuild whichever side changed, restart/reload. Run these on the server, inside the repo.</p>
+
+<div class="step">
+  <div class="num">1</div>
+  <div class="body">
+    <h3>Pull the latest code</h3>
+    <pre>cd /var/www/7alps
+git status              <span class="cmt"># should be clean — nothing local should ever be edited on the server</span>
+git pull origin main</pre>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">2</div>
+  <div class="body">
+    <h3>Backend changed? Reinstall + restart</h3>
+    <pre>cd /var/www/7alps/backend
+npm ci --omit=dev        <span class="cmt"># only needed if package.json/package-lock.json changed</span>
+pm2 restart 7alps-backend
+pm2 logs 7alps-backend --lines 30 --nostream   <span class="cmt"># confirm it came back up clean</span></pre>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">3</div>
+  <div class="body">
+    <h3>Frontend changed? Reinstall + rebuild</h3>
+    <pre>cd /var/www/7alps/frontend
+npm ci                   <span class="cmt"># only needed if package.json/package-lock.json changed</span>
+npm run build             <span class="cmt"># overwrites frontend/dist — nginx serves this directly, no restart needed</span></pre>
+    <p>nginx serves <code>dist/</code> as static files, so a rebuild takes effect immediately on the next page load — no nginx reload required. If the site still shows old content after a rebuild, it's almost always a <b>browser cache</b> issue — hard refresh (Cmd/Ctrl+Shift+R) before assuming the deploy failed.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">4</div>
+  <div class="body">
+    <h3>nginx config itself changed?</h3>
+    <p>Only needed if you edited <code>deploy/nginx.conf</code> in the repo (new route, new proxy rule, etc.) — most day-to-day deploys never touch this.</p>
+    <pre>sudo cp /var/www/7alps/deploy/nginx.conf /etc/nginx/sites-available/7alpsglobal.com
+sudo nginx -t              <span class="cmt"># always test before reloading</span>
+sudo systemctl reload nginx</pre>
+    <div class="callout warn">
+      <b>Certbot has already edited this file once</b> (added the 443/SSL block and the HTTP→HTTPS redirect). Copying <code>deploy/nginx.conf</code> from the repo over the live file will <b>wipe those SSL directives</b> unless you've also updated the repo copy to match. Safer default: hand-edit <code>/etc/nginx/sites-available/7alpsglobal.com</code> directly on the server for nginx-only changes, and only copy from the repo if you deliberately re-synced the repo's copy with the live SSL config first.
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">5</div>
+  <div class="body">
+    <h3>Environment variable changed?</h3>
+    <p>Edit the real file directly on the server — it is not in git (gitignored on purpose, since it holds secrets):</p>
+    <pre>nano /var/www/7alps/backend/.env        <span class="cmt"># backend secrets/config</span>
+pm2 restart 7alps-backend               <span class="cmt"># env vars only load at process start</span></pre>
+    <p>For a <b>frontend</b> env change (e.g. rotating the Google Maps key), edit <code>frontend/.env.production</code> and rebuild — Vite bakes these into the JS bundle at build time, so a restart alone does nothing:</p>
+    <pre>nano /var/www/7alps/frontend/.env.production
+cd /var/www/7alps/frontend && npm run build</pre>
+  </div>
+</div>
+
+<h2 class="section">2. What to run, by change type</h2>
+<table>
+  <tr><th>You changed…</th><th>What to run</th></tr>
+  <tr><td>Backend route/controller/model code</td><td><code>pm2 restart 7alps-backend</code></td></tr>
+  <tr><td>Backend <code>package.json</code> (new dependency)</td><td><code>npm ci --omit=dev</code> then restart</td></tr>
+  <tr><td>Backend <code>.env</code></td><td>edit on server directly, then restart</td></tr>
+  <tr><td>Frontend React/component code</td><td><code>npm run build</code> (no restart needed)</td></tr>
+  <tr><td>Frontend <code>package.json</code> (new dependency)</td><td><code>npm ci</code> then <code>npm run build</code></td></tr>
+  <tr><td>Frontend <code>.env.production</code></td><td>edit on server, then <code>npm run build</code> (env is baked at build time)</td></tr>
+  <tr><td><code>deploy/nginx.conf</code> in the repo</td><td>copy over live config, <code>nginx -t</code>, reload — see the SSL warning above</td></tr>
+  <tr><td>Nothing, just want to see current state</td><td><code>pm2 status</code>, <code>sudo systemctl status nginx</code></td></tr>
+</table>
+
+<h2 class="section">3. PM2 cheat sheet</h2>
+<pre>pm2 status                              <span class="cmt"># is it up? memory/CPU? restart count?</span>
+pm2 logs 7alps-backend                  <span class="cmt"># live tail (Ctrl+C to exit)</span>
+pm2 logs 7alps-backend --lines 100 --nostream   <span class="cmt"># last 100 lines, no follow</span>
+pm2 restart 7alps-backend               <span class="cmt"># hard restart (brief downtime, single fork instance)</span>
+pm2 reload 7alps-backend                <span class="cmt"># graceful reload — no-op in fork mode with 1 instance, same as restart here</span>
+pm2 stop 7alps-backend                  <span class="cmt"># stop without removing from PM2's process list</span>
+pm2 monit                               <span class="cmt"># live CPU/memory dashboard</span>
+pm2 save                                <span class="cmt"># persist current process list — run after any pm2 start/stop/delete</span></pre>
+<div class="callout info">
+  <b>Log files</b> also live on disk at <code>backend/logs/out.log</code> and <code>backend/logs/error.log</code> (configured in <code>ecosystem.config.js</code>), in case <code>pm2 logs</code> has rotated past what you need.
+</div>
+
+<h2 class="section">4. Rolling back a bad deploy</h2>
+<p>If a deploy breaks something and you need to get back to the last known-good commit fast:</p>
+<pre>cd /var/www/7alps
+git log --oneline -10                   <span class="cmt"># find the last good commit hash</span>
+git checkout &lt;good-commit-hash&gt;         <span class="cmt"># detached HEAD, that's fine for a quick rollback</span>
+
+cd backend && npm ci --omit=dev && pm2 restart 7alps-backend
+cd ../frontend && npm ci && npm run build</pre>
+<p>Once the underlying issue is actually fixed, return to the branch tip properly:</p>
+<pre>cd /var/www/7alps
+git checkout main
+git pull origin main
+<span class="cmt"># then repeat the normal backend/frontend rebuild steps above</span></pre>
+
+<h2 class="section">5. SSL certificate renewal</h2>
+<p>Renewal is automatic — certbot installs a systemd timer that runs twice a day and only actually renews when the cert is within 30 days of expiry. You generally don't need to do anything. To check on it:</p>
+<pre>sudo systemctl status certbot.timer     <span class="cmt"># confirm the timer is active</span>
+sudo certbot renew --dry-run            <span class="cmt"># simulate a renewal without actually replacing the cert</span>
+sudo certbot certificates               <span class="cmt"># see current cert, issuer, and expiry date</span></pre>
+
+<h2 class="section">6. Troubleshooting quick reference</h2>
+<table>
+  <tr><th>Symptom</th><th>Likely cause / first check</th></tr>
+  <tr><td>Site shows <b>502 Bad Gateway</b></td><td>Backend process is down or crashed. <code>pm2 status</code>, then <code>pm2 logs 7alps-backend</code> for the crash reason.</td></tr>
+  <tr><td>Site loads but shows <b>old content</b></td><td>Either you forgot to run <code>npm run build</code> on the frontend, or it's just your browser cache — hard refresh first.</td></tr>
+  <tr><td><b>CORS error</b> in browser console</td><td>Only matters if something calls the API from a different origin than <code>7alpsglobal.com</code>. Check <code>CORS_ORIGINS</code> in <code>backend/.env</code>.</td></tr>
+  <tr><td>Database connection errors in <code>pm2 logs</code></td><td>Check MongoDB Atlas → Network Access — if the server's IP ever changes (e.g. a new ephemeral IP after a reboot on some cloud providers), it needs to be re-added to the allowlist.</td></tr>
+  <tr><td>Login/session issues after a deploy</td><td>Cookies are httpOnly + <code>secure</code> + <code>sameSite=none</code> in production — this requires HTTPS to actually be working. Confirm the SSL cert is valid, not just that nginx is up.</td></tr>
+  <tr><td>Emails (OTP, notifications) stop sending</td><td>Check <code>RESEND_API_KEY</code> is still set and the sending domain is still verified in the Resend dashboard.</td></tr>
+  <tr><td>Payments fail at checkout</td><td>Check <code>RAZORPAY_KEY_ID</code>/<code>RAZORPAY_KEY_SECRET</code> are still valid — the backend returns a graceful 503 if they're ever blanked out.</td></tr>
+</table>
+
+<div class="callout danger">
+  <b>Never run <code>npm run seed</code> on this server without reading the script first.</b> It has wiped the live Products collection once before during development. There should be no reason to run any <code>seed</code>/<code>seed:b2b</code>/<code>seed:categories</code> script against production data — those are dev-only bootstrap scripts.
+</div>
+
+<div class="callout info">
+  <b>Zero-downtime deploys.</b> The backend currently runs as a single PM2 fork-mode process, so <code>pm2 restart</code> causes a brief (typically sub-second) gap in availability while it restarts. If that ever becomes a problem, PM2 cluster mode with 2+ instances and <code>pm2 reload</code> (instead of <code>restart</code>) would give truly zero-downtime deploys — not set up today since traffic doesn't warrant it yet.
+</div>
+
+<p class="footer-note">7ALP's — Future Deployments Guide. Companion to the initial server setup guide; keep both.</p>
+
+</body>
+</html>
