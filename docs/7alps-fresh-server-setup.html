@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>7ALP's — Fresh Server Setup Guide</title>
+<link rel="stylesheet" href="_pdf-shared.css" />
+</head>
+<body>
+
+<section class="cover">
+  <div class="eyebrow">Deployment Guide</div>
+  <h1>Deploying 7ALP's<br/>on a New Ubuntu Server</h1>
+  <p class="lead">Complete, start-to-finish instructions for standing up the frontend and backend on a brand new Ubuntu VPS — written for migrating off the current GCP instance to a different provider, with the real gotchas hit during the first deployment called out inline.</p>
+  <div class="meta">Domain: 7alpsglobal.com &middot; Repo: github.com/Eagleclaw123/7alps (private) &middot; Ubuntu 22.04/24.04 &middot; Generated 2026-09-10</div>
+</section>
+
+<h2 class="section">0. Before you touch the new server</h2>
+<p>Gather these first — you'll need them mid-setup and it's disruptive to stop and go hunting:</p>
+<ul>
+  <li>SSH access to the new server (root or sudo user, key-based auth set up)</li>
+  <li>Access to whichever DNS panel manages <code>7alpsglobal.com</code> (domain registrar, or a separate DNS host if you use one)</li>
+  <li>MongoDB Atlas login — you'll add the new server's IP to Network Access</li>
+  <li>A copy of the current production secrets: <code>DATABASE</code>/<code>DATABASE_PASSWORD</code>, <code>RESEND_API_KEY</code>, <code>JWT_SECRET</code>, <code>R2_*</code> keys, <code>RAZORPAY_KEY_ID</code>/<code>SECRET</code> — pull these from the current server's <code>backend/.env</code> (see Appendix A for the full list of keys)</li>
+  <li>The <code>VITE_GOOGLE_MAPS_API_KEY</code> value, and access to the Google Cloud Console project it belongs to (you'll update the allowed HTTP referrers)</li>
+  <li>GitHub access to add a new deploy key to <code>Eagleclaw123/7alps</code> (repo is private)</li>
+</ul>
+
+<div class="callout danger">
+  <b>Two hard-won lessons from the first deployment (GCP), worth reading before you start:</b>
+  <ol>
+    <li><b>DNS pointing at the wrong IP looks like a working server.</b> If an A record points at a stale IP (e.g. a leftover CDN/parking service from the registrar), requests can still get a clean HTTP response — just from the wrong host — making it look like a server-side bug when it's actually DNS. Always verify with <code>curl -4 ifconfig.me</code> on the server itself vs. what the domain actually resolves to, before debugging anything else.</li>
+    <li><b>Cloud provider firewalls block port 80/443 by default, separately from anything inside the VM.</b> On GCP this meant nginx was running perfectly and answered fine on <code>localhost</code>, yet timed out from the outside world — until "Allow HTTP traffic" / "Allow HTTPS traffic" was enabled at the instance/network level. Every provider has an equivalent (security groups on AWS, cloud firewalls on DigitalOcean/Linode/Hetzner, NSGs on Azure) — check it early, don't assume the OS firewall (<code>ufw</code>) is the only gate.</li>
+  </ol>
+</div>
+
+<h2 class="section">1. DNS — point the domain at the new server</h2>
+<p>Once the new server has a static public IP, update the A records wherever <code>7alpsglobal.com</code>'s DNS is managed:</p>
+<table>
+  <tr><th>Type</th><th>Host</th><th>Value</th></tr>
+  <tr><td>A</td><td><code>@</code></td><td>&lt;new server's public IP&gt;</td></tr>
+  <tr><td>A</td><td><code>www</code></td><td>&lt;new server's public IP&gt; (or a CNAME to <code>@</code>)</td></tr>
+</table>
+<p>If the DNS provider offers a "proxy"/"CDN" toggle on the record, leave it <b>off</b> (DNS-only) — a proxying layer in front of the origin will interfere with the Let's Encrypt HTTP-01 challenge in step 10 unless specifically configured to pass it through.</p>
+<div class="callout warn">
+  <b>Lower the TTL a day ahead of the cutover if possible</b> (e.g. to 300s), so the switch from the old GCP IP to the new server propagates fast when you actually flip it — rather than waiting out a long cached TTL.
+</div>
+<p>Verify propagation before moving on:</p>
+<pre>nslookup 7alpsglobal.com
+nslookup www.7alpsglobal.com
+<span class="cmt"># both should resolve to the NEW server's IP</span></pre>
+
+<h2 class="section">2. Open the cloud firewall (before installing anything)</h2>
+<p>Do this <i>first</i>, on whichever provider you've moved to — get it out of the way so it's not a mystery later:</p>
+<ul>
+  <li>Find the provider's network/firewall/security-group panel (not something inside the VM)</li>
+  <li>Allow inbound TCP <b>22</b> (SSH — should already be open, that's how you're connected)</li>
+  <li>Allow inbound TCP <b>80</b> (HTTP — needed for the Let's Encrypt challenge and for the redirect to HTTPS)</li>
+  <li>Allow inbound TCP <b>443</b> (HTTPS)</li>
+</ul>
+<p>Sanity check from your own machine once the server is reachable (even before nginx is installed, this confirms the network path is open):</p>
+<pre>curl -I http://&lt;new-server-ip&gt;   <span class="cmt"># connection refused is fine (nothing listening yet) — a timeout means the firewall is still blocking</span></pre>
+
+<h2 class="section">3. Server prep</h2>
+<div class="step"><div class="num">1</div><div class="body">
+<h3>Update the system</h3>
+<pre>sudo apt update && sudo apt upgrade -y</pre>
+</div></div>
+<div class="step"><div class="num">2</div><div class="body">
+<h3>Install Node.js 20 LTS</h3>
+<p>Vite 8 (used by the frontend) requires Node ≥20.19; the backend only requires ≥16, so 20 LTS covers both.</p>
+<pre>curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs git nginx
+node -v    <span class="cmt"># confirm v20.x</span>
+npm -v</pre>
+</div></div>
+<div class="step"><div class="num">3</div><div class="body">
+<h3>Install PM2 globally</h3>
+<pre>sudo npm install -g pm2</pre>
+</div></div>
+<div class="step"><div class="num">4</div><div class="body">
+<h3>OS-level firewall (ufw)</h3>
+<p>Some minimal cloud images (this bit us on the GCP box) don't ship <code>ufw</code> pre-installed — install it if missing, then open the same three ports at the OS level too. This is a second, independent gate from the provider firewall in step 2 — you generally need <b>both</b> open.</p>
+<pre>sudo apt install -y ufw   <span class="cmt"># skip if already installed</span>
+sudo ufw allow OpenSSH
+sudo ufw allow 'Nginx Full'
+sudo ufw enable
+sudo ufw status verbose</pre>
+</div></div>
+
+<h2 class="section">4. Give the server access to the private GitHub repo</h2>
+<pre>ssh-keygen -t ed25519 -C "7alpsglobal-deploy" -f ~/.ssh/id_ed25519 -N ""
+cat ~/.ssh/id_ed25519.pub</pre>
+<p>Copy the printed public key → GitHub repo <code>Eagleclaw123/7alps</code> → <b>Settings → Deploy keys → Add deploy key</b>. Read-only access is sufficient — a server never needs to push.</p>
+
+<h2 class="section">5. Clone the repo</h2>
+<pre>sudo mkdir -p /var/www/7alps
+sudo chown -R $USER:$USER /var/www/7alps
+git clone git@github.com:Eagleclaw123/7alps.git /var/www/7alps
+cd /var/www/7alps</pre>
+
+<h2 class="section">6. Backend setup</h2>
+<pre>cd /var/www/7alps/backend
+npm ci --omit=dev</pre>
+<p>Create <code>backend/.env</code> — this is gitignored, so it must be created by hand on every new server. Use Appendix A as the template and fill in the <i>real</i> secrets carried over from the old server:</p>
+<pre>nano .env</pre>
+<p>Start it under PM2, using the checked-in <code>ecosystem.config.js</code> (Appendix D):</p>
+<pre>mkdir -p logs
+pm2 start ecosystem.config.js --env production
+pm2 save
+pm2 logs 7alps-backend --lines 50   <span class="cmt"># confirm "DB connection successful!" and "App running on port 3000..."</span></pre>
+<p>Make PM2 survive reboots:</p>
+<pre>pm2 startup systemd
+<span class="cmt"># it prints a sudo command — copy/paste and run EXACTLY what it outputs</span>
+pm2 save</pre>
+
+<h2 class="section">7. MongoDB Atlas — allow the new server's IP</h2>
+<p>In Atlas → your project → <b>Network Access</b>, add the new server's public IP to the allowlist. The backend will fail every database call (visible in <code>pm2 logs</code>) until this is done. Once the new server is confirmed fully working end-to-end, remove the old GCP server's IP from the allowlist.</p>
+
+<h2 class="section">8. Frontend build</h2>
+<pre>cd /var/www/7alps/frontend
+npm ci</pre>
+<p>Create <code>frontend/.env.production</code> from Appendix B — Vite bakes these values into the JS bundle at build time, so this file must exist <i>before</i> every build, and changing it later requires a rebuild, not a restart:</p>
+<pre>nano .env.production</pre>
+<pre>npm run build   <span class="cmt"># produces frontend/dist — this is what nginx serves</span></pre>
+
+<h2 class="section">9. nginx</h2>
+<p>Install the config from the repo (Appendix C) — it already assumes the <code>/var/www/7alps</code> path used above:</p>
+<pre>sudo cp /var/www/7alps/deploy/nginx.conf /etc/nginx/sites-available/7alpsglobal.com
+sudo ln -s /etc/nginx/sites-available/7alpsglobal.com /etc/nginx/sites-enabled/
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo nginx -t
+sudo systemctl reload nginx</pre>
+<p>At this point <code>http://7alpsglobal.com</code> should already load the frontend, and <code>http://7alpsglobal.com/api/v1/...</code> should hit the backend. Verify before moving to SSL:</p>
+<pre>curl -I http://7alpsglobal.com
+curl http://7alpsglobal.com/api/v1/products/public</pre>
+
+<h2 class="section">10. HTTPS (Let's Encrypt)</h2>
+<pre>sudo apt install -y certbot python3-certbot-nginx
+sudo certbot --nginx -d 7alpsglobal.com -d www.7alpsglobal.com</pre>
+<p>Certbot edits <code>/etc/nginx/sites-available/7alpsglobal.com</code> in place, adding the 443/SSL server block and (if you accept the prompt) an HTTP→HTTPS redirect. Verify auto-renewal is wired up:</p>
+<pre>sudo systemctl status certbot.timer
+sudo certbot renew --dry-run</pre>
+<div class="callout warn">
+  <b>If this fails with a challenge error</b>, before anything else confirm: (a) DNS actually resolves to <i>this</i> server — <code>nslookup 7alpsglobal.com</code> vs. <code>curl -4 ifconfig.me</code> on the server, and (b) port 80 is reachable from the outside — <code>curl -I http://7alpsglobal.com</code> from your own machine, not from the server itself. Both of these bit us on the first deployment; see the callout in Section 0.
+</div>
+
+<h2 class="section">11. Google Maps API key</h2>
+<p>In Google Cloud Console, update the <code>VITE_GOOGLE_MAPS_API_KEY</code>'s HTTP referrer restriction to include the new domain (it's the same domain, so this is likely already correct — just confirm it wasn't accidentally scoped to an old IP or staging URL):</p>
+<pre>https://7alpsglobal.com/*
+https://www.7alpsglobal.com/*</pre>
+
+<h2 class="section">12. Full smoke test</h2>
+<ul>
+  <li><code>curl -I https://7alpsglobal.com</code> — 200 over HTTPS</li>
+  <li><code>curl https://7alpsglobal.com/api/v1/products/public</code> — real JSON, not an error</li>
+  <li>In a real browser: customer signup (email OTP arrives via Resend), login, add to cart, checkout with both COD and Razorpay test payment</li>
+  <li>Admin login, load the dashboard, confirm real stats appear</li>
+  <li>B2B login and a quote request, including the Google Maps address picker</li>
+  <li>Upload a product image in the admin panel — confirms R2 credentials are correct on the new server</li>
+</ul>
+
+<h2 class="section">13. Cutover &amp; decommission</h2>
+<ol>
+  <li>Confirm the smoke test above is fully clean on the new server <i>while the old GCP server is still up</i> — don't decommission anything yet.</li>
+  <li>Flip DNS (if not already done in Section 1) and wait for propagation.</li>
+  <li>Watch traffic/logs on the new server for a short burn-in period.</li>
+  <li>Remove the old GCP server's IP from MongoDB Atlas's Network Access list.</li>
+  <li>Only once confident: stop the old GCP instance, then delete it (and its reserved static IP, if billed separately) to stop paying for both.</li>
+</ol>
+
+<h2 class="section">Appendix A — backend/.env template</h2>
+<div class="file-label">deploy/backend.env.example</div>
+<pre># Copy to backend/.env on the server and fill in real values.
+# NEVER commit this file with real secrets — backend/.gitignore already ignores .env
+
+NODE_ENV=production
+PORT=3000
+
+DATABASE=&lt;your MongoDB Atlas SRV string with &lt;PASSWORD&gt; placeholder kept literally&gt;
+DATABASE_PASSWORD=&lt;atlas password&gt;
+
+RESEND_API_KEY=&lt;resend api key&gt;
+RESEND_FROM_EMAIL=&lt;verified sender e.g. 7alps@lanvaus.com&gt;
+
+JWT_SECRET=&lt;long random string&gt;
+JWT_EXPIRES_IN=90d
+JWT_COOKIE_EXPIRES_IN=90
+
+R2_ACCESS_KEY_ID=&lt;cloudflare r2 key&gt;
+R2_SECRET_ACCESS_KEY=&lt;cloudflare r2 secret&gt;
+R2_ACCOUNT_ID=&lt;cloudflare r2 account id&gt;
+R2_BUCKET_NAME=&lt;bucket name&gt;
+R2_PUBLIC_URL=&lt;public bucket url&gt;
+
+RAZORPAY_KEY_ID=&lt;live or test key id&gt;
+RAZORPAY_KEY_SECRET=&lt;live or test key secret&gt;
+
+# Comma-separated list of origins allowed to call the API with credentials.
+# Same-origin requests through the nginx proxy don't need this, but keep it
+# set in case anything ever calls the API cross-origin.
+CORS_ORIGINS=https://7alpsglobal.com,https://www.7alpsglobal.com</pre>
+
+<h2 class="section">Appendix B — frontend/.env.production template</h2>
+<div class="file-label">deploy/frontend.env.production.example</div>
+<pre># Copy to frontend/.env.production on the server before running `npm run build`.
+# Vite bakes these values into the JS bundle at build time — there is no
+# runtime env for a static build, so this file must exist before every build.
+
+VITE_API_BASE_URL=https://7alpsglobal.com/api/v1
+VITE_APP_URL=https://7alpsglobal.com
+VITE_GOOGLE_MAPS_API_KEY=&lt;same key as production Google Cloud Console project&gt;</pre>
+
+<h2 class="section">Appendix C — nginx config</h2>
+<div class="file-label">deploy/nginx.conf</div>
+<pre>server {
+    listen 80;
+    listen [::]:80;
+    server_name 7alpsglobal.com www.7alpsglobal.com;
+
+    root /var/www/7alps/frontend/dist;
+    index index.html;
+
+    client_max_body_size 10M;
+
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript image/svg+xml;
+    gzip_min_length 1024;
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:3000/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    location /images/ {
+        proxy_pass http://127.0.0.1:3000/images/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    location /assets/ {
+        try_files $uri =404;
+        access_log off;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+        add_header Cache-Control "no-cache";
+    }
+}</pre>
+
+<h2 class="section">Appendix D — PM2 ecosystem file</h2>
+<div class="file-label">backend/ecosystem.config.js</div>
+<pre>module.exports = {
+  apps: [
+    {
+      name: '7alps-backend',
+      script: 'server.js',
+      cwd: __dirname,
+      instances: 1,
+      exec_mode: 'fork',
+      env_production: {
+        NODE_ENV: 'production',
+      },
+      max_memory_restart: '300M',
+      out_file: './logs/out.log',
+      error_file: './logs/error.log',
+      merge_logs: true,
+      time: true,
+    },
+  ],
+};</pre>
+
+<p class="footer-note">7ALP's — Fresh Server Setup Guide. Companion to the Future Deployments guide, which covers day-to-day updates once this initial setup is done.</p>
+
+</body>
+</html>
