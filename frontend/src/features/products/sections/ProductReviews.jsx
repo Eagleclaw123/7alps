@@ -6,18 +6,23 @@ import {
   FiStar,
   FiArrowDown,
   FiArrowUp,
+  FiArrowUpRight,
 } from "react-icons/fi";
+
 import ReviewModal from "../components/ReviewModal";
+
 import {
   getProductReviews,
   createReview,
 } from "../../../shared/services/review.service";
+
 import { selectCustomer } from "../../../store/slices/authSlice";
 
 const VISIBLE_COUNT = 3;
 
 const formatDate = (dateString) => {
   if (!dateString) return null;
+
   try {
     return new Date(dateString).toLocaleDateString(undefined, {
       month: "short",
@@ -30,48 +35,57 @@ const formatDate = (dateString) => {
 };
 
 const StarRow = ({ rating, size = 12 }) => (
-  <div className="flex gap-0.5 text-[#EF9F27]">
+  <div className="flex gap-1 text-[#C56B4E]">
     {Array.from({ length: 5 }).map((_, i) => (
       <FiStar
         key={i}
         size={size}
-        fill={i < Math.round(rating) ? "#EF9F27" : "none"}
+        strokeWidth={1.5}
+        fill={i < Math.round(rating) ? "#C56B4E" : "none"}
       />
     ))}
   </div>
 );
 
-// Encodes real distribution data — how many reviews landed at each star level —
-// rather than decorating with a generic average-only summary.
 const RatingBreakdown = ({ reviews }) => {
   const total = reviews.length || 1;
+
   const counts = [5, 4, 3, 2, 1].map((star) => ({
     star,
-    count: reviews.filter((r) => Math.round(r.rating) === star).length,
+    count: reviews.filter((review) => Math.round(review.rating) === star)
+      .length,
   }));
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {counts.map(({ star, count }) => (
         <div
           key={star}
-          className="flex items-center gap-3 text-xs text-gray-500"
+          className="grid grid-cols-[14px_14px_1fr_20px] items-center gap-2"
         >
-          <span className="w-3 text-right font-medium text-[#22301A]">
+          <span className="font-ibm-mono text-[9px] text-[#756A62]">
             {star}
           </span>
+
           <FiStar
             size={10}
-            className="shrink-0 text-[#EF9F27]"
-            fill="#EF9F27"
+            strokeWidth={1.5}
+            className="text-[#C56B4E]"
+            fill="#C56B4E"
           />
-          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100">
+
+          <div className="h-[3px] overflow-hidden bg-[#D8CCC0]">
             <div
-              className="h-full rounded-full bg-[#0F6B3E]"
-              style={{ width: `${(count / total) * 100}%` }}
+              className="h-full bg-[#C56B4E] transition-all duration-500"
+              style={{
+                width: `${(count / total) * 100}%`,
+              }}
             />
           </div>
-          <span className="w-4 text-gray-400">{count}</span>
+
+          <span className="text-right font-ibm-mono text-[9px] text-[#91847A]">
+            {count}
+          </span>
         </div>
       ))}
     </div>
@@ -83,31 +97,50 @@ const ReviewRow = ({ review, isFirst }) => {
   const date = formatDate(review.createdAt);
 
   return (
-    <div className={`py-6 ${isFirst ? "" : "border-t border-gray-200"}`}>
-      <div className="flex items-start gap-4">
-        <span className="mt-1 font-serif text-4xl leading-none text-[#0F6B3E]/20 select-none">
-          &ldquo;
-        </span>
+    <article className={`py-8 ${isFirst ? "" : "border-t border-[#D8CCC0]"}`}>
+      <div className="grid gap-5 md:grid-cols-[70px_1fr]">
+        {/* Review index */}
+        <div className="hidden md:block">
+          <span className="font-ibm-mono text-[9px] uppercase tracking-[0.2em] text-[#A79A90]">
+            Review
+          </span>
 
-        <div className="flex-1">
-          <p className="text-[15px] leading-relaxed text-[#22301A]">
-            {review.comment}
-          </p>
+          <div className="mt-3 h-px w-8 bg-[#C56B4E]" />
+        </div>
 
-          <div className="mt-4 flex items-center gap-3 text-sm">
-            <span className="font-semibold text-[#22301A]">{name}</span>
-            <span className="text-gray-300">&middot;</span>
+        <div>
+          <div className="flex items-start gap-3">
+            <span className="font-serif text-4xl leading-none text-[#C56B4E]/40">
+              &ldquo;
+            </span>
+
+            <p className="max-w-3xl pt-1 font-manrope text-[15px] leading-7 text-[#514740] md:text-base">
+              {review.comment}
+            </p>
+          </div>
+
+          <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2">
+            <span className="font-manrope text-sm font-semibold text-[#211B17]">
+              {name}
+            </span>
+
+            <span className="h-1 w-1 rounded-full bg-[#C8BDB3]" />
+
             <StarRow rating={review.rating} size={11} />
+
             {date && (
               <>
-                <span className="text-gray-300">&middot;</span>
-                <span className="text-xs text-gray-400">{date}</span>
+                <span className="h-1 w-1 rounded-full bg-[#C8BDB3]" />
+
+                <span className="font-ibm-mono text-[9px] uppercase tracking-[0.12em] text-[#91847A]">
+                  {date}
+                </span>
               </>
             )}
           </div>
         </div>
       </div>
-    </div>
+    </article>
   );
 };
 
@@ -117,11 +150,13 @@ const ProductReviews = ({ product }) => {
   const [avgRating, setAvgRating] = useState(0);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(false);
+
   const customer = useSelector(selectCustomer);
   const navigate = useNavigate();
 
   const loadReviews = () => {
     setLoading(true);
+
     getProductReviews(product.id)
       .then(({ data }) => {
         setReviews(data?.data?.reviews || []);
@@ -131,7 +166,10 @@ const ProductReviews = ({ product }) => {
   };
 
   useEffect(() => {
-    if (product?.id) loadReviews();
+    if (product?.id) {
+      loadReviews();
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product?.id]);
 
@@ -142,21 +180,33 @@ const ProductReviews = ({ product }) => {
   const handleWriteReview = () => {
     if (!customer) {
       navigate("/customer/login", {
-        state: { from: { pathname: `/products/${product.id}` } },
+        state: {
+          from: {
+            pathname: `/products/${product.id}`,
+          },
+        },
       });
+
       return;
     }
+
     setShowReviewModal(true);
   };
 
   const handleSubmitReview = async ({ rating, comment }) => {
-    await createReview({ productId: product.id, rating, comment });
+    await createReview({
+      productId: product.id,
+      rating,
+      comment,
+    });
+
     setShowReviewModal(false);
     loadReviews();
   };
 
   const reviewCount = reviews.length;
   const hasMore = reviewCount > VISIBLE_COUNT;
+
   const visibleReviews = useMemo(
     () => (expanded ? reviews : reviews.slice(0, VISIBLE_COUNT)),
     [expanded, reviews],
@@ -164,88 +214,167 @@ const ProductReviews = ({ product }) => {
 
   return (
     <>
-      <section className="bg-[#F8FAF8] py-16 px-6 xl:px-0">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-10 flex items-baseline justify-between">
+      <section className="bg-[#F4EDE2] px-5 sm:px-8 xl:px-16">
+        <div className="mx-auto max-w-[1600px]">
+          {/* Section heading */}
+          <div className="grid gap-8 border-b border-[#D8CCC0] pb-10 lg:grid-cols-[1fr_auto] lg:items-end">
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#6B8F3E]">
-                From buyers
-              </p>
-              <h2 className="font-medium text-3xl text-[#22301A]">
-                Customer Reviews
+              <div className="mb-5 flex items-center gap-3">
+                <span className="font-ibm-mono text-[10px] uppercase tracking-[0.3em] text-[#A85F43]">
+                  03
+                </span>
+                <span className="h-px w-10 bg-[#C56B4E]" />
+
+                <span className="font-ibm-mono text-[9px] uppercase tracking-[0.3em] text-[#C56B4E]">
+                  From our customers
+                </span>
+              </div>
+
+              <h2 className="max-w-3xl font-manrope text-[clamp(3.5rem,6vw,6.5rem)] font-medium leading-[1.0] tracking-[-0.07em] text-[#211B17]">
+                Real people.
+                <br />
+                <span className="font-normal text-[#C56B4E]">
+                  Real experiences.
+                </span>
               </h2>
             </div>
 
             <button
+              type="button"
               onClick={handleWriteReview}
-              className="rounded-lg border border-[#0F6B3E] px-5 py-2 text-sm font-medium text-[#0F6B3E] transition hover:bg-[#0F6B3E] hover:text-white"
+              className="group inline-flex w-fit items-center gap-4 border border-[#211B17] px-6 py-4 font-manrope text-sm font-medium text-[#211B17] transition-all duration-300 hover:bg-[#211B17] hover:text-[#F4EDE2]"
             >
               Write a Review
+              <span className="flex h-7 w-7 items-center justify-center border border-current transition-transform duration-300 group-hover:translate-x-1">
+                <FiArrowUpRight size={14} />
+              </span>
             </button>
           </div>
 
-          {loading ? (
-            <p className="py-10 text-center text-gray-500">
-              Loading reviews...
-            </p>
-          ) : reviewCount === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-gray-300 py-12">
-              <FiMessageCircle className="text-gray-400" size={24} />
-              <p className="text-gray-500">
-                Reviews will appear here after customers submit them.
-              </p>
-            </div>
-          ) : (
-            <div className="grid gap-10 md:grid-cols-[220px_1fr]">
-              {/* Summary panel */}
-              <div>
-                <p className="font-serif text-5xl text-[#22301A]">
-                  {avgRating.toFixed(1)}
-                </p>
-                <div className="mt-2">
-                  <StarRow rating={avgRating} size={14} />
-                </div>
-                <p className="mt-1 text-xs text-gray-500">
-                  Based on {reviewCount} review{reviewCount === 1 ? "" : "s"}
-                </p>
-
-                <div className="mt-6">
-                  <RatingBreakdown reviews={reviews} />
-                </div>
-              </div>
-
-              {/* Review rows */}
-              <div>
-                {visibleReviews.map((review, i) => (
-                  <ReviewRow
-                    key={review._id}
-                    review={review}
-                    isFirst={i === 0}
-                  />
-                ))}
-
-                {hasMore && (
-                  <div className="mt-2 border-t border-gray-200 pt-6">
-                    <button
-                      onClick={() => setExpanded((prev) => !prev)}
-                      className="flex items-center gap-1.5 text-sm font-medium text-[#0F6B3E] underline decoration-[#0F6B3E]/30 underline-offset-4 transition hover:decoration-[#0F6B3E]"
-                    >
-                      {expanded ? (
-                        <>
-                          Show less <FiArrowUp size={14} />
-                        </>
-                      ) : (
-                        <>
-                          Show all {reviewCount} reviews{" "}
-                          <FiArrowDown size={14} />
-                        </>
-                      )}
-                    </button>
+          {/* Content */}
+          <div className="pt-12">
+            {loading ? (
+              <div className="grid gap-10 lg:grid-cols-[280px_1fr]">
+                <div className="animate-pulse">
+                  <div className="h-14 w-24 bg-[#EAE0D4]" />
+                  <div className="mt-4 h-4 w-32 bg-[#EAE0D4]" />
+                  <div className="mt-8 space-y-4">
+                    <div className="h-2 bg-[#EAE0D4]" />
+                    <div className="h-2 bg-[#EAE0D4]" />
+                    <div className="h-2 bg-[#EAE0D4]" />
                   </div>
-                )}
+                </div>
+
+                <div className="space-y-6">
+                  <div className="h-28 animate-pulse bg-[#EAE0D4]" />
+                  <div className="h-28 animate-pulse bg-[#EAE0D4]" />
+                  <div className="h-28 animate-pulse bg-[#EAE0D4]" />
+                </div>
               </div>
-            </div>
-          )}
+            ) : reviewCount === 0 ? (
+              <div className="border border-dashed border-[#CFC2B7] px-6 py-20 text-center">
+                <FiMessageCircle
+                  size={28}
+                  strokeWidth={1.2}
+                  className="mx-auto text-[#A79A90]"
+                />
+
+                <p className="mt-5 font-manrope text-sm text-[#756A62]">
+                  Reviews will appear here after customers submit them.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={handleWriteReview}
+                  className="mt-6 inline-flex items-center gap-2 font-manrope text-sm font-medium text-[#C56B4E] underline decoration-[#C56B4E]/40 underline-offset-4"
+                >
+                  Be the first to review
+                  <FiArrowUpRight size={14} />
+                </button>
+              </div>
+            ) : (
+              <div className="grid gap-12 lg:grid-cols-[280px_1fr] xl:grid-cols-[320px_1fr]">
+                {/* Rating summary */}
+                <aside className="lg:border-r lg:border-[#D8CCC0] lg:pr-10">
+                  <div>
+                    <span className="font-ibm-mono text-[9px] uppercase tracking-[0.25em] text-[#91847A]">
+                      Overall rating
+                    </span>
+
+                    <div className="mt-4 flex items-end gap-3">
+                      <span className="font-manrope text-6xl font-medium leading-none tracking-[-0.07em] text-[#211B17]">
+                        {avgRating.toFixed(1)}
+                      </span>
+
+                      <span className="pb-1 font-ibm-mono text-[9px] text-[#91847A]">
+                        / 5
+                      </span>
+                    </div>
+
+                    <div className="mt-5">
+                      <StarRow rating={avgRating} size={15} />
+                    </div>
+
+                    <p className="mt-3 font-manrope text-xs leading-5 text-[#756A62]">
+                      Based on{" "}
+                      <span className="font-semibold text-[#211B17]">
+                        {reviewCount}
+                      </span>{" "}
+                      customer review
+                      {reviewCount === 1 ? "" : "s"}.
+                    </p>
+                  </div>
+
+                  <div className="mt-10 border-t border-[#D8CCC0] pt-8">
+                    <div className="mb-5 flex items-center justify-between">
+                      <span className="font-ibm-mono text-[9px] uppercase tracking-[0.2em] text-[#91847A]">
+                        Rating distribution
+                      </span>
+                    </div>
+
+                    <RatingBreakdown reviews={reviews} />
+                  </div>
+                </aside>
+
+                {/* Reviews */}
+                <div>
+                  <div className="border-t border-[#D8CCC0]">
+                    {visibleReviews.map((review, i) => (
+                      <ReviewRow
+                        key={review._id}
+                        review={review}
+                        isFirst={i === 0}
+                      />
+                    ))}
+                  </div>
+
+                  {hasMore && (
+                    <div className="border-t border-[#D8CCC0] pt-7">
+                      <button
+                        type="button"
+                        onClick={() => setExpanded((prev) => !prev)}
+                        className="group inline-flex items-center gap-3 font-manrope text-sm font-medium text-[#211B17]"
+                      >
+                        <span className="border-b border-[#211B17]/30 pb-1 transition-colors group-hover:border-[#C56B4E]">
+                          {expanded
+                            ? "Show less"
+                            : `Show all ${reviewCount} reviews`}
+                        </span>
+
+                        <span className="flex h-7 w-7 items-center justify-center border border-[#D8CCC0] transition-all duration-300 group-hover:border-[#C56B4E] group-hover:text-[#C56B4E]">
+                          {expanded ? (
+                            <FiArrowUp size={13} />
+                          ) : (
+                            <FiArrowDown size={13} />
+                          )}
+                        </span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </section>
 

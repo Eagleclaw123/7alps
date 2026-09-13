@@ -1,20 +1,18 @@
-// ProfileDropdown.jsx
 import { useRef, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { FiUser } from "react-icons/fi";
+import { FiUser, FiArrowUpRight } from "react-icons/fi";
 
 import {
   selectCustomer,
   logoutCustomerThunk,
 } from "../../../../store/slices/authSlice";
 
-const ProfileDropdown = () => {
+const ProfileDropdown = ({ scrolled }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const customer = useSelector(selectCustomer);
-  const user = customer;
 
-  const initial = user?.name?.charAt(0).toUpperCase();
+  const customer = useSelector(selectCustomer);
+  const initial = customer?.name?.charAt(0).toUpperCase();
 
   const ref = useRef(null);
   const navigate = useNavigate();
@@ -32,17 +30,6 @@ const ProfileDropdown = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  if (!customer) {
-    return (
-      <Link
-        to="/customer/login"
-        className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-[#FAF6EF] transition-all duration-300 hover:bg-[#FAF6EF] hover:text-[#3F4A2E]"
-      >
-        <FiUser size={20} />
-      </Link>
-    );
-  }
-
   const handleLogout = async () => {
     setIsOpen(false);
 
@@ -56,53 +43,125 @@ const ProfileDropdown = () => {
     }
   };
 
+  if (!customer) {
+    return (
+      <Link
+        to="/customer/login"
+        aria-label="Login"
+        className={`
+          flex
+          h-10
+          w-10
+          items-center
+          justify-center
+          rounded-full
+          transition-all
+          duration-300
+          ${
+            scrolled
+              ? "text-[#211B17] hover:bg-[#E7DCCE]"
+              : "text-white hover:bg-white/15"
+          }
+        `}
+      >
+        <FiUser size={19} />
+      </Link>
+    );
+  }
+
   return (
     <div ref={ref} className="relative">
       <button
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-[#FAF6EF] transition-all duration-300 hover:bg-[#FAF6EF] hover:text-[#3F4A2E]"
+        aria-label="Account menu"
+        className={`
+          flex
+          h-10
+          w-10
+          items-center
+          justify-center
+          rounded-full
+          transition-all
+          duration-300
+          ${
+            isOpen
+              ? scrolled
+                ? "bg-[#211B17] text-[#F4EDE2]"
+                : "bg-white text-[#211B17]"
+              : scrolled
+                ? "text-[#211B17] hover:bg-[#E7DCCE]"
+                : "text-white hover:bg-white/15"
+          }
+        `}
       >
-        {customer ? (
-          <span className="flex h-9 w-9 items-center justify-center rounded-full border border-current text-sm font-bold">
-            {initial}
-          </span>
-        ) : (
-          <FiUser size={20} />
-        )}
+        <span className="flex h-7 w-7 items-center justify-center rounded-full border border-current font-manrope text-[10px] font-semibold">
+          {initial}
+        </span>
       </button>
 
-      {customer && isOpen && (
-        <div className="absolute right-0 top-14 z-50 w-52 overflow-hidden rounded-xl border border-[#E3D9C7] bg-white text-[#3F4A2E] shadow-xl">
-          <Link
-            to="/customer/profile"
-            className="block px-5 py-3 transition hover:bg-[#FAF6EF]"
-            onClick={() => setIsOpen(false)}
-          >
-            My Profile
-          </Link>
+      {isOpen && (
+        <div
+          className="
+            absolute
+            right-0
+            top-14
+            z-50
+            w-56
+            overflow-hidden
+            border
+            border-[#D8CDC2]
+            bg-[#F7F2EB]
+            text-[#211B17]
+            shadow-[0_20px_60px_rgba(33,27,23,0.16)]
+          "
+        >
+          <div className="border-b border-[#D8CDC2] px-5 py-4">
+            <p className="font-manrope text-sm font-semibold">
+              {customer.name || "My account"}
+            </p>
 
-          <Link
-            to="/customer/orders"
-            className="block px-5 py-3 transition hover:bg-[#FAF6EF]"
-            onClick={() => setIsOpen(false)}
-          >
-            Orders
-          </Link>
+            <p className="mt-1 font-ibm-mono text-[8px] uppercase tracking-[0.16em] text-[#95887F]">
+              7ALP's account
+            </p>
+          </div>
 
-          <Link
-            to="/customer/wishlist"
-            className="block px-5 py-3 transition hover:bg-[#FAF6EF]"
-            onClick={() => setIsOpen(false)}
-          >
-            Wishlist
-          </Link>
+          <div className="p-2">
+            {[
+              {
+                label: "My Profile",
+                href: "/customer/profile",
+              },
+              {
+                label: "Orders",
+                href: "/customer/orders",
+              },
+              {
+                label: "Wishlist",
+                href: "/customer/wishlist",
+              },
+            ].map((item) => (
+              <Link
+                key={item.label}
+                to={item.href}
+                onClick={() => setIsOpen(false)}
+                className="group flex items-center justify-between px-4 py-3 font-manrope text-sm text-[#514740] transition hover:bg-[#EDE3D8] hover:text-[#C56B4E]"
+              >
+                {item.label}
 
-          <button
-            onClick={handleLogout}
-            className="block w-full cursor-pointer px-5 py-3 text-left text-[#C0503A] transition hover:bg-[#C0503A]/10"
-          >
-            Logout
-          </button>
+                <FiArrowUpRight
+                  size={13}
+                  className="opacity-0 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100"
+                />
+              </Link>
+            ))}
+
+            <button
+              onClick={handleLogout}
+              className="mt-1 w-full border-t border-[#D8CDC2] px-4 py-3 text-left font-manrope text-sm text-[#B05442] transition hover:bg-[#B05442]/5"
+            >
+              Logout
+            </button>
+          </div>
         </div>
       )}
     </div>

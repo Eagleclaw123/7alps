@@ -112,14 +112,6 @@ const AdminLoginPage = () => {
   return (
     <AuthLayout>
       <AuthCard>
-        <div className="mb-8">
-          <img
-            src="https://res.cloudinary.com/dasvdkncm/image/upload/v1781664574/7_ALP_s_Logo-removebg-preview_e7kr1k.png"
-            alt="7ALP's Logo"
-            className="h-16 w-auto"
-          />
-        </div>
-
         <AuthHeader
           title="Admin Portal"
           subtitle="Authorized personnel only."
@@ -157,10 +149,10 @@ const AdminLoginPage = () => {
             ) : null}
           </div>
 
-          <div className="flex justify-end text-sm">
+          <div className="flex justify-end text-xs">
             <Link
               to="/admin/forgot-password"
-              className="font-medium text-[#0F6B3E] hover:underline"
+              className="font-semibold text-[#211B17] underline decoration-[#C56B4E] underline-offset-4 transition hover:text-[#C56B4E]"
             >
               Forgot Password?
             </Link>
@@ -174,8 +166,11 @@ const AdminLoginPage = () => {
             {loading ? "Signing In..." : "Login"}
           </AuthButton>
 
-          <p className="text-center text-sm text-gray-600">
-            <Link to="/" className="font-medium text-[#0F6B3E] hover:underline">
+          <p className="text-center text-xs text-gray-600">
+            <Link
+              to="/"
+              className="font-semibold text-[#211B17] underline decoration-[#C56B4E] underline-offset-4 transition hover:text-[#C56B4E]"
+            >
               ← Back to Website
             </Link>
           </p>

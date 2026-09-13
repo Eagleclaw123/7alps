@@ -2,6 +2,7 @@ import { PiPlantLight } from "react-icons/pi";
 import { MdVerified } from "react-icons/md";
 import { GiFarmer } from "react-icons/gi";
 import { CiGlobe } from "react-icons/ci";
+
 import HeroSection from "../../../shared/components/hero/HeroSection";
 
 const highlights = [
@@ -28,25 +29,17 @@ const highlights = [
 ];
 
 const ProductHeroSection = () => {
-  // const buttons = [
-  //   {
-  //     label: "Explore",
-  //     variant: "secondary",
-  //   },
-  // ];
-
   return (
     <HeroSection
-      backgroundImage="https://res.cloudinary.com/dasvdkncm/image/upload/v1783564641/powdered-matcha-plate-created-using-generative-ai-technology_qpkrit.jpg"
-      badgeText="Wellness Collections"
-      badgeColor="#fff"
-      heading="Premium"
-      headingHighlight="Herbal Ingredients for Natural Wellness"
-      description="Premium herbal ingredients and wellness solutions sourced directly from farmers and delivered to consumers, businesses, and global partners."
-      // buttons={buttons}
+      backgroundImage="https://www.rkwellbeinganddistributions.com/cdn/shop/files/ChatGPT_Image_Mar_17_2026_11_08_32_PM.png?v=1773769131"
+      badgeText="Our product collection"
+      badgeColor="#C56B4E"
+      heading="Nature"
+      headingHighlight="made useful."
+      description="Explore carefully selected herbal ingredients and wellness products, sourced from trusted farmers and prepared with uncompromising attention to quality."
       highlights={highlights}
-      containerHeight="h-[100vh] md:h-[60vh] xl:h-screen"
-      textColor="text-white"
+      containerHeight="min-h-[720px] h-screen"
+      textColor="text-[#211B17]"
     />
   );
 };

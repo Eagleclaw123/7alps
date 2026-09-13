@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { motion } from "framer-motion";
+
 import {
   Search,
   Package,
@@ -9,12 +10,14 @@ import {
   CreditCard,
   MapPin,
   BadgeIndianRupee,
-  Leaf,
   Truck,
   Home,
   X,
   Star,
+  ArrowUpRight,
+  Check,
 } from "lucide-react";
+
 import { LiaUndoAltSolid } from "react-icons/lia";
 
 import { getMyOrders } from "../../../shared/services/order.service";
@@ -23,12 +26,14 @@ import {
   getMyReviews,
   createReview,
 } from "../../../shared/services/review.service";
+
 import { addToCart } from "../../../store/slices/cartSlice";
 import { normalizeProducts } from "../../products/utils/normalizeProduct";
+
 import AnimatedPage from "../../../shared/components/ui/AnimatedPage";
 import Pagination from "../../products/components/ProductPagination";
-import HeroBanner from "../../../shared/components/ui/HeroBanner";
 import ReviewModal from "../../products/components/ReviewModal";
+import PageHero from "../../../shared/components/ui/PageHero";
 
 const TABS = [
   "All Orders",
@@ -39,60 +44,24 @@ const TABS = [
   "Cancelled",
 ];
 
-/**
- * Status badge treatment: in-progress states share the forest outline so
- * they read as one continuous journey, "Delivered" fills solid as the
- * completed end-state, and "Cancelled" breaks the leaf language entirely
- * (clay, X icon) so it never reads as "just a slow order".
- */
-const STATUS_BADGE = {
-  Confirmed: {
-    className: "border border-[#16442C] text-[#16442C] bg-white",
-    icon: Leaf,
-  },
-  Processing: {
-    className: "border border-[#16442C] text-[#16442C] bg-white",
-    icon: Leaf,
-  },
-  Shipped: {
-    className: "border border-[#16442C] text-[#16442C] bg-white",
-    icon: Truck,
-  },
-  Delivered: { className: "bg-[#16442C] text-white", icon: Home },
-  Cancelled: {
-    className: "border border-[#B4652F] text-[#B4652F] bg-[#B4652F]/5",
-    icon: X,
-  },
-};
-
-// Ordered tracking steps. Every non-cancelled order progresses left -> right through these.
 const TRACKING_STEPS = [
-  { key: "Confirmed", icon: Leaf },
-  { key: "Processing", icon: Leaf },
-  { key: "Shipped", icon: Truck },
-  { key: "Delivered", icon: Home },
+  { key: "Confirmed" },
+  { key: "Processing" },
+  { key: "Shipped" },
+  { key: "Delivered" },
 ];
 
 const PAGE_SIZE = 5;
 
-/* Dashed "perforation" strip — the seed-packet detail used across the site */
-const Perforation = () => (
-  <div
-    className="h-px w-full"
-    style={{
-      backgroundImage:
-        "repeating-linear-gradient(to right, #C9C2AE 0, #C9C2AE 6px, transparent 6px, transparent 13px)",
-    }}
-  />
-);
+/* ─────────────────────────────────────────────────────────
+   Helpers
+───────────────────────────────────────────────────────── */
 
-/**
- * Formats a Date (or date-string) as e.g. "23 Jul, 09:59 AM".
- * Returns null if the value is missing/invalid so callers can hide it.
- */
 const formatStepTime = (value) => {
   if (!value) return null;
+
   const date = new Date(value);
+
   if (Number.isNaN(date.getTime())) return null;
 
   return date.toLocaleString("en-IN", {
@@ -103,17 +72,27 @@ const formatStepTime = (value) => {
   });
 };
 
-/**
- * Compact horizontal order-tracking stepper with leaf/truck/home icons and
- * an optional timestamp per step. Timestamps come from `order.statusHistory`
- * (an array of { status, timestamp }) if the API provides one; if not,
- * only the "Confirmed" step falls back to `order.placedAt` and the rest
- * are left blank rather than guessed.
- *
- * Only rendered for orders that are actually progressing — Cancelled orders
- * get a separate, non-progress treatment below instead of this bar grayed out.
- */
+const formatOrderDate = (value) => {
+  if (!value) return "";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "";
+
+  return date.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+/* ─────────────────────────────────────────────────────────
+   Order Tracking
+───────────────────────────────────────────────────────── */
+
 const OrderTrackingBar = ({ order }) => {
+  const isCancelled = order.status === "Cancelled";
+
   const currentIndex = TRACKING_STEPS.findIndex(
     (step) => step.key === order.status,
   );
@@ -124,59 +103,147 @@ const OrderTrackingBar = ({ order }) => {
     )?.timestamp;
 
     if (fromHistory) return formatStepTime(fromHistory);
-    if (stepKey === "Confirmed") return formatStepTime(order.placedAt);
+
+    if (stepKey === "Confirmed") {
+      return formatStepTime(order.placedAt);
+    }
+
     return null;
   };
 
   return (
-    <div className="flex items-start">
-      {TRACKING_STEPS.map((step, index) => {
-        const isComplete = currentIndex >= index;
-        const StepIcon = step.icon;
-        const time = timeForStep(step.key);
+    <div className="w-full">
+      <div className="flex items-start">
+        {TRACKING_STEPS.map((step, index) => {
+          const isComplete = !isCancelled && currentIndex >= index;
 
-        return (
-          <div
-            key={step.key}
-            className="flex flex-1 items-start last:flex-none min-w-0"
-          >
-            <div className="flex flex-col items-center flex-shrink-0 w-12 sm:w-14">
-              <span
-                className={`flex h-8 w-8 items-center justify-center rounded-full border transition-colors ${
-                  isComplete
-                    ? "border-[#16442C] bg-[#16442C] text-white"
-                    : "border-[#E3DFD2] bg-white text-[#B8B2A0]"
-                }`}
-              >
-                <StepIcon className="h-3.5 w-3.5" />
-              </span>
-              <span
-                className={`mt-2 hidden text-center text-[11px] font-semibold uppercase tracking-wide sm:block ${
-                  isComplete ? "text-[#16442C]" : "text-[#B8B2A0]"
-                }`}
-              >
-                {step.key}
-              </span>
-              {time ? (
-                <span className="text-[10px] text-[#B8B2A0] whitespace-nowrap">
-                  {time}
+          const isCurrent = !isCancelled && currentIndex === index;
+
+          const isLast = index === TRACKING_STEPS.length - 1;
+
+          const isCancelledOrigin = isCancelled && index === 0;
+
+          const time = timeForStep(step.key);
+
+          return (
+            <div
+              key={step.key}
+              className={`flex min-w-0 items-start ${isLast ? "" : "flex-1"}`}
+            >
+              {/* Step */}
+              <div className="flex w-[58px] shrink-0 flex-col items-center sm:w-[76px]">
+                <div
+                  className={`
+                    relative flex h-9 w-9 items-center justify-center
+                    border transition-all duration-500
+                    ${
+                      isComplete
+                        ? "border-[#211B17] bg-[#211B17] text-[#F4EDE2]"
+                        : isCancelledOrigin
+                          ? "border-[#C56B4E] bg-[#C56B4E] text-white"
+                          : "border-[#D8CCC0] bg-[#F4EDE2] text-[#91847A]"
+                    }
+                  `}
+                >
+                  {isComplete ? (
+                    <Check className="h-3.5 w-3.5" strokeWidth={1.8} />
+                  ) : isCancelledOrigin ? (
+                    <X className="h-3.5 w-3.5" strokeWidth={1.8} />
+                  ) : (
+                    <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                  )}
+
+                  {isCurrent && (
+                    <span className="absolute -right-1 -top-1 h-2 w-2 bg-[#C56B4E]" />
+                  )}
+                </div>
+
+                <span
+                  className={`
+                    mt-3 whitespace-nowrap
+                    font-ibm-mono text-[7px]
+                    uppercase tracking-[0.14em]
+                    sm:text-[8px]
+                    ${
+                      isComplete
+                        ? "text-[#211B17]"
+                        : isCancelledOrigin
+                          ? "text-[#C56B4E]"
+                          : "text-[#91847A]"
+                    }
+                  `}
+                >
+                  {isCancelled && index === 0 ? "Cancelled" : step.key}
                 </span>
-              ) : null}
-            </div>
 
-            {index < TRACKING_STEPS.length - 1 ? (
-              <div
-                className={`mx-2 mt-[15px] h-px flex-1 ${
-                  currentIndex > index ? "bg-[#16442C]" : "bg-[#E3DFD2]"
-                }`}
-              />
-            ) : null}
-          </div>
-        );
-      })}
+                {time && (
+                  <span className="mt-1 whitespace-nowrap font-manrope text-[9px] text-[#A79A90]">
+                    {time}
+                  </span>
+                )}
+              </div>
+
+              {/* Connector */}
+              {!isLast && (
+                <div className="relative mx-2 mt-[18px] h-px flex-1 overflow-hidden bg-[#D8CCC0]">
+                  <div
+                    className={`absolute inset-y-0 left-0 transition-all duration-700 ${
+                      !isCancelled && currentIndex > index
+                        ? "w-full bg-[#211B17]"
+                        : "w-0"
+                    }`}
+                  />
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };
+
+/* ─────────────────────────────────────────────────────────
+   Status
+───────────────────────────────────────────────────────── */
+
+const getStatusStyle = (status) => {
+  switch (status) {
+    case "Delivered":
+      return "bg-[#211B17] text-[#F4EDE2]";
+
+    case "Cancelled":
+      return "border border-[#C56B4E] text-[#C56B4E] bg-[#C56B4E]/5";
+
+    case "Confirmed":
+    case "Processing":
+    case "Shipped":
+      return "border border-[#D8CCC0] text-[#211B17] bg-[#F4EDE2]";
+
+    default:
+      return "border border-[#D8CCC0] text-[#756A62] bg-[#F4EDE2]";
+  }
+};
+
+const getStatusIcon = (status) => {
+  switch (status) {
+    case "Shipped":
+      return Truck;
+
+    case "Delivered":
+      return Home;
+
+    case "Cancelled":
+      return X;
+
+    default:
+      return Package;
+  }
+};
+
+/* ─────────────────────────────────────────────────────────
+   Main Component
+───────────────────────────────────────────────────────── */
 
 const CustomerOrders = () => {
   const location = useLocation();
@@ -188,26 +255,26 @@ const CustomerOrders = () => {
   const [activeTab, setActiveTab] = useState("All Orders");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+
   const [reorderingId, setReorderingId] = useState(null);
   const [reorderMessage, setReorderMessage] = useState(null);
 
   const [recommended, setRecommended] = useState([]);
 
-  // Product IDs the customer has already reviewed — hides "Rate this
-  // product" on items they've already rated instead of letting them hit the
-  // backend's one-review-per-product error.
   const [reviewedProductIds, setReviewedProductIds] = useState(new Set());
-  const [reviewTarget, setReviewTarget] = useState(null); // { productId, name } | null
 
-  // Re-adds every item from a past order to the cart, then goes to /cart.
-  // Items whose product/variant no longer exists (deleted, discontinued,
-  // out of stock) are skipped individually rather than failing the whole
-  // action — the customer still gets everything that's still available.
+  const [reviewTarget, setReviewTarget] = useState(null);
+
+  /* ─────────────────────────────────────────────────────
+     Reorder
+  ───────────────────────────────────────────────────── */
+
   const handleOrderAgain = async (order) => {
     setReorderingId(order._id);
     setReorderMessage(null);
 
     const failed = [];
+
     for (const item of order.items) {
       try {
         await dispatch(
@@ -230,27 +297,44 @@ const CustomerOrders = () => {
     if (failed.length) {
       setReorderMessage({
         orderId: order._id,
-        text: `${failed.length === order.items.length ? "These items are" : "Some items are"} no longer available: ${failed.join(", ")}.`,
+        text: `${
+          failed.length === order.items.length
+            ? "These items are"
+            : "Some items are"
+        } no longer available: ${failed.join(", ")}.`,
       });
     } else {
       navigate("/cart");
     }
   };
 
+  /* ─────────────────────────────────────────────────────
+     Fetch Orders / Reviews
+  ───────────────────────────────────────────────────── */
+
   useEffect(() => {
     getMyOrders()
-      .then(({ data }) => setOrders(data?.data?.orders || []))
-      .finally(() => setLoading(false));
+      .then(({ data }) => {
+        setOrders(data?.data?.orders || []);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
 
     getMyReviews()
       .then(({ data }) => {
         const ids = (data?.data?.reviews || []).map(
           (r) => r.product?._id || r.product,
         );
+
         setReviewedProductIds(new Set(ids));
       })
       .catch(() => {});
   }, []);
+
+  /* ─────────────────────────────────────────────────────
+     Review
+  ───────────────────────────────────────────────────── */
 
   const handleSubmitReview = async ({ rating, comment }) => {
     await createReview({
@@ -258,14 +342,16 @@ const CustomerOrders = () => {
       rating,
       comment,
     });
-    setReviewedProductIds(
-      (prev) => new Set([...prev, reviewTarget.productId]),
-    );
+
+    setReviewedProductIds((prev) => new Set([...prev, reviewTarget.productId]));
+
     setReviewTarget(null);
   };
 
-  // Cross-sell strip — reuses the same public products endpoint the
-  // storefront already uses, just capped to a handful of items.
+  /* ─────────────────────────────────────────────────────
+     Recommendations
+  ───────────────────────────────────────────────────── */
+
   useEffect(() => {
     let cancelled = false;
 
@@ -282,6 +368,10 @@ const CustomerOrders = () => {
     };
   }, []);
 
+  /* ─────────────────────────────────────────────────────
+     Search / Filter
+  ───────────────────────────────────────────────────── */
+
   const filteredOrders = useMemo(() => {
     const term = search.trim().toLowerCase();
 
@@ -290,6 +380,7 @@ const CustomerOrders = () => {
         activeTab === "All Orders" ? true : order.status === activeTab;
 
       if (!tabMatch) return false;
+
       if (!term) return true;
 
       const address = order.shippingAddress || {};
@@ -324,6 +415,7 @@ const CustomerOrders = () => {
   }, [orders, activeTab, search]);
 
   const totalPages = Math.max(1, Math.ceil(filteredOrders.length / PAGE_SIZE));
+
   const pagedOrders = filteredOrders.slice(
     (page - 1) * PAGE_SIZE,
     page * PAGE_SIZE,
@@ -339,219 +431,354 @@ const CustomerOrders = () => {
   }, [search]);
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   }, [page]);
+
+  /* ─────────────────────────────────────────────────────
+     UI
+  ───────────────────────────────────────────────────── */
 
   return (
     <AnimatedPage>
-      {/* <div className="bg-[#FBF8F2]"> */}
-      <div>
-        <HeroBanner
-          eyebrow="Orders"
-          title="Your Orders"
-          description="View past purchases, track shipments, and reorder your favorites."
-          image="https://res.cloudinary.com/dasvdkncm/image/upload/v1784788176/ChatGPT_Image_Jul_23_2026_11_57_14_AM_gbwvsk.png"
+      <div className="min-h-screen bg-[#F4EDE2] text-[#211B17]">
+        {/* HERO */}
+
+        <PageHero
+          eyebrow="Your account"
+          title="Your"
+          titleHighlight="orders."
+          description="Track your purchases and see where your wellness journey is headed."
+          backgroundImage="https://res.cloudinary.com/dasvdkncm/image/upload/v1784788176/ChatGPT_Image_Jul_23_2026_11_57_14_AM_gbwvsk.png"
+          imageAlt="7ALP orders"
+          leftLabel="7ALP's / Orders"
+          rightLabel="Personal / Delivery"
         />
+        <section className="mx-auto max-w-[1500px] px-5 py-16 sm:px-8 xl:px-16">
+          {/* Success message */}
+          {location.state?.justPlaced && (
+            <motion.div
+              initial={{
+                opacity: 0,
+                y: 12,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              className="mb-12 border-l-2 border-[#C56B4E] bg-white/50 px-6 py-5"
+            >
+              <span className="font-ibm-mono text-[8px] uppercase tracking-[0.25em] text-[#C56B4E]">
+                Order confirmed
+              </span>
 
-        <div className="px-6 py-10 xl:px-0">
-          <div className="mx-auto max-w-7xl">
-            {location.state?.justPlaced ? (
-              <div className="mb-6 border border-[#16442C]/30 bg-[#16442C]/5 p-4 text-[#16442C]">
-                Your order has been placed successfully!
-              </div>
-            ) : null}
+              <p className="mt-2 font-manrope text-sm text-[#211B17]">
+                Your order has been placed successfully.
+              </p>
+            </motion.div>
+          )}
 
+          {/* PAGE HEADER */}
+          <div className="flex flex-col gap-8  pb-8 lg:flex-row lg:items-end lg:justify-between">
             {/* Search */}
-            <div className="mb-6 flex justify-end">
-              <div className="relative w-full sm:w-80">
-                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#B8B2A0]" />
+            <div className="w-full lg:max-w-[380px]">
+              <label className="mb-2 block font-ibm-mono text-[8px] uppercase tracking-[0.24em] text-[#91847A]">
+                Search orders
+              </label>
+
+              <div className="relative border-b border-[#CFC2B5]">
+                <Search
+                  className="pointer-events-none absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-[#91847A]"
+                  strokeWidth={1.4}
+                />
+
                 <input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search by order ID, product, status, address..."
-                  className="w-full rounded-full border border-[#E3DFD2] bg-white py-2.5 pl-10 pr-4 text-sm text-[#201F1B] outline-none focus:border-[#16442C]"
+                  placeholder="Order ID, product, address..."
+                  className="w-full bg-transparent py-3 pl-7 pr-2 font-manrope text-sm text-[#211B17] outline-none placeholder:text-[#A79A90] focus:border-[#C56B4E]"
                 />
               </div>
             </div>
+          </div>
 
-            {/* (Status tabs kept available but hidden per existing design —
-                re-enable by rendering TABS.map if wanted) */}
+          {/* ORDERS */}
+          <div className="mt-10">
+            {loading ? (
+              <div className="py-24 text-center">
+                <span className="font-ibm-mono text-[8px] uppercase tracking-[0.25em] text-[#91847A]">
+                  Loading / Orders
+                </span>
+              </div>
+            ) : pagedOrders.length === 0 ? (
+              <div className="border-t border-[#D8CCC0] py-20">
+                <span className="font-ibm-mono text-[8px] uppercase tracking-[0.25em] text-[#91847A]">
+                  Orders / Empty
+                </span>
 
-            {/* Orders list */}
-            <div className="space-y-6">
-              {loading ? (
-                <p className="text-center text-[#86806F]">Loading orders...</p>
-              ) : pagedOrders.length === 0 ? (
-                <div className="border border-[#E3DFD2] bg-white p-10 text-center text-[#86806F]">
-                  You haven't placed any orders yet.
-                </div>
-              ) : (
-                pagedOrders.map((order) => {
-                  const badge = STATUS_BADGE[order.status] || {
-                    className:
-                      "border border-[#E3DFD2] text-[#86806F] bg-white",
-                    icon: Leaf,
-                  };
-                  const BadgeIcon = badge.icon;
+                <h3 className="mt-5 font-manrope text-3xl font-medium tracking-[-0.05em]">
+                  No orders found.
+                </h3>
+
+                <p className="mt-3 font-manrope text-sm leading-6 text-[#756A62]">
+                  You haven&apos;t placed any orders matching your search.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-14">
+                {pagedOrders.map((order, orderIndex) => {
+                  const statusIcon = getStatusIcon(order.status);
+
+                  const StatusIcon = statusIcon;
+
                   const isCancelled = order.status === "Cancelled";
 
                   const itemsTotal = order.items.reduce(
-                    (sum, i) => sum + i.subtotal,
+                    (sum, item) => sum + item.subtotal,
                     0,
                   );
+
                   const extraCharges = order.totalAmount - itemsTotal;
 
                   return (
-                    <div
+                    <motion.article
                       key={order._id}
-                      className="border border-[#E3DFD2] bg-white p-6"
+                      initial={{
+                        opacity: 0,
+                        y: 25,
+                      }}
+                      whileInView={{
+                        opacity: 1,
+                        y: 0,
+                      }}
+                      viewport={{
+                        once: true,
+                        amount: 0.08,
+                      }}
+                      transition={{
+                        duration: 0.7,
+                        delay: orderIndex * 0.04,
+                        ease: [0.22, 1, 0.36, 1],
+                      }}
+                      className="border-t border-[#CFC2B5]"
                     >
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#EEF1E6]">
-                            <Package className="h-5 w-5 text-[#16442C]" />
-                          </span>
+                      {/* ORDER HEADER */}
+                      <div className="flex flex-col gap-6 py-7 md:flex-row md:items-center md:justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="flex h-11 w-11 items-center justify-center border border-[#D8CCC0]">
+                            <Package size={18} strokeWidth={1.3} />
+                          </div>
+
                           <div>
-                            <p className="font-medium text-lg text-[#201F1B]">
-                              Order #{order._id.slice(-8).toUpperCase()}
-                            </p>
-                            <p className="text-sm text-[#86806F]">
-                              {new Date(order.placedAt).toLocaleString()}
+                            <span className="font-ibm-mono text-[8px] uppercase tracking-[0.22em] text-[#91847A]">
+                              Order
+                            </span>
+
+                            <h3 className="mt-1 font-manrope text-lg font-medium tracking-[-0.025em]">
+                              #{order._id.slice(-8).toUpperCase()}
+                            </h3>
+
+                            <p className="mt-1 font-manrope text-xs text-[#91847A]">
+                              {formatOrderDate(order.placedAt)}
                             </p>
                           </div>
                         </div>
-                        <span
-                          className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${badge.className}`}
+
+                        <div
+                          className={`inline-flex w-fit items-center gap-2 px-3 py-2 font-ibm-mono text-[8px] uppercase tracking-[0.16em] ${getStatusStyle(
+                            order.status,
+                          )}`}
                         >
-                          <BadgeIcon className="h-3 w-3" />
+                          <StatusIcon size={12} strokeWidth={1.5} />
+
                           {order.status}
-                        </span>
+                        </div>
                       </div>
 
-                      <div className="mt-5">
-                        <Perforation />
-                      </div>
-
+                      {/* TRACKING */}
                       {isCancelled ? (
-                        <div className="mt-5 flex items-center gap-3 border border-dashed border-[#B4652F]/40 bg-[#B4652F]/5 px-6 py-4 text-sm text-[#B4652F]">
-                          <X className="h-4 w-4 flex-shrink-0" />
-                          This order was cancelled and is no longer being
-                          processed.
+                        <div className="border-y border-[#C56B4E]/20 bg-[#C56B4E]/5 px-5 py-5">
+                          <div className="flex items-center gap-3">
+                            <X size={16} className="shrink-0 text-[#C56B4E]" />
+
+                            <div>
+                              <span className="font-ibm-mono text-[8px] uppercase tracking-[0.2em] text-[#C56B4E]">
+                                Order cancelled
+                              </span>
+
+                              <p className="mt-1 font-manrope text-xs leading-5 text-[#756A62]">
+                                This order was cancelled and is no longer being
+                                processed.
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       ) : (
-                        <div className="mt-5 border border-[#F0EEE3] bg-[#FBF8F2]/60 px-6 py-4">
+                        <div className="border-y border-[#D8CCC0] py-7">
                           <OrderTrackingBar order={order} />
                         </div>
                       )}
 
-                      <div className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-[1.6fr_1fr]">
-                        {/* Items */}
-                        <div className="flex flex-col justify-between items-start border border-[#F0EEE3] bg-white p-5">
-                          <div className="w-full divide-y divide-[#F0EEE3]">
+                      {/* CONTENT */}
+                      <div className="grid gap-10 py-8 lg:grid-cols-[1.55fr_0.85fr]">
+                        {/* ITEMS */}
+                        <div>
+                          <div className="mb-5 flex items-center justify-between">
+                            <span className="font-ibm-mono text-[8px] uppercase tracking-[0.25em] text-[#91847A]">
+                              Items
+                            </span>
+
+                            <span className="font-ibm-mono text-[8px] text-[#B0A49A]">
+                              {order.items.length.toString().padStart(2, "0")}
+                            </span>
+                          </div>
+
+                          <div className="border-t border-[#D8CCC0]">
                             {order.items.map((item) => (
                               <div
                                 key={`${item.product}-${item.variantLabel}`}
-                                className="flex items-center gap-4 py-3"
+                                className="flex gap-5 border-b border-[#D8CCC0] py-5"
                               >
+                                {/* Image */}
                                 {item.image ? (
                                   <img
                                     src={item.image}
                                     alt={item.name}
-                                    className="h-16 w-16 flex-shrink-0 object-cover"
+                                    className="h-20 w-20 shrink-0 object-cover bg-[#EAE0D4]"
                                   />
                                 ) : (
-                                  <span className="flex h-16 w-16 flex-shrink-0 items-center justify-center bg-[#EEF1E6]">
-                                    <Package className="h-6 w-6 text-[#16442C]" />
-                                  </span>
+                                  <div className="flex h-20 w-20 shrink-0 items-center justify-center bg-[#EAE0D4]">
+                                    <Package
+                                      size={22}
+                                      strokeWidth={1.2}
+                                      className="text-[#91847A]"
+                                    />
+                                  </div>
                                 )}
-                                <div className="flex-1">
-                                  <span className="text-sm font-medium text-[#201F1B]">
-                                    {item.name}
-                                  </span>
-                                  <p className="text-xs text-[#86806F]">
-                                    {item.variantLabel} · Qty {item.quantity}
-                                  </p>
-                                  {order.status === "Delivered" ? (
-                                    reviewedProductIds.has(item.product) ? (
-                                      <span className="mt-1 flex items-center gap-1 text-xs text-[#16442C]">
-                                        <Star className="h-3 w-3 fill-[#16442C]" />
-                                        Reviewed
-                                      </span>
-                                    ) : (
-                                      <button
-                                        onClick={() =>
-                                          setReviewTarget({
-                                            productId: item.product,
-                                            name: item.name,
-                                          })
-                                        }
-                                        className="mt-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[#16442C] underline hover:text-[#0E3220]"
-                                      >
-                                        <Star className="h-3 w-3" />
-                                        Rate this product
-                                      </button>
-                                    )
-                                  ) : null}
+
+                                {/* Product */}
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                    <div>
+                                      <p className="font-manrope text-sm font-medium text-[#211B17]">
+                                        {item.name}
+                                      </p>
+
+                                      <p className="mt-1 font-manrope text-xs text-[#91847A]">
+                                        {item.variantLabel || "Standard"} · Qty{" "}
+                                        {item.quantity}
+                                      </p>
+                                    </div>
+
+                                    <span className="font-manrope text-sm font-medium text-[#211B17]">
+                                      ₹{item.subtotal}
+                                    </span>
+                                  </div>
+
+                                  {/* Review */}
+                                  {order.status === "Delivered" && (
+                                    <div className="mt-3">
+                                      {reviewedProductIds.has(item.product) ? (
+                                        <span className="flex items-center gap-1.5 font-ibm-mono text-[8px] uppercase tracking-[0.15em] text-[#91847A]">
+                                          <Star
+                                            size={11}
+                                            fill="currentColor"
+                                            strokeWidth={1}
+                                          />
+                                          Reviewed
+                                        </span>
+                                      ) : (
+                                        <button
+                                          type="button"
+                                          onClick={() =>
+                                            setReviewTarget({
+                                              productId: item.product,
+                                              name: item.name,
+                                            })
+                                          }
+                                          className="flex items-center gap-1.5 font-ibm-mono text-[8px] uppercase tracking-[0.15em] text-[#C56B4E] transition-colors hover:text-[#211B17]"
+                                        >
+                                          <Star size={11} strokeWidth={1.4} />
+                                          Rate this product
+                                        </button>
+                                      )}
+                                    </div>
+                                  )}
                                 </div>
-                                <span className="text-sm font-medium text-[#201F1B]">
-                                  ₹{item.subtotal}
-                                </span>
                               </div>
                             ))}
                           </div>
 
-                          <button
-                            onClick={() => handleOrderAgain(order)}
-                            disabled={reorderingId === order._id}
-                            className="mt-4 flex items-center gap-1.5 rounded-full border border-[#16442C] px-4 py-2 text-xs font-semibold uppercase tracking-wide text-[#16442C] hover:bg-[#16442C] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
-                          >
-                            {reorderingId === order._id
-                              ? "Adding to cart..."
-                              : "Order Again"}
-                            <LiaUndoAltSolid className="h-3.5 w-3.5" />
-                          </button>
-                          {reorderMessage?.orderId === order._id ? (
-                            <p className="mt-2 text-xs text-[#B4652F]">
-                              {reorderMessage.text}
-                            </p>
-                          ) : null}
+                          {/* Reorder */}
+                          <div className="pt-6">
+                            <button
+                              type="button"
+                              onClick={() => handleOrderAgain(order)}
+                              disabled={reorderingId === order._id}
+                              className="group inline-flex items-center gap-4 border border-[#211B17] px-6 py-3 font-manrope text-xs font-medium text-[#211B17] transition-all duration-300 hover:bg-[#211B17] hover:text-[#F4EDE2] disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              {reorderingId === order._id
+                                ? "Adding to cart..."
+                                : "Order again"}
+
+                              <span className="transition-transform duration-300 group-hover:translate-x-1">
+                                <LiaUndoAltSolid size={14} />
+                              </span>
+                            </button>
+
+                            {reorderMessage?.orderId === order._id && (
+                              <p className="mt-3 max-w-xl font-manrope text-xs leading-5 text-[#C56B4E]">
+                                {reorderMessage.text}
+                              </p>
+                            )}
+                          </div>
                         </div>
 
-                        {/* Summary */}
-                        <div className="border border-[#F0EEE3] bg-white p-5">
-                          <div className="space-y-4 text-sm">
-                            <div className="flex items-start justify-between gap-3">
-                              <span className="flex items-center gap-2 text-[#86806F]">
-                                <ShoppingBag className="h-4 w-4" />
-                                Total Items
+                        {/* SUMMARY */}
+                        <div className="border-t border-[#D8CCC0] lg:border-l lg:border-t-0 lg:pl-8">
+                          <div className="mb-5">
+                            <span className="font-ibm-mono text-[8px] uppercase tracking-[0.25em] text-[#91847A]">
+                              Order summary
+                            </span>
+                          </div>
+
+                          <div className="space-y-5">
+                            <div className="flex items-start justify-between gap-5">
+                              <span className="flex items-center gap-2 font-manrope text-xs text-[#91847A]">
+                                <ShoppingBag size={14} />
+                                Total items
                               </span>
-                              <span className="font-medium text-[#201F1B]">
+
+                              <span className="font-manrope text-xs font-medium">
                                 {order.items.reduce(
-                                  (sum, i) => sum + i.quantity,
+                                  (sum, item) => sum + item.quantity,
                                   0,
-                                )}{" "}
-                                Item(s)
+                                )}
                               </span>
                             </div>
 
-                            <div className="flex items-start justify-between gap-3">
-                              <span className="flex items-center gap-2 text-[#86806F]">
-                                <CreditCard className="h-4 w-4" />
-                                Payment Method
+                            <div className="flex items-start justify-between gap-5">
+                              <span className="flex items-center gap-2 font-manrope text-xs text-[#91847A]">
+                                <CreditCard size={14} />
+                                Payment
                               </span>
-                              <span className="font-medium text-[#201F1B]">
+
+                              <span className="max-w-[55%] text-right font-manrope text-xs font-medium">
                                 {order.paymentMethod}
                               </span>
                             </div>
 
-                            {!isCancelled && order.expectedDeliveryDate ? (
-                              <div className="flex items-start justify-between gap-3">
-                                <span className="flex items-center gap-2 text-[#86806F]">
-                                  <Truck className="h-4 w-4" />
-                                  Expected Delivery
+                            {!isCancelled && order.expectedDeliveryDate && (
+                              <div className="flex items-start justify-between gap-5">
+                                <span className="flex items-center gap-2 font-manrope text-xs text-[#91847A]">
+                                  <Truck size={14} />
+                                  Delivery
                                 </span>
-                                <span className="font-medium text-[#201F1B]">
+
+                                <span className="text-right font-manrope text-xs font-medium">
                                   {new Date(
                                     order.expectedDeliveryDate,
                                   ).toLocaleDateString("en-IN", {
@@ -561,14 +788,15 @@ const CustomerOrders = () => {
                                   })}
                                 </span>
                               </div>
-                            ) : null}
+                            )}
 
-                            <div className="flex items-start justify-between gap-3">
-                              <span className="flex items-center gap-2 text-[#86806F]">
-                                <MapPin className="h-4 w-4" />
-                                Shipping Address
+                            <div className="flex items-start justify-between gap-5">
+                              <span className="flex items-center gap-2 font-manrope text-xs text-[#91847A]">
+                                <MapPin size={14} />
+                                Shipping
                               </span>
-                              <span className="max-w-[60%] text-right font-medium text-[#201F1B]">
+
+                              <span className="max-w-[55%] text-right font-manrope text-xs font-medium leading-5">
                                 {order.shippingAddress?.city},{" "}
                                 {order.shippingAddress?.state}
                                 <br />
@@ -578,105 +806,180 @@ const CustomerOrders = () => {
                             </div>
 
                             {extraCharges !== 0 &&
-                            !Number.isNaN(extraCharges) ? (
-                              <div className="flex items-start justify-between gap-3">
-                                <span className="flex items-center gap-2 text-[#86806F]">
-                                  <BadgeIndianRupee className="h-4 w-4" />
-                                  Taxes &amp; Shipping
+                              !Number.isNaN(extraCharges) && (
+                                <div className="flex items-start justify-between gap-5">
+                                  <span className="flex items-center gap-2 font-manrope text-xs text-[#91847A]">
+                                    <BadgeIndianRupee size={14} />
+                                    Taxes & shipping
+                                  </span>
+
+                                  <span className="font-manrope text-xs font-medium">
+                                    ₹{extraCharges}
+                                  </span>
+                                </div>
+                              )}
+
+                            {/* Total */}
+                            <div className="mt-6 border-t border-[#211B17] pt-5">
+                              <div className="flex items-end justify-between gap-5">
+                                <span className="font-ibm-mono text-[8px] uppercase tracking-[0.2em] text-[#756A62]">
+                                  Order total
                                 </span>
-                                <span className="font-medium text-[#201F1B]">
-                                  ₹{extraCharges}
+
+                                <span className="font-manrope text-2xl font-medium tracking-[-0.04em] text-[#211B17]">
+                                  ₹{order.totalAmount}
                                 </span>
                               </div>
-                            ) : null}
-
-                            <div className="flex items-center justify-between border-t border-[#F0EEE3] pt-4">
-                              <span className="flex items-center gap-2 text-[#86806F]">
-                                <BadgeIndianRupee className="h-4 w-4" />
-                                Order Total
-                              </span>
-                              <span className="text-lg font-medium text-[#16442C]">
-                                ₹{order.totalAmount}
-                              </span>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </motion.article>
                   );
-                })
-              )}
-            </div>
+                })}
+              </div>
+            )}
+          </div>
 
-            {!loading && filteredOrders.length > 0 ? (
+          {/* PAGINATION */}
+          {!loading && filteredOrders.length > 0 && (
+            <div className="mt-14 border-t border-[#D8CCC0] pt-8">
               <Pagination
                 currentPage={page}
                 totalPages={totalPages}
                 onPageChange={setPage}
               />
-            ) : null}
+            </div>
+          )}
 
-            {/* ── Cross-sell CTA ─────────────────────────────────────── */}
-            {!loading && orders.length > 0 ? (
-              <div className="mt-10 flex flex-col items-center justify-between gap-4 border border-[#E3DFD2] bg-[#EEF1E6] p-6 sm:flex-row">
+          {/* ─────────────────────────────────────────
+              SHOP CTA
+          ───────────────────────────────────────── */}
+          {!loading && orders.length > 0 && (
+            <motion.div
+              initial={{
+                opacity: 0,
+                y: 20,
+              }}
+              whileInView={{
+                opacity: 1,
+                y: 0,
+              }}
+              viewport={{
+                once: true,
+              }}
+              className="mt-10"
+            >
+              <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
                 <div>
-                  <p className="font-medium text-lg text-[#201F1B]">
-                    Need More Herbal Products?
-                  </p>
-                  <p className="text-sm text-[#5B564A]">
-                    Continue your wellness journey with nature's best.
-                  </p>
+                  <span className="font-ibm-mono text-[8px] uppercase tracking-[0.25em] text-[#C56B4E]">
+                    Continue exploring
+                  </span>
+
+                  <h3 className="mt-3 font-manrope text-3xl font-medium tracking-[-0.055em] md:text-4xl">
+                    More good things
+                    <br />
+                    <span className="font-normal text-[#91847A]">
+                      start naturally.
+                    </span>
+                  </h3>
                 </div>
+
                 <button
+                  type="button"
                   onClick={() => navigate("/products")}
-                  className="flex items-center gap-2 rounded-full bg-[#16442C] px-5 py-2.5 text-sm font-semibold uppercase tracking-wide text-white hover:bg-[#0E3220]"
+                  className="group inline-flex w-fit items-center gap-4 bg-[#211B17] px-7 py-4 font-manrope text-sm font-medium text-[#F4EDE2] transition-colors hover:bg-[#C56B4E]"
                 >
-                  <Leaf className="h-4 w-4" />
-                  Shop Now
+                  Shop products
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#F4EDE2] text-[#211B17] transition-transform duration-300 group-hover:translate-x-1">
+                    <ArrowUpRight size={14} />
+                  </span>
                 </button>
               </div>
-            ) : null}
+            </motion.div>
+          )}
 
-            {/* ── You May Also Like ──────────────────────────────────── */}
-            {!loading && recommended.length > 0 ? (
-              <div className="mt-10">
-                <p className="mb-4 flex items-center gap-2 font-medium text-xl text-[#201F1B]">
-                  <Leaf className="h-4 w-4 text-[#16442C]" />
-                  You May Also Like
-                </p>
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                  {recommended.map((product) => (
-                    <button
-                      key={product.id}
-                      onClick={() => navigate(`/products/${product.id}`)}
-                      className="border border-[#E3DFD2] bg-white p-3 text-left hover:border-[#16442C]"
-                    >
+          {/* ─────────────────────────────────────────
+              RECOMMENDED
+          ───────────────────────────────────────── */}
+          {!loading && recommended.length > 0 && (
+            <motion.section
+              initial={{
+                opacity: 0,
+                y: 20,
+              }}
+              whileInView={{
+                opacity: 1,
+                y: 0,
+              }}
+              viewport={{
+                once: true,
+              }}
+              className="mt-24"
+            >
+              <div className="mb-8 flex items-end justify-between border-b border-[#D8CCC0] pb-6">
+                <div>
+                  <span className="font-ibm-mono text-[8px] uppercase tracking-[0.25em] text-[#C56B4E]">
+                    You might like
+                  </span>
+
+                  <h3 className="mt-3 font-manrope text-3xl font-medium tracking-[-0.055em]">
+                    Worth another look.
+                  </h3>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-px bg-[#CFC2B5] md:grid-cols-4">
+                {recommended.map((product) => (
+                  <button
+                    key={product.id}
+                    type="button"
+                    onClick={() => navigate(`/products/${product.id}`)}
+                    className="group bg-[#F4EDE2] p-4 text-left md:p-5"
+                  >
+                    <div className="overflow-hidden bg-[#EAE0D4]">
                       {product.ProductImage ? (
                         <img
                           src={product.ProductImage}
                           alt={product.ProductName}
-                          className="mb-2 h-28 w-full object-cover"
+                          className="aspect-square w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
                         />
                       ) : (
-                        <span className="mb-2 flex h-28 w-full items-center justify-center bg-[#EEF1E6]">
-                          <Package className="h-6 w-6 text-[#16442C]" />
-                        </span>
+                        <div className="flex aspect-square items-center justify-center">
+                          <Package
+                            size={28}
+                            strokeWidth={1.2}
+                            className="text-[#91847A]"
+                          />
+                        </div>
                       )}
-                      <p className="truncate text-sm font-medium text-[#201F1B]">
+                    </div>
+
+                    <div className="mt-5">
+                      <p className="truncate font-manrope text-sm font-medium text-[#211B17]">
                         {product.ProductName}
                       </p>
-                      <p className="text-sm font-medium text-[#16442C]">
-                        ₹{product.ProductPrice}
-                      </p>
-                    </button>
-                  ))}
-                </div>
+
+                      <div className="mt-2 flex items-center justify-between">
+                        <span className="font-manrope text-sm text-[#756A62]">
+                          ₹{product.ProductPrice}
+                        </span>
+
+                        <ArrowUpRight
+                          size={14}
+                          className="text-[#91847A] transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1"
+                        />
+                      </div>
+                    </div>
+                  </button>
+                ))}
               </div>
-            ) : null}
-          </div>
-        </div>
+            </motion.section>
+          )}
+        </section>
       </div>
 
+      {/* REVIEW MODAL */}
       {reviewTarget ? (
         <ReviewModal
           onClose={() => setReviewTarget(null)}

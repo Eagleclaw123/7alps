@@ -1,15 +1,14 @@
-import { Minus, Plus, Leaf } from "lucide-react";
+import { Minus, Plus } from "lucide-react";
 import { RxCross2 } from "react-icons/rx";
 
 /**
- * Defensive decode for category/name strings that may arrive pre-escaped
- * from the API (e.g. "Health &amp; Wellness" instead of "Health & Wellness").
- * The real fix belongs wherever that string is written, but this keeps the
- * UI from ever showing a raw HTML entity in the meantime.
+ * Defensive decode for category/name strings that may arrive
+ * pre-escaped from the API.
  */
 const decodeEntities = (value) => {
   if (!value) return value;
-  return value
+
+  return String(value)
     .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
@@ -17,36 +16,39 @@ const decodeEntities = (value) => {
     .replace(/&#39;/g, "'");
 };
 
-/* Dashed "perforation" strip — the seed-packet detail used across the site */
-const Perforation = () => (
-  <div
-    className="h-px w-full"
-    style={{
-      backgroundImage:
-        "repeating-linear-gradient(to right, #C9C2AE 0, #C9C2AE 6px, transparent 6px, transparent 13px)",
-    }}
-  />
-);
+/* =========================================================
+   QUANTITY STEPPER
+========================================================= */
 
 const QuantityStepper = ({ quantity, onIncrease, onDecrease, id }) => (
-  <div className="flex w-fit items-center gap-2 rounded-full border border-[#E3DFD2] px-2 py-1">
+  <div className="inline-flex h-8 items-center border border-[#D8CCC0] bg-[#F7F2EB] sm:h-9">
     <button
+      type="button"
       onClick={() => onDecrease(id)}
-      className="flex h-6 w-6 items-center justify-center text-[#86806F] transition hover:text-[#16442C]"
+      className="flex h-8 w-8 shrink-0 items-center justify-center text-[#756A62] hover:bg-[#EAE0D4] hover:text-[#211B17] sm:h-9 sm:w-9"
+      aria-label="Decrease quantity"
     >
-      <Minus size={12} />
+      <Minus size={12} strokeWidth={1.7} />
     </button>
-    <span className="w-4 text-center text-[14px] font-semibold text-[#201F1B]">
+
+    <span className="flex h-8 min-w-8 shrink-0 items-center justify-center border-x border-[#D8CCC0] px-1 font-ibm-mono text-[10px] text-[#211B17] sm:h-9 sm:min-w-9">
       {quantity}
     </span>
+
     <button
+      type="button"
       onClick={() => onIncrease(id)}
-      className="flex h-6 w-6 items-center justify-center text-[#86806F] transition hover:text-[#16442C]"
+      className="flex h-8 w-8 shrink-0 items-center justify-center text-[#756A62] hover:bg-[#EAE0D4] hover:text-[#211B17] sm:h-9 sm:w-9"
+      aria-label="Increase quantity"
     >
-      <Plus size={12} />
+      <Plus size={12} strokeWidth={1.7} />
     </button>
   </div>
 );
+
+/* =========================================================
+   CART ITEM
+========================================================= */
 
 const CartItem = ({
   item,
@@ -59,91 +61,141 @@ const CartItem = ({
   const price = Number(item.price || 0);
   const quantity = Number(item.quantity || 1);
   const total = price * quantity;
+
   const name = decodeEntities(item.name);
   const category = decodeEntities(item.category);
+
   const hasAddAction = Boolean(onAdd);
+
+  // Desktop/table grid only kicks in at lg (1024px+), giving enough room
+  // for all columns. Between sm/md it still uses the card layout.
   const desktopGridClass = showTotal
-    ? "sm:grid-cols-[2.2fr_1fr_0.8fr_1fr_0.8fr]"
-    : "sm:grid-cols-[2.2fr_1fr_0.8fr_1fr]";
+    ? "lg:grid-cols-[2fr_0.9fr_0.7fr_1fr_0.8fr]"
+    : "lg:grid-cols-[2fr_0.9fr_0.7fr_1fr]";
 
   return (
-    <div>
-      {/* ── Mobile card (below sm) ─────────────────────────────── */}
-      <div className="border border-[#E3DFD2] bg-white p-4 sm:hidden">
-        <div className="flex gap-3">
-          <div className="relative h-20 w-20 shrink-0 overflow-hidden bg-[#EEF1E6]">
+    <div className="w-full min-w-0">
+      {/* =====================================================
+          CARD LAYOUT (mobile + tablet, < lg)
+          Fully fluid: wraps, shrinks, and reflows as needed.
+      ===================================================== */}
+
+      <div className="w-full min-w-0 border-b border-[#D8CCC0] py-4 lg:hidden">
+        {/* PRODUCT TOP */}
+
+        <div className="flex w-full min-w-0 items-start gap-3">
+          {/* IMAGE */}
+
+          <div className="h-16 w-16 shrink-0 overflow-hidden bg-[#EAE0D4] sm:h-[72px] sm:w-[72px]">
             <img
               src={
                 item.image ||
                 "https://images.unsplash.com/photo-1515377905703-c4788e51af15"
               }
               alt={name || "Product"}
-              className="h-full w-full object-cover"
+              className="block h-full w-full object-cover"
             />
           </div>
 
+          {/* DETAILS */}
+
           <div className="min-w-0 flex-1">
-            <div className="flex items-start justify-between gap-2">
-              <p className="font-serif text-base leading-snug text-[#201F1B]">
-                {name}
-              </p>
+            <div className="flex w-full items-start gap-2">
+              <div className="min-w-0 flex-1">
+                <p className="break-words font-manrope text-[13px] font-medium leading-5 text-[#211B17] sm:text-[14px]">
+                  {name}
+                </p>
+
+                {category && (
+                  <p className="mt-1 truncate font-manrope text-[11px] leading-4 text-[#91847A]">
+                    {category}
+                  </p>
+                )}
+
+                {item.weight && (
+                  <p className="mt-0.5 font-manrope text-[11px] leading-4 text-[#91847A]">
+                    Size / {item.weight}
+                  </p>
+                )}
+              </div>
+
+              {/* REMOVE */}
+
               <button
+                type="button"
                 onClick={() => onRemove(item.id)}
-                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[#E3DFD2] text-[#86806F] hover:border-red-400 hover:text-red-500"
+                className="flex h-6 w-6 shrink-0 items-center justify-center text-[#91847A]"
                 aria-label="Remove item"
               >
-                <RxCross2 size={12} />
+                <RxCross2 size={14} />
               </button>
             </div>
-            <p className="mt-1 text-xs text-[#86806F]">
-              {category} · Size {item.weight}
-            </p>
-            <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-[#EEF1E6] px-2 py-0.5 text-[11px] font-medium text-[#16442C]">
-              <Leaf className="h-2.5 w-2.5" />
-              {item.inStock ? "In Stock" : "Out of Stock"}
-            </span>
+
+            {/* STOCK */}
+
+            <div className="mt-2">
+              <span
+                className={`font-ibm-mono text-[8px] uppercase tracking-[0.14em] ${
+                  item.inStock ? "text-[#756A62]" : "text-[#C56B4E]"
+                }`}
+              >
+                {item.inStock ? "In stock" : "Out of stock"}
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className="my-3">
-          <Perforation />
-        </div>
+        {/* BOTTOM */}
 
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] text-[#86806F]">Qty</span>
+        <div className="mt-4 flex w-full min-w-0 flex-wrap items-center justify-between gap-3 border-t border-[#D8CCC0] pt-3">
+          {/* QUANTITY */}
+
+          <div className="shrink-0">
+            {hasAddAction ? (
+              <button
+                type="button"
+                onClick={() => onAdd(item)}
+                className="whitespace-nowrap border border-[#211B17] px-3.5 py-2 font-ibm-mono text-[8px] uppercase tracking-[0.14em] text-[#211B17]"
+              >
+                Add to cart
+              </button>
+            ) : (
               <QuantityStepper
                 id={item.id}
                 quantity={quantity}
                 onIncrease={onIncrease}
                 onDecrease={onDecrease}
               />
-            </div>
-            <div className="text-right">
-              <p className="text-[11px] text-[#86806F]">
-                ₹{price.toFixed(2)} each
-              </p>
-            </div>
+            )}
           </div>
-          {onAdd && (
-            <button
-              onClick={() => onAdd(item)}
-              className="w-full rounded-full bg-[#16442C] px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white hover:bg-[#0E3220]"
-            >
-              Add to Cart
-            </button>
-          )}
+
+          {/* PRICE */}
+
+          <div className="min-w-0 text-right">
+            <p className="whitespace-nowrap font-manrope text-[10px] text-[#91847A]">
+              ₹{price.toFixed(2)} each
+            </p>
+
+            {showTotal && (
+              <p className="mt-0.5 whitespace-nowrap font-manrope text-sm font-semibold text-[#211B17]">
+                ₹{total.toFixed(2)}
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* ── Desktop / tablet row (sm and up) ──────────────────────── */}
+      {/* =====================================================
+          TABLE ROW (desktop, lg and up)
+      ===================================================== */}
+
       <div
-        className={`hidden border-t border-[#F0EEE3] px-6 py-4 sm:grid ${desktopGridClass} sm:items-center sm:gap-4`}
+        className={`hidden w-full border-b border-[#D8CCC0] py-5 lg:grid xl:py-6 ${desktopGridClass} lg:items-center lg:gap-3`}
       >
-        {/* Product */}
-        <div className="flex gap-3">
-          <div className="relative h-16 w-16 shrink-0 overflow-hidden bg-[#EEF1E6]">
+        {/* PRODUCT */}
+
+        <div className="flex min-w-0 gap-4 pr-4 xl:gap-5 xl:pr-5">
+          <div className="relative h-16 w-16 shrink-0 overflow-hidden bg-[#EAE0D4] xl:h-20 xl:w-20">
             <img
               src={
                 item.image ||
@@ -152,62 +204,82 @@ const CartItem = ({
               alt={name || "Product"}
               className="h-full w-full object-cover"
             />
+
             <button
+              type="button"
               onClick={() => onRemove(item.id)}
-              className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full border border-[#E3DFD2] bg-white text-[9px] text-[#86806F] hover:border-red-400 hover:text-red-500"
+              className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center bg-[#F4EDE2]/90 text-[#756A62] hover:bg-[#C56B4E] hover:text-white"
+              aria-label="Remove item"
             >
-              <RxCross2 size={10} />
+              <RxCross2 size={11} />
             </button>
           </div>
 
-          <div className="text-xs">
-            <p className="text-base font-medium leading-snug text-[#201F1B]">
+          <div className="min-w-0">
+            <p className="truncate font-manrope text-sm font-medium text-[#211B17]">
               {name}
             </p>
-            <p className="mt-1 text-[#86806F]">
-              Category:{" "}
-              <span className="font-medium text-[#5B564A]">{category}</span>
-            </p>
-            <p className="text-[#86806F]">
-              Size:{" "}
-              <span className="font-medium text-[#5B564A]">{item.weight}</span>
-            </p>
+
+            {category && (
+              <p className="mt-2 truncate font-manrope text-xs text-[#91847A]">
+                {category}
+              </p>
+            )}
+
+            {item.weight && (
+              <p className="mt-1 truncate font-manrope text-xs text-[#91847A]">
+                Size / {item.weight}
+              </p>
+            )}
           </div>
         </div>
 
-        {/* Stock */}
-        <p className="flex items-center gap-1.5 text-[13px] text-[#5B564A]">
-          <Leaf className="h-3 w-3 text-[#16442C]" />
-          {item.inStock ? "In Stock" : "Out of Stock"}
-        </p>
+        {/* STOCK */}
 
-        {/* Price */}
-        <span className="text-[14px] font-medium text-[#201F1B]">
-          ₹{price.toFixed(2)}
-        </span>
+        <div className="min-w-0 border-l border-[#D8CCC0] pl-3 xl:pl-5">
+          <span
+            className={`whitespace-nowrap font-ibm-mono text-[8px] uppercase tracking-[0.16em] ${
+              item.inStock ? "text-[#756A62]" : "text-[#C56B4E]"
+            }`}
+          >
+            {item.inStock ? "In stock" : "Out of stock"}
+          </span>
+        </div>
 
-        {/* Qty / Action */}
-        {onAdd ? (
-          <div className="">
+        {/* PRICE */}
+
+        <div className="min-w-0 border-l border-[#D8CCC0] pl-3 xl:pl-5">
+          <span className="whitespace-nowrap font-manrope text-sm font-medium text-[#211B17]">
+            ₹{price.toFixed(2)}
+          </span>
+        </div>
+
+        {/* QUANTITY */}
+
+        <div className="min-w-0 border-l border-[#D8CCC0] pl-3 xl:pl-5">
+          {hasAddAction ? (
             <button
+              type="button"
               onClick={() => onAdd(item)}
-              className="rounded-full bg-[#16442C] px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white hover:bg-[#0E3220]"
+              className="w-fit whitespace-nowrap border border-[#211B17] px-3 py-2 font-ibm-mono text-[8px] uppercase tracking-[0.14em] text-[#211B17] xl:px-4"
             >
-              Add to Cart
+              Add to cart
             </button>
-          </div>
-        ) : (
-          <QuantityStepper
-            id={item.id}
-            quantity={quantity}
-            onIncrease={onIncrease}
-            onDecrease={onDecrease}
-          />
-        )}
+          ) : (
+            <QuantityStepper
+              id={item.id}
+              quantity={quantity}
+              onIncrease={onIncrease}
+              onDecrease={onDecrease}
+            />
+          )}
+        </div>
+
+        {/* TOTAL */}
 
         {showTotal && (
-          <div className="">
-            <span className="text-[15px] font-medium text-[#16442C]">
+          <div className="min-w-0 border-l border-[#D8CCC0] pl-3 xl:pl-5">
+            <span className="whitespace-nowrap font-manrope text-base font-medium text-[#211B17]">
               ₹{total.toFixed(2)}
             </span>
           </div>

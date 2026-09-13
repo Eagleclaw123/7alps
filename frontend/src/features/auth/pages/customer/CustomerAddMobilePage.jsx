@@ -99,9 +99,7 @@ const CustomerAddMobilePage = () => {
       const destination = from ? `${from.pathname}${from.search || ""}` : "/";
       navigate(destination, { replace: true });
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Unable to save mobile number.",
-      );
+      setError(err.response?.data?.message || "Unable to save mobile number.");
     } finally {
       setLoading(false);
     }
@@ -110,20 +108,20 @@ const CustomerAddMobilePage = () => {
   return (
     <AuthLayout>
       <AuthCard>
-        <div className="mb-8">
+        <div className="mb-10 flex items-center justify-between lg:hidden">
           <img
             src="https://res.cloudinary.com/dasvdkncm/image/upload/v1781664574/7_ALP_s_Logo-removebg-preview_e7kr1k.png"
             alt="7ALP's Logo"
-            className="h-16 w-auto"
+            className="h-12 w-auto object-contain"
           />
         </div>
 
         <AuthHeader
-          title="One Last Step"
+          title="One last step."
           subtitle="Add your mobile number so we can reach you about your orders."
         />
 
-        <form className="space-y-6" onSubmit={handleSubmit} noValidate>
+        <form className="space-y-7" onSubmit={handleSubmit} noValidate>
           <div>
             <AuthInput
               name="mobile"
@@ -135,9 +133,16 @@ const CustomerAddMobilePage = () => {
               onBlur={handleBlur}
               maxLength={10}
             />
-            {error ? (
-              <p className="mt-1.5 text-sm text-red-600">{error}</p>
-            ) : null}
+
+            {error && (
+              <p className="mt-2 font-manrope text-xs text-red-600">{error}</p>
+            )}
+          </div>
+
+          <div className="border-l-2 border-[#C56B4E] pl-4">
+            <p className="font-manrope text-xs leading-5 text-[#756A62]">
+              We'll only use your number for order and delivery communication.
+            </p>
           </div>
 
           <AuthButton type="submit" disabled={loading || mobile.length !== 10}>

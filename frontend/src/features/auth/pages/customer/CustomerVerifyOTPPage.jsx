@@ -99,26 +99,21 @@ const CustomerVerifyOTPPage = () => {
   return (
     <AuthLayout>
       <AuthCard>
-        <div className="mb-8">
-          <img
-            src="https://res.cloudinary.com/dasvdkncm/image/upload/v1781664574/7_ALP_s_Logo-removebg-preview_e7kr1k.png"
-            alt="7ALP's Logo"
-            className="h-16 w-auto"
-          />
-        </div>
-
         <AuthHeader
-          title="Verify OTP"
+          title="Verify your email."
           subtitle="Enter the 6-digit verification code sent to your email."
         />
 
         <form onSubmit={handleSubmit} className="space-y-8">
-          <p className="text-center text-sm text-gray-500">
-            Code sent to
-            <span className="ml-1 font-semibold text-[#0F6B3E]">
+          <div className="border-l-2 border-[#C56B4E] pl-4">
+            <p className="font-ibm-mono text-[9px] uppercase tracking-[0.2em] text-[#91847A]">
+              Code sent to
+            </p>
+
+            <p className="mt-1 break-all font-manrope text-sm font-medium text-[#211B17]">
               {email}
-            </span>
-          </p>
+            </p>
+          </div>
 
           <OTPInput onChange={setOtp} />
 
@@ -126,22 +121,24 @@ const CustomerVerifyOTPPage = () => {
             {loading ? "Verifying..." : "Verify OTP"}
           </AuthButton>
 
-          <div className="space-y-3 text-center text-sm">
-            <p className="text-gray-500">Didn't receive the code?</p>
+          <div className="space-y-4 border-t border-[#D8CCC0] pt-6 text-center">
+            <p className="font-manrope text-xs text-[#756A62]">
+              Didn't receive the code?
+            </p>
 
             <button
               type="button"
               onClick={handleResend}
-              className="font-semibold text-[#0F6B3E] transition hover:underline"
+              className="font-ibm-mono text-[9px] font-medium uppercase tracking-[0.2em] text-[#211B17] underline decoration-[#C56B4E] underline-offset-4 transition hover:text-[#C56B4E]"
             >
               Resend OTP
             </button>
 
             <Link
               to="/customer/login"
-              className="block font-medium text-[#0F6B3E] transition hover:underline"
+              className="block font-ibm-mono text-[9px] uppercase tracking-[0.2em] text-[#756A62] transition hover:text-[#C56B4E]"
             >
-              ← Change Email Address
+              ← Change email address
             </Link>
           </div>
         </form>

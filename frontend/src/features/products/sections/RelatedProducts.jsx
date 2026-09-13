@@ -43,8 +43,8 @@ const RelatedProducts = ({ currentProduct }) => {
   if (!relatedProducts.length) return null;
 
   return (
-    <section className="py-16 px-6 xl:px-0">
-      <div className="mx-auto max-w-7xl">
+    <section className="py-16 px-6 xl:px-16">
+      <div className="mx-auto max-w-[1600px]">
         <h2 className="mb-10 text-4xl font-semibold">Related Products</h2>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

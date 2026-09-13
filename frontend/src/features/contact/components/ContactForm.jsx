@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FiCheckCircle } from "react-icons/fi";
-import { Leaf } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 import { submitContactForm } from "../../../shared/services/contact.service";
@@ -15,9 +15,6 @@ const initialFormData = {
   message: "",
 };
 
-// Only fullName and phone are mandatory now. Every other field is optional —
-// but if the person does fill one in (e.g. email), it's still validated for
-// a sensible format rather than accepted as-is.
 const validators = {
   fullName: (value) => {
     if (!value.trim()) return "Full name is required.";
@@ -26,21 +23,25 @@ const validators = {
       return "Name can only contain letters and spaces.";
     return "";
   },
+
   email: (value) => {
     if (!value.trim()) return "";
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()))
       return "Enter a valid email address.";
     return "";
   },
+
   phone: (value) => {
     if (!value.trim()) return "Phone number is required.";
     if (!/^\d{10}$/.test(value.trim()))
       return "Enter a valid 10-digit phone number.";
     return "";
   },
+
   companyName: () => "",
   productInterest: () => "",
   quantityRequirement: () => "",
+
   message: (value) => {
     if (!value.trim()) return "";
     if (value.trim().length < 10)
@@ -50,34 +51,57 @@ const validators = {
 };
 
 const FIELD_CONFIG = [
-  { name: "fullName", label: "Full Name", type: "text", required: true },
-  { name: "email", label: "Email", type: "email", required: false },
-  { name: "phone", label: "Phone Number", type: "text", required: true },
-  { name: "companyName", label: "Company Name", type: "text", required: false },
+  {
+    name: "fullName",
+    label: "Full Name",
+    type: "text",
+    required: true,
+    placeholder: "Your name",
+  },
+  {
+    name: "email",
+    label: "Email",
+    type: "email",
+    required: false,
+    placeholder: "you@example.com",
+  },
+  {
+    name: "phone",
+    label: "Phone Number",
+    type: "text",
+    required: true,
+    placeholder: "10-digit number",
+  },
+  {
+    name: "companyName",
+    label: "Company Name",
+    type: "text",
+    required: false,
+    placeholder: "Your company",
+  },
   {
     name: "productInterest",
     label: "Product Interest",
     type: "text",
     required: false,
+    placeholder: "What are you looking for?",
   },
   {
     name: "quantityRequirement",
     label: "Quantity Requirement",
     type: "text",
     required: false,
+    placeholder: "Approximate quantity",
   },
 ];
 
-/* Tracked-out field label, matches the profile page's label system */
 const FieldLabel = ({ required, children }) => (
-  <label className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#86806F] mb-1.5">
+  <label className="mb-2 block font-ibm-mono text-[8px] uppercase tracking-[0.24em] text-[#91847A]">
     {children}
-    {required ? <span className="text-[#B4652F]"> *</span> : null}
+
+    {required && <span className="ml-1 text-[#C56B4E]">*</span>}
   </label>
 );
-
-const underlineInput =
-  "border-b bg-transparent py-2 text-[15px] text-[#201F1B] outline-none transition-colors focus:border-[#16442C] placeholder:text-[#B8B2A0]";
 
 const ContactForm = () => {
   const [formData, setFormData] = useState(initialFormData);
@@ -88,7 +112,10 @@ const ContactForm = () => {
   const [submitError, setSubmitError] = useState("");
 
   const handleChange = ({ target: { name, value } }) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
 
     if (touched[name]) {
       setFieldErrors((prev) => ({
@@ -99,7 +126,11 @@ const ContactForm = () => {
   };
 
   const handleBlur = ({ target: { name, value } }) => {
-    setTouched((prev) => ({ ...prev, [name]: true }));
+    setTouched((prev) => ({
+      ...prev,
+      [name]: true,
+    }));
+
     setFieldErrors((prev) => ({
       ...prev,
       [name]: validators[name] ? validators[name](value) : "",
@@ -108,31 +139,36 @@ const ContactForm = () => {
 
   const validateAll = () => {
     const nextErrors = {};
+
     Object.keys(validators).forEach((field) => {
       nextErrors[field] = validators[field](formData[field] || "");
     });
+
     setFieldErrors(nextErrors);
+
     setTouched(
       Object.keys(validators).reduce((acc, field) => {
         acc[field] = true;
         return acc;
       }, {}),
     );
+
     return Object.values(nextErrors).every((msg) => !msg);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setSubmitted(false);
     setSubmitError("");
 
-    if (!validateAll()) {
-      return;
-    }
+    if (!validateAll()) return;
 
     setSubmitting(true);
+
     try {
       await submitContactForm(formData);
+
       setSubmitted(true);
       setFormData(initialFormData);
       setTouched({});
@@ -151,7 +187,7 @@ const ContactForm = () => {
     hidden: {},
     visible: {
       transition: {
-        staggerChildren: 0.1,
+        staggerChildren: 0.07,
       },
     },
   };
@@ -159,109 +195,163 @@ const ContactForm = () => {
   const itemVariants = {
     hidden: {
       opacity: 0,
-      y: 25,
+      y: 18,
     },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.7,
-        ease: [0.25, 0.1, 0.25, 1],
+        duration: 0.6,
+        ease: [0.22, 1, 0.36, 1],
       },
     },
   };
 
   return (
     <motion.form
-      className="mt-12 border border-[#E3DFD2] bg-white p-8"
+      onSubmit={handleSubmit}
+      noValidate
       variants={containerVariants}
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, amount: 0.1 }}
-      onSubmit={handleSubmit}
-      noValidate
+      className="bg-[#F4EDE2]"
     >
-      <div className="mb-6 flex items-center gap-2">
-        <Leaf size={16} className="text-[#16442C]" />
-        <h4 className="font-medium text-xl text-[#201F1B]">Request a Quote</h4>
-      </div>
-      <div
-        className="mb-8 h-px w-full"
-        style={{
-          backgroundImage:
-            "repeating-linear-gradient(to right, #C9C2AE 0, #C9C2AE 6px, transparent 6px, transparent 13px)",
-        }}
-      />
+      {/* Header */}
+      <div className="flex items-end justify-between border-b border-[#D8CCC0] pb-7">
+        <div>
+          <span className="font-ibm-mono text-[8px] uppercase tracking-[0.28em] text-[#C56B4E]">
+            Start a conversation
+          </span>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {FIELD_CONFIG.map(({ name, label, type, required }) => (
+          <h3 className="mt-3 font-manrope text-3xl font-medium leading-none tracking-[-0.055em] text-[#211B17] md:text-4xl">
+            Request a quote.
+          </h3>
+        </div>
+
+        <span className="hidden font-ibm-mono text-[8px] uppercase tracking-[0.2em] text-[#91847A] sm:block">
+          7ALP / 01
+        </span>
+      </div>
+
+      {/* Intro */}
+      <div className="py-7">
+        <p className="max-w-lg font-manrope text-sm leading-6 text-[#756A62]">
+          Tell us what you&apos;re looking for and our team will get back to
+          you.
+        </p>
+      </div>
+
+      {/* Fields */}
+      <div className="grid grid-cols-1 gap-x-8 gap-y-7 md:grid-cols-2">
+        {FIELD_CONFIG.map(({ name, label, type, required, placeholder }) => (
           <motion.div
-            className="flex flex-col"
-            variants={itemVariants}
             key={name}
+            variants={itemVariants}
+            className="flex flex-col"
           >
             <FieldLabel required={required}>{label}</FieldLabel>
+
             <input
               type={type}
               name={name}
               value={formData[name]}
               onChange={handleChange}
               onBlur={handleBlur}
-              className={`${underlineInput} ${
-                fieldErrors[name] ? "border-red-500" : "border-[#E3DFD2]"
+              placeholder={placeholder}
+              className={`w-full border-0 border-b bg-transparent px-0 py-3 font-manrope text-sm text-[#211B17] outline-none transition-colors placeholder:text-[#B0A49A] ${
+                fieldErrors[name]
+                  ? "border-red-500"
+                  : "border-[#D8CCC0] focus:border-[#C56B4E]"
               }`}
             />
-            {fieldErrors[name] ? (
-              <span className="mt-1 text-xs text-red-600">
+
+            {fieldErrors[name] && (
+              <span className="mt-2 font-manrope text-xs text-red-600">
                 {fieldErrors[name]}
               </span>
-            ) : null}
+            )}
           </motion.div>
         ))}
 
+        {/* Message */}
         <motion.div
-          className="flex flex-col sm:col-span-2"
           variants={itemVariants}
+          className="flex flex-col md:col-span-2"
         >
           <FieldLabel required={false}>Message</FieldLabel>
-          <input
-            type="text"
+
+          <textarea
             name="message"
             value={formData.message}
             onChange={handleChange}
             onBlur={handleBlur}
-            className={`${underlineInput} ${
-              fieldErrors.message ? "border-red-500" : "border-[#E3DFD2]"
+            placeholder="Tell us a little more..."
+            rows={4}
+            className={`w-full resize-none border-0 border-b bg-transparent px-0 py-3 font-manrope text-sm text-[#211B17] outline-none transition-colors placeholder:text-[#B0A49A] ${
+              fieldErrors.message
+                ? "border-red-500"
+                : "border-[#D8CCC0] focus:border-[#C56B4E]"
             }`}
           />
-          {fieldErrors.message ? (
-            <span className="mt-1 text-xs text-red-600">
+
+          {fieldErrors.message && (
+            <span className="mt-2 font-manrope text-xs text-red-600">
               {fieldErrors.message}
             </span>
-          ) : null}
+          )}
         </motion.div>
       </div>
 
-      {submitted ? (
-        <p className="mt-6 flex items-center gap-2 text-sm font-medium text-[#16442C]">
-          <FiCheckCircle size={16} />
-          Thanks! Your quote request has been submitted.
+      {/* Success */}
+      {submitted && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-8 flex items-start gap-3 border-l-2 border-[#C56B4E] bg-white/50 px-5 py-4"
+        >
+          <FiCheckCircle size={17} className="mt-0.5 shrink-0 text-[#C56B4E]" />
+
+          <div>
+            <p className="font-manrope text-sm font-medium text-[#211B17]">
+              Request received.
+            </p>
+
+            <p className="mt-1 font-manrope text-xs leading-5 text-[#756A62]">
+              Thanks! Your quote request has been submitted.
+            </p>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Error */}
+      {submitError && (
+        <p className="mt-7 border-l-2 border-red-500 bg-red-50 px-5 py-4 font-manrope text-sm text-red-600">
+          {submitError}
         </p>
-      ) : null}
+      )}
 
-      {submitError ? (
-        <p className="mt-6 text-sm font-medium text-red-600">{submitError}</p>
-      ) : null}
+      {/* Submit */}
+      <motion.div
+        variants={itemVariants}
+        className="mt-10 flex items-center justify-between border-t border-[#D8CCC0] pt-7"
+      >
+        <span className="hidden max-w-xs font-manrope text-xs leading-5 text-[#91847A] sm:block">
+          We&apos;ll use your details only to respond to your enquiry.
+        </span>
 
-      <div className="mt-12 flex">
         <button
           type="submit"
           disabled={submitting}
-          className="bg-[#16442C] text-white px-8 py-3 text-sm font-semibold uppercase tracking-wide transition-colors hover:bg-[#0E3220] disabled:cursor-not-allowed disabled:opacity-60"
+          className="group inline-flex items-center gap-5 bg-[#211B17] px-7 py-4 font-manrope text-sm font-medium text-[#F4EDE2] transition-colors duration-300 hover:bg-[#C56B4E] disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {submitting ? "Submitting..." : "Submit Quote"}
+          {submitting ? "Submitting..." : "Submit enquiry"}
+
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#F4EDE2] text-[#211B17] transition-transform duration-300 group-hover:translate-x-1">
+            <ArrowUpRight size={14} />
+          </span>
         </button>
-      </div>
+      </motion.div>
     </motion.form>
   );
 };

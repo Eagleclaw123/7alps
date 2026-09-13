@@ -12,12 +12,13 @@ const CartList = ({
   showTotal = true,
 }) => {
   return (
-    <div className="sm:overflow-x-auto">
-      <div className="sm:min-w-[720px]">
+    <div className="mt-2 w-full min-w-0">
+      <div className="w-full min-w-0 overflow-hidden border border-[#D8CCC0] bg-[#F4EDE2]">
+        {/* Desktop table header */}
         <CartTableHeader columns={columns} showTotal={showTotal} />
 
         {items.length > 0 ? (
-          <div className="space-y-3 px-4 py-4 sm:space-y-0 sm:px-0 sm:py-0">
+          <div className="w-full min-w-0">
             {items.map((item) => (
               <CartItem
                 key={item.id}
@@ -31,12 +32,14 @@ const CartList = ({
             ))}
           </div>
         ) : (
-          <EmptyCart
-            title="Your cart is empty"
-            description="Add some herbal blends to get started — they'll show up here ready for checkout."
-            buttonText="Shop Products"
-            buttonHref="/products"
-          />
+          <div className="w-full min-w-0">
+            <EmptyCart
+              title="Your cart is empty"
+              description="Add some herbal products to get started."
+              buttonText="Shop Products"
+              buttonHref="/products"
+            />
+          </div>
         )}
       </div>
     </div>

@@ -24,12 +24,7 @@ const Why7ALPsPage = lazy(
 const GlobalTradePage = lazy(
   () => import("../../features/globalTrade/pages/GlobalTradePage"),
 );
-const PartnershipsPage = lazy(
-  () => import("../../features/partnerships/pages/PartnershipsPage"),
-);
-const B2BPortal = lazy(
-  () => import("../../features/b2bPortal/pages/B2BPortal"),
-);
+
 const ContactPage = lazy(
   () => import("../../features/contact/pages/ContactPage"),
 );
@@ -114,8 +109,6 @@ const AppRoutes = () => {
           <Route path="/our-process" element={<OurProcessPage />} />
           <Route path="/why-7alps" element={<Why7ALPsPage />} />
           <Route path="/global-trade" element={<GlobalTradePage />} />
-          <Route path="/partners" element={<PartnershipsPage />} />
-          <Route path="/b2b-portal" element={<B2BPortal />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="cart" element={<CartPage />} />
           <Route

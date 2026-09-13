@@ -1,26 +1,28 @@
 import { CiHeart } from "react-icons/ci";
 import { FaHeart } from "react-icons/fa";
+import { GoArrowUpRight } from "react-icons/go";
 import { motion } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-import Button from "../../../shared/components/ui/Button";
-import ImageCarousel from "../../../shared/components/ui/ImageCarousel";
 import {
   addToCart,
   updateQuantity,
   removeCartItemAsync,
   selectCartItems,
 } from "../../../store/slices/cartSlice";
+
 import {
   toggleWishlistItem,
   selectIsWishlisted,
 } from "../../../store/slices/wishlistSlice";
+
 import { selectIsCustomerLoggedIn } from "../../../store/slices/authSlice";
 
 const ProductCard = ({ product, variants, className = "" }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
   const cartItems = useSelector(selectCartItems);
   const isLoggedIn = useSelector(selectIsCustomerLoggedIn);
   const isWishlisted = useSelector(selectIsWishlisted(product.id));
@@ -28,9 +30,6 @@ const ProductCard = ({ product, variants, className = "" }) => {
   const defaultVariant =
     product.variants?.find((v) => v.isDefault) || product.variants?.[0];
 
-  // Stock is tracked per-variant on the backend, so we check the
-  // currently selected (default) variant's stock rather than a
-  // top-level flag.
   const availableStock = defaultVariant?.stock ?? 0;
   const isOutOfStock = !defaultVariant || availableStock <= 0;
 
@@ -41,10 +40,20 @@ const ProductCard = ({ product, variants, className = "" }) => {
           item.variantLabel === defaultVariant.label,
       )
     : null;
+
   const quantity = cartItem?.quantity || 0;
+
+  const productImage = Array.isArray(product.ProductImages)
+    ? product.ProductImages[0]
+    : product.ProductImage;
+
+  /* =========================================================
+     CART
+  ========================================================= */
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
+
     if (!defaultVariant || isOutOfStock) return;
 
     dispatch(
@@ -62,23 +71,15 @@ const ProductCard = ({ product, variants, className = "" }) => {
 
   const handleIncrease = (e) => {
     e.stopPropagation();
-    if (!defaultVariant) return;
-    // Don't allow increasing past available stock
-    if (quantity >= availableStock) return;
-    handleAddToCart(e);
-  };
 
-  const handleToggleWishlist = (e) => {
-    e.stopPropagation();
-    if (!isLoggedIn) {
-      navigate("/customer/login");
-      return;
-    }
-    dispatch(toggleWishlistItem(product.id));
+    if (!defaultVariant || quantity >= availableStock) return;
+
+    handleAddToCart(e);
   };
 
   const handleDecrease = (e) => {
     e.stopPropagation();
+
     if (!defaultVariant) return;
 
     if (quantity <= 1) {
@@ -99,95 +100,176 @@ const ProductCard = ({ product, variants, className = "" }) => {
     }
   };
 
+  /* =========================================================
+     WISHLIST
+  ========================================================= */
+
+  const handleToggleWishlist = (e) => {
+    e.stopPropagation();
+
+    if (!isLoggedIn) {
+      navigate("/customer/login");
+      return;
+    }
+
+    dispatch(toggleWishlistItem(product.id));
+  };
+
   return (
-    <motion.div
-      className={`product-card overflow-hidden  ${className}`}
-      onClick={() => navigate(`/products/${product.id}`)}
+    <motion.article
       variants={variants}
+      onClick={() => navigate(`/products/${product.id}`)}
+      className={`group cursor-pointer ${className}`}
     >
-      <div className="relative group h-72">
-        <img
-          src={
-            Array.isArray(product.ProductImages)
-              ? product.ProductImages[0]
-              : product.ProductImage
-          }
+      {/* =====================================================
+          IMAGE
+      ====================================================== */}
+
+      <div className="relative overflow-hidden rounded-[20px] bg-[#E5DDD0]">
+        <motion.img
+          src={productImage}
           alt={product.ProductName}
-          className="w-full h-72 object-cover"
+          className="aspect-[1.22] w-full object-cover"
+          initial={{ scale: 1 }}
+          whileHover={{ scale: 1.035 }}
+          transition={{
+            duration: 0.7,
+            ease: [0.22, 1, 0.36, 1],
+          }}
         />
 
-        <div className="absolute top-4 right-4 opacity-100 xl:opacity-0 xl:group-hover:opacity-100 transition-all duration-300">
-          <button
-            className="bg-white w-10 h-10 rounded-lg flex items-center justify-center shadow-md hover:shadow-lg hover:scale-110 transition-all cursor-pointer"
-            onClick={handleToggleWishlist}
-            aria-label={
-              isWishlisted ? "Remove from wishlist" : "Add to wishlist"
-            }
-          >
-            {isWishlisted ? (
-              <FaHeart size={19} className="text-[#C0503A]" />
-            ) : (
-              <CiHeart size={22} />
-            )}
-          </button>
+        {/* Very subtle hover overlay */}
+        <div className="pointer-events-none absolute inset-0 bg-black/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+
+        {/* -------------------------------------------------
+            CATEGORY
+        -------------------------------------------------- */}
+
+        <div className="absolute left-4 top-4">
+          <span className="rounded-full bg-[#F7F3EB]/95 px-3 py-1.5 font-ibm-mono text-[8px] font-medium uppercase tracking-[0.18em] text-[#625A52] backdrop-blur-sm">
+            {product.ProductCategory || "Herbal"}
+          </span>
         </div>
 
-        {/* {isOutOfStock && (
-          <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded-full shadow-md text-xs font-medium">
-            Out of Stock
-          </div>
-        )} */}
+        {/* -------------------------------------------------
+            WISHLIST
+        -------------------------------------------------- */}
 
-        <div className="absolute bottom-4 right-4 bg-white px-3 py-1 rounded-full shadow-md text-sm font-medium">
-          {product.ProductRatingCount > 0 ? (
-            <>⭐ {product.ProductRating.toFixed(1)}</>
+        <button
+          type="button"
+          onClick={handleToggleWishlist}
+          aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+          className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-[#F7F3EB]/95 text-[#241B16] shadow-sm transition-all duration-300 hover:scale-105 hover:bg-white"
+        >
+          {isWishlisted ? (
+            <FaHeart size={15} className="text-[#B65F43]" />
           ) : (
-            "New"
+            <CiHeart size={22} />
           )}
+        </button>
+
+        {/* -------------------------------------------------
+            RATING
+        -------------------------------------------------- */}
+
+        <div className="absolute bottom-4 right-4">
+          <span className="rounded-full bg-[#F7F3EB]/95 px-3 py-1.5 font-manrope text-xs font-medium text-[#241B16] shadow-sm backdrop-blur-sm">
+            {product.ProductRatingCount > 0
+              ? `★ ${product.ProductRating.toFixed(1)}`
+              : "New"}
+          </span>
         </div>
       </div>
 
-      <div className="space-y-6 py-4">
-        <h3 className="text-xl font-semibold mb-2">{product.ProductName}</h3>
+      {/* =====================================================
+          INFORMATION
+      ====================================================== */}
 
-        <p className="text-gray-600 mb-2">{product.ProductDescription}</p>
+      <div className="pt-5">
+        <div className="flex items-start justify-between gap-5">
+          <div className="min-w-0">
+            <h3 className="font-manrope text-[21px] font-semibold leading-tight tracking-[-0.035em] text-[#211B17] transition-colors duration-300 group-hover:text-[#A85F43]">
+              {product.ProductName}
+            </h3>
 
-        <div className="flex items-center justify-between gap-4">
-          <div className="text-lg font-semibold">₹{product.ProductPrice}</div>
+            <p className="mt-2 line-clamp-1 font-manrope text-sm leading-6 text-[#827970]">
+              {product.ProductDescription}
+            </p>
+          </div>
 
-          {quantity === 0 ? (
-            isOutOfStock ? (
-              <p className="text-red-600">Out of Stock</p>
-            ) : (
-              <Button
-                variant="primary"
-                size="md"
-                className="w-30"
-                onClick={handleAddToCart}
-              >
-                Add to Cart
-              </Button>
-            )
+          <span className="shrink-0 pt-0.5 font-manrope text-lg font-semibold tracking-[-0.02em] text-[#211B17]">
+            ₹{product.ProductPrice}
+          </span>
+        </div>
+
+        {/* =================================================
+            PRODUCT META
+        ================================================== */}
+
+        <div className="mt-4 flex items-center gap-3">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#B65F43]" />
+
+          <span className="font-ibm-mono text-[8px] uppercase tracking-[0.2em] text-[#91877D]">
+            {defaultVariant?.label || "Standard"}
+          </span>
+
+          {!isOutOfStock && (
+            <>
+              <span className="h-px w-4 bg-[#D0C5B8]" />
+
+              <span className="font-ibm-mono text-[8px] uppercase tracking-[0.2em] text-[#91877D]">
+                In stock
+              </span>
+            </>
+          )}
+        </div>
+
+        {/* =================================================
+            ACTION
+        ================================================== */}
+
+        <div className="mt-5">
+          {isOutOfStock ? (
+            <div className="flex h-12 items-center justify-center rounded-full border border-[#D2C8BB] font-ibm-mono text-[9px] uppercase tracking-[0.2em] text-[#A07868]">
+              Out of stock
+            </div>
+          ) : quantity === 0 ? (
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              className="group/add flex h-12 w-full items-center justify-between rounded-full border border-[#C8BDB0] px-5 font-manrope text-sm font-medium text-[#211B17] transition-all duration-300 hover:border-[#211B17] hover:bg-[#211B17] hover:text-[#F7F3EB]"
+            >
+              <span>Add to cart</span>
+
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#211B17] text-[#F7F3EB] transition-all duration-300 group-hover/add:bg-[#B65F43]">
+                <GoArrowUpRight
+                  size={16}
+                  className="transition-transform duration-300 group-hover/add:rotate-45"
+                />
+              </span>
+            </button>
           ) : (
             <div
-              className="flex items-center overflow-hidden rounded-xl border border-[#047B22]"
               onClick={(e) => e.stopPropagation()}
+              className="flex h-12 items-center justify-between rounded-full border border-[#211B17] px-2"
             >
               <button
+                type="button"
                 onClick={handleDecrease}
-                className="flex h-10 w-10 items-center justify-center bg-[#047B22] text-xl font-semibold text-white transition hover:bg-[#03641c]"
+                className="flex h-9 w-9 items-center justify-center rounded-full text-lg text-[#211B17] transition-colors hover:bg-[#211B17] hover:text-white"
               >
                 −
               </button>
 
-              <span className="flex w-10 items-center justify-center font-semibold">
+              <span className="font-ibm-mono text-xs font-medium text-[#211B17]">
                 {quantity}
               </span>
 
               <button
+                type="button"
                 onClick={handleIncrease}
                 disabled={quantity >= availableStock}
-                className="flex h-10 w-10 items-center justify-center bg-[#047B22] text-xl font-semibold text-white transition hover:bg-[#03641c] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex h-9 w-9 items-center justify-center rounded-full text-lg text-[#211B17] transition-colors hover:bg-[#211B17] hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
               >
                 +
               </button>
@@ -195,7 +277,7 @@ const ProductCard = ({ product, variants, className = "" }) => {
           )}
         </div>
       </div>
-    </motion.div>
+    </motion.article>
   );
 };
 

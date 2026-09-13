@@ -12,7 +12,7 @@ const SidebarDesktop = ({ menuItems, collapsed, setCollapsed, portal }) => {
   return (
     <motion.aside
       animate={{
-        width: collapsed ? 88 : 280,
+        width: collapsed ? 80 : 230,
       }}
       transition={{
         duration: 0.35,

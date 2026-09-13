@@ -1,39 +1,33 @@
-import { LuInstagram, LuFacebook, LuTwitter, LuLinkedin } from "react-icons/lu";
-import { FaLinkedin } from "react-icons/fa";
-import { FiPhone } from "react-icons/fi";
+import { LuInstagram } from "react-icons/lu";
+import { FiPhone, FiArrowUpRight } from "react-icons/fi";
 import { CiMail, CiLocationOn } from "react-icons/ci";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
-// TODO: swap these placeholder social URLs for your real profile links
+// Existing social/contact channels
 const socialMediaIconsInfo = [
   {
-    icon: "https://res.cloudinary.com/dasvdkncm/image/upload/v1781970699/image_46_qhhum1.png",
-    href: "https://instagram.com/",
+    icon: LuInstagram,
+    href: "https://www.instagram.com/7alps.official",
     label: "Instagram",
   },
   {
-    icon: "https://res.cloudinary.com/dasvdkncm/image/upload/v1781970828/image_47_crtmhd.png",
-    href: "https://facebook.com/",
-    label: "Facebook",
-  },
-  {
-    icon: "https://res.cloudinary.com/dasvdkncm/image/upload/v1781970699/image_48_tmqj8v.png",
-    href: "https://linkedin.com/",
-    label: "LinkedIn",
+    icon: CiMail,
+    href: "mailto:7alps.global@gmail.com",
+    label: "Mail",
   },
 ];
 
-// TODO: point these at your real routes/section ids (e.g. "/about", "#about")
 const cols = [
   {
-    title: "Quick link",
+    title: "Explore",
     links: [
       { label: "Home", href: "/" },
-      { label: "About Us", href: "#about" },
-      { label: "Products", href: "#products" },
-      { label: "Global Trade", href: "#global-trade" },
-      { label: "Industries We Serve", href: "#industries" },
-      { label: "Contact Us", href: "#contact" },
+      { label: "Products", href: "/products" },
+      { label: "Our Process", href: "/our-process" },
+      { label: "Why 7ALP's", href: "/why-7alps" },
+      { label: "Global Trade", href: "/global-trade" },
+      { label: "Contact", href: "/contact" },
     ],
   },
   {
@@ -50,10 +44,10 @@ const cols = [
   {
     title: "Contact",
     links: [
-      { label: "+91 79010 82907", href: "tel:+917901082907" },
+      { label: "+91 72070 03679", href: "tel:+917207003679" },
       {
-        label: "7alp.globalmark@gmail.com",
-        href: "mailto:7alp.globalmark@gmail.com",
+        label: "7alps.global@gmail.com",
+        href: "mailto:7alps.global@gmail.com",
       },
       {
         label: "Madhapur, Hyderabad",
@@ -61,17 +55,13 @@ const cols = [
       },
     ],
   },
-  {
-    title: "Follow Us",
-    links: [],
-  },
 ];
 
 const containerVariants = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.1,
+      staggerChildren: 0.08,
     },
   },
 };
@@ -85,126 +75,355 @@ const itemVariants = {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.7,
-      ease: [0.25, 0.1, 0.25, 1],
+      duration: 0.6,
+      ease: [0.22, 1, 0.36, 1],
     },
   },
 };
 
 const Footer = () => {
   return (
-    <footer className="relative pt-20 pb-10 overflow-hidden bg-[#A77858] text-white">
-      <div className="mx-auto max-w-7xl px-6 xl:px-0">
+    <footer className="relative overflow-hidden bg-[#171312] text-[#F4EDE2]">
+      {/* Decorative giant 7 */}
+      <div className="pointer-events-none absolute -right-10 -top-24 select-none font-manrope text-[360px] font-semibold leading-none tracking-[-0.12em] text-white/[0.025] md:text-[500px]">
+        7
+      </div>
+
+      <div className="relative z-10 mx-auto max-w-[1600px] px-5 sm:px-8 lg:px-12 xl:px-16">
+        {/* Top CTA */}
         <motion.div
-          className="grid md:grid-cols-12 gap-10 pb-14"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="border-b border-white/10 py-20 md:py-28"
+        >
+          <div className="grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end">
+            <div>
+              <div className="mb-7 flex items-center gap-4">
+                <span className="h-px w-12 bg-[#C56B4E]" />
+
+                <span className="font-ibm-mono text-[10px] uppercase tracking-[0.28em] text-white/45">
+                  Stay connected
+                </span>
+              </div>
+
+              <h2 className="max-w-5xl font-manrope text-[clamp(3.5rem,6vw,6.5rem)] font-medium leading-[1.0] tracking-[-0.08em]">
+                Good things
+                <br />
+                <span className="text-[#C56B4E]">start naturally.</span>
+              </h2>
+            </div>
+
+            <p className="max-w-sm font-manrope text-sm leading-7 text-white/45 lg:pb-2">
+              Premium herbal ingredients, thoughtful sourcing, and wellness
+              solutions built with care from the ground up.
+            </p>
+          </div>
+        </motion.div>
+
+        {/* Main footer */}
+        <motion.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.1 }}
+          className="
+    grid
+    gap-y-14
+    py-14
+    sm:grid-cols-2
+    sm:gap-x-10
+    sm:gap-y-16
+    sm:py-16
+    lg:grid-cols-12
+    lg:gap-x-8
+    lg:gap-y-0
+    lg:py-20
+    xl:gap-x-12
+  "
         >
-          {" "}
-          <motion.div className="md:col-span-4" variants={itemVariants}>
-            {" "}
-            <div className="flex items-center gap-3">
-              <div className="h-20 w-20 rounded-xl bg-background text-foreground flex items-center justify-center font-display font-bold">
+          {/* ================= BRAND ================= */}
+          <motion.div
+            variants={itemVariants}
+            className="sm:col-span-2 lg:col-span-5 xl:col-span-4"
+          >
+            <div className="flex items-center gap-4">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center bg-[#F4EDE2] p-2 sm:h-16 sm:w-16">
                 <img
                   src="https://res.cloudinary.com/dasvdkncm/image/upload/v1781664574/7_ALP_s_Logo-removebg-preview_e7kr1k.png"
-                  alt="company-logo"
+                  alt="7ALP's"
+                  className="h-full w-full object-contain"
                 />
               </div>
-              <div className="text-[30px] font-semibold uppercase tracking-[0.1em]">
-                7ALP's
+
+              <div className="min-w-0">
+                <p className="font-manrope text-2xl font-semibold tracking-[-0.04em] sm:text-3xl">
+                  7ALP's
+                </p>
+
+                <p className="mt-1 font-ibm-mono text-[8px] uppercase tracking-[0.2em] text-white/35">
+                  Natural wellness
+                </p>
               </div>
             </div>
-            <p className="mt-5 text-white/80 hover:text-white transition-colors max-w-sm leading-relaxed">
+
+            <p className="mt-7 max-w-md font-manrope text-sm leading-7 text-white/45">
               Premium herbal ingredients and wellness solutions sourced directly
               from farmers and delivered to consumers, businesses, and global
               partners.
             </p>
+
+            {/* Social */}
+            <div className="mt-8 flex flex-wrap gap-3">
+              {socialMediaIconsInfo.map((social) => {
+                const Icon = social.icon;
+                const isExternal = social.href?.startsWith("http");
+
+                return (
+                  <a
+                    key={social.label}
+                    href={social.href}
+                    target={isExternal ? "_blank" : undefined}
+                    rel={isExternal ? "noopener noreferrer" : undefined}
+                    aria-label={social.label}
+                    className="
+              group
+              flex
+              h-10
+              w-10
+              shrink-0
+              items-center
+              justify-center
+              rounded-full
+              border
+              border-white/10
+              text-white/70
+              transition-all
+              duration-300
+              hover:border-[#C56B4E]
+              hover:bg-[#C56B4E]
+              hover:text-[#211B17]
+              sm:h-11
+              sm:w-11
+            "
+                  >
+                    <Icon className="text-base transition-transform duration-300 group-hover:scale-110 sm:text-lg" />
+                  </a>
+                );
+              })}
+            </div>
           </motion.div>
-          {cols.map((c) => (
-            <motion.div
-              key={c.title}
-              className="md:col-span-4 xl:col-span-2"
-              variants={itemVariants}
-            >
-              {" "}
-              <div className="text-[15px] uppercase tracking-[0.2em]">
-                {c.title}
-              </div>
-              {c.title === "Follow Us" ? (
-                <div className="mt-5 flex flex-wrap gap-3">
-                  {socialMediaIconsInfo.map((social, i) => (
-                    <a
-                      key={i}
-                      href={social.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={social.label}
-                      className="h-10 w-10 flex items-center justify-center"
-                    >
-                      <img src={social.icon} alt={social.label} />
-                    </a>
-                  ))}
-                </div>
-              ) : (
-                <ul className="mt-5 space-y-4">
-                  {c.links.map((l, index) => (
-                    <li key={l.label}>
-                      <a
-                        href={l.href}
-                        target={
-                          l.href?.startsWith("http") ? "_blank" : undefined
-                        }
-                        rel={
-                          l.href?.startsWith("http")
-                            ? "noopener noreferrer"
-                            : undefined
-                        }
-                        className="text-[16px] text-white/80 hover:text-white transition-colors flex items-start gap-3"
-                      >
-                        {c.title === "Contact" && (
-                          <>
-                            {index === 0 && (
-                              <FiPhone className="mt-1 text-lg shrink-0" />
-                            )}
-                            {index === 1 && (
-                              <CiMail className="mt-1 text-xl shrink-0" />
-                            )}
-                            {index === 2 && (
-                              <CiLocationOn className="mt-1 text-xl shrink-0" />
-                            )}
-                          </>
-                        )}
 
-                        <span>{l.label}</span>
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </motion.div>
-          ))}
+          {/* ================= EXPLORE ================= */}
+          <motion.div
+            variants={itemVariants}
+            className="sm:col-span-1 lg:col-span-2 lg:col-start-6 xl:col-start-5"
+          >
+            <p className="font-ibm-mono text-[9px] uppercase tracking-[0.25em] text-white/35">
+              Explore
+            </p>
+
+            <ul className="mt-6 space-y-3 sm:mt-7 sm:space-y-4">
+              {cols[0].links.map((link) => (
+                <li key={link.label}>
+                  <Link
+                    to={link.href}
+                    className="
+              group
+              inline-flex
+              max-w-full
+              items-center
+              gap-2
+              font-manrope
+              text-sm
+              text-white/65
+              transition-colors
+              duration-300
+              hover:text-[#C56B4E]
+            "
+                  >
+                    <span className="truncate">{link.label}</span>
+
+                    <FiArrowUpRight
+                      size={12}
+                      className="
+                shrink-0
+                opacity-0
+                transition-all
+                duration-300
+                group-hover:translate-x-0.5
+                group-hover:-translate-y-0.5
+                group-hover:opacity-100
+              "
+                    />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+
+          {/* ================= CATEGORIES ================= */}
+          <motion.div
+            variants={itemVariants}
+            className="sm:col-span-1 lg:col-span-2"
+          >
+            <p className="font-ibm-mono text-[9px] uppercase tracking-[0.25em] text-white/35">
+              Categories
+            </p>
+
+            <ul className="mt-6 space-y-3 sm:mt-7 sm:space-y-4">
+              {cols[1].links.map((link) => (
+                <li key={link.label}>
+                  <a
+                    href={link.href}
+                    className="
+              group
+              inline-flex
+              max-w-full
+              items-center
+              gap-2
+              font-manrope
+              text-sm
+              text-white/65
+              transition-colors
+              duration-300
+              hover:text-[#C56B4E]
+            "
+                  >
+                    <span className="truncate">{link.label}</span>
+
+                    <FiArrowUpRight
+                      size={12}
+                      className="
+                shrink-0
+                opacity-0
+                transition-all
+                duration-300
+                group-hover:translate-x-0.5
+                group-hover:-translate-y-0.5
+                group-hover:opacity-100
+              "
+                    />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+
+          {/* ================= CONTACT ================= */}
+          <motion.div
+            variants={itemVariants}
+            className="sm:col-span-2 lg:col-span-3 xl:col-span-3"
+          >
+            <p className="font-ibm-mono text-[9px] uppercase tracking-[0.25em] text-white/35">
+              Contact
+            </p>
+
+            <ul className="mt-6 space-y-5 sm:mt-7">
+              {/* Phone */}
+              <li>
+                <a
+                  href="tel:+917207003679"
+                  className="
+            group
+            flex
+            items-start
+            gap-3
+            font-manrope
+            text-sm
+            text-white/65
+            transition-colors
+            duration-300
+            hover:text-[#C56B4E]
+          "
+                >
+                  <FiPhone className="mt-0.5 shrink-0" size={16} />
+
+                  <span className="break-words">+91 72070 03679</span>
+                </a>
+              </li>
+
+              {/* Email */}
+              <li>
+                <a
+                  href="mailto:7alps.global@gmail.com"
+                  className="
+            group
+            flex
+            min-w-0
+            items-start
+            gap-3
+            font-manrope
+            text-sm
+            text-white/65
+            transition-colors
+            duration-300
+            hover:text-[#C56B4E]
+          "
+                >
+                  <CiMail className="mt-0.5 shrink-0 text-lg" />
+
+                  <span className="break-all">7alps.global@gmail.com</span>
+                </a>
+              </li>
+
+              {/* Location */}
+              <li>
+                <a
+                  href="https://www.google.com/maps/search/?api=1&query=Madhapur%2C+Hyderabad"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="
+            group
+            flex
+            items-start
+            gap-3
+            font-manrope
+            text-sm
+            text-white/65
+            transition-colors
+            duration-300
+            hover:text-[#C56B4E]
+          "
+                >
+                  <CiLocationOn className="mt-0.5 shrink-0 text-lg" />
+
+                  <span>Madhapur, Hyderabad</span>
+                </a>
+              </li>
+            </ul>
+          </motion.div>
         </motion.div>
 
-        <motion.div
-          className="pt-8 flex flex-col md:flex-row gap-3 items-center justify-between text-background/50"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1, delay: 0.3 }}
-        >
-          {" "}
-          <div>© {new Date().getFullYear()} 7 ALP's. All rights reserved.</div>
-          <div className="flex items-center gap-5">
-            <a href="/privacy" className="hover:text-background">
-              Privacy
-            </a>
-            <a href="/terms" className="hover:text-background">
-              Terms
-            </a>
+        {/* Bottom */}
+        <div className="border-t border-white/10 py-7">
+          <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+            <p className="font-ibm-mono text-[8px] uppercase tracking-[0.2em] text-white/30">
+              © {new Date().getFullYear()} 7ALP's. All rights reserved.
+            </p>
+
+            <div className="flex items-center gap-6">
+              <a
+                href="/privacy"
+                className="font-ibm-mono text-[8px] uppercase tracking-[0.18em] text-white/30 transition-colors hover:text-white"
+              >
+                Privacy
+              </a>
+
+              <a
+                href="/terms"
+                className="font-ibm-mono text-[8px] uppercase tracking-[0.18em] text-white/30 transition-colors hover:text-white"
+              >
+                Terms
+              </a>
+            </div>
+
+            <span className="font-ibm-mono text-[8px] uppercase tracking-[0.18em] text-white/20">
+              Rooted in nature
+            </span>
           </div>
-        </motion.div>
+        </div>
       </div>
     </footer>
   );

@@ -1,75 +1,209 @@
 import { Link } from "react-router-dom";
-import { FiUser, FiBriefcase, FiShield, FiX } from "react-icons/fi";
-import { BsCart } from "react-icons/bs";
+import { FiX, FiArrowUpRight } from "react-icons/fi";
 import { navItems } from "./navItems";
 
 const MobileSidebar = ({ isOpen, onClose, isActive }) => (
   <>
-    {isOpen && (
-      <div className="fixed inset-0 bg-black/50 z-40" onClick={onClose} />
-    )}
-
+    {/* Overlay */}
     <div
-      className={`flex flex-col justify-between fixed top-0 left-0 h-full w-84 bg-white shadow-lg z-[55] transform transition-transform duration-300 ease-in-out ${
-        isOpen ? "translate-x-0" : "-translate-x-full"
-      }`}
+      className={`
+        fixed
+        inset-0
+        z-40
+        bg-[#171312]/55
+        backdrop-blur-[3px]
+        transition-all
+        duration-500
+        ${
+          isOpen
+            ? "pointer-events-auto opacity-100"
+            : "pointer-events-none opacity-0"
+        }
+      `}
+      onClick={onClose}
+    />
+
+    {/* Sidebar */}
+    <aside
+      className={`
+        fixed
+        left-0
+        top-0
+        z-[55]
+        flex
+        h-full
+        w-[min(88vw,400px)]
+        flex-col
+        justify-between
+        overflow-hidden
+        bg-[#F4EDE2]
+        text-[#211B17]
+        shadow-[25px_0_70px_rgba(23,19,18,0.18)]
+        transition-transform
+        duration-500
+        ease-[cubic-bezier(0.22,1,0.36,1)]
+        ${isOpen ? "translate-x-0" : "-translate-x-full"}
+      `}
     >
-      <div>
-        <div className="flex justify-between items-center gap-2 text-2xl text-gray-800 px-6 py-4">
-          <div>
-            <h2 className="text-2xl font-bold text-[#0F6B3E]">7ALP's</h2>
-            <p className="text-sm text-gray-500">Natural Herbal Powders</p>
-          </div>
-          <button
-            onClick={onClose}
-            className="rounded-lg p-2 transition hover:bg-gray-100"
-          >
-            <FiX size={30} />
-          </button>
-        </div>
-        <hr className="text-gray-300" />
+      {/* Decorative 7 */}
+      <div className="pointer-events-none absolute -right-20 top-20 select-none font-manrope text-[300px] font-semibold leading-none tracking-[-0.12em] text-[#211B17]/[0.025]">
+        7
+      </div>
 
-        <div className="flex flex-col gap-6 p-6">
-          {navItems.map((item) => (
-            <Link key={item.label} to={item.href} onClick={onClose}>
-              <button
-                className={`cursor-pointer text-left ${
-                  isActive(item.href) ? "text-[#0F6B3E] font-semibold" : ""
-                }`}
-              >
-                {item.label}
-              </button>
-            </Link>
-          ))}
-          {/* <hr className="text-gray-300" />
-
+      <div className="relative z-10">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-[#D8CDC2] px-6 py-5">
+          {/* LOGO + BRAND */}
           <Link
-            to="/cart"
+            to="/"
             onClick={onClose}
-            className={`flex items-center gap-3 rounded-xl border p-4 transition ${
-              isActive("/cart")
-                ? "border-[#0F6B3E] bg-[#F8FAF7]"
-                : "hover:border-[#0F6B3E] hover:bg-[#F8FAF7]"
-            }`}
+            className="group flex items-center gap-3"
           >
-            <BsCart className="text-xl text-[#0F6B3E]" />
-            Cart
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#211B17] p-2 transition-transform duration-300 group-hover:scale-105">
+              <img
+                src="https://res.cloudinary.com/dasvdkncm/image/upload/v1781664574/7_ALP_s_Logo-removebg-preview_e7kr1k.png"
+                alt="7ALP's"
+                className="h-full w-full object-contain"
+              />
+            </div>
+
+            <div>
+              <p className="font-manrope text-[20px] font-semibold tracking-[-0.045em] text-[#211B17]">
+                7ALP's
+              </p>
+
+              <p className="mt-0.5 font-ibm-mono text-[8px] uppercase tracking-[0.2em] text-[#95887F]">
+                Natural wellness
+              </p>
+            </div>
           </Link>
 
-          <Link
-            to="/customer/login"
-            className="flex items-center gap-3 rounded-xl border p-4 transition hover:border-[#0F6B3E] hover:bg-[#F8FAF7]"
+          {/* CLOSE */}
+          <button
+            onClick={onClose}
+            aria-label="Close menu"
+            className="
+              flex
+              h-10
+              w-10
+              items-center
+              justify-center
+              rounded-full
+              border
+              border-[#D8CDC2]
+              text-[#211B17]
+              transition-all
+              duration-300
+              hover:border-[#C56B4E]
+              hover:bg-[#C56B4E]
+              hover:text-white
+            "
           >
-            <FiUser className="text-xl text-[#0F6B3E]" />
-            Login
-          </Link> */}
+            <FiX size={19} />
+          </button>
         </div>
+
+        {/* Navigation */}
+        <nav className="px-6 py-9">
+          <div className="mb-6 flex items-center justify-between">
+            <p className="font-ibm-mono text-[9px] uppercase tracking-[0.28em] text-[#A09288]">
+              Menu
+            </p>
+
+            <span className="font-ibm-mono text-[8px] tracking-[0.15em] text-[#B0A299]">
+              7ALP / 2026
+            </span>
+          </div>
+
+          <div>
+            {navItems.map((item, index) => {
+              const active = isActive(item.href);
+
+              return (
+                <Link
+                  key={item.label}
+                  to={item.href}
+                  onClick={onClose}
+                  className={`
+                    group
+                    flex
+                    items-center
+                    justify-between
+                    border-b
+                    border-[#D8CDC2]
+                    py-5
+                    transition-all
+                    duration-300
+                    ${
+                      active
+                        ? "text-[#C56B4E]"
+                        : "text-[#211B17] hover:text-[#C56B4E]"
+                    }
+                  `}
+                >
+                  <div className="flex items-center gap-5">
+                    <span
+                      className={`
+                        font-ibm-mono
+                        text-[8px]
+                        tracking-[0.18em]
+                        ${active ? "text-[#C56B4E]" : "text-[#A09288]"}
+                      `}
+                    >
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+
+                    <span className="font-manrope text-[18px] font-medium tracking-[-0.02em]">
+                      {item.label}
+                    </span>
+                  </div>
+
+                  <span
+                    className={`
+                      flex
+                      h-8
+                      w-8
+                      items-center
+                      justify-center
+                      rounded-full
+                      border
+                      transition-all
+                      duration-300
+                      ${
+                        active
+                          ? "border-[#C56B4E] bg-[#C56B4E] text-white"
+                          : "border-transparent text-[#A09288] group-hover:border-[#C56B4E] group-hover:text-[#C56B4E]"
+                      }
+                    `}
+                  >
+                    <FiArrowUpRight size={15} />
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
       </div>
 
-      <div className="border-t border-gray-300 px-6 py-5">
-        <p className="text-sm text-gray-500">© 2026 7ALP's Global</p>
+      {/* Bottom */}
+      <div className="relative z-10 border-t border-[#D8CDC2] px-6 py-6">
+        <div className="flex items-end justify-between">
+          <div>
+            <p className="font-manrope text-sm font-medium text-[#514740]">
+              Natural wellness.
+            </p>
+
+            <p className="mt-1 max-w-[210px] font-manrope text-xs leading-5 text-[#95887F]">
+              Premium herbal ingredients sourced with care.
+            </p>
+          </div>
+
+          <span className="font-ibm-mono text-[8px] uppercase tracking-[0.2em] text-[#95887F]">
+            {new Date().getFullYear()}
+          </span>
+        </div>
       </div>
-    </div>
+    </aside>
   </>
 );
 

@@ -11,6 +11,7 @@ import {
 } from "../../../shared/services/customer.service";
 import AddressMapPicker from "../../../shared/components/map/AddressMapPicker";
 import HeroBanner from "../../../shared/components/ui/HeroBanner";
+import PageHero from "../../../shared/components/ui/PageHero";
 
 const initialProfile = {
   name: "",
@@ -260,96 +261,128 @@ const CustomerProfile = () => {
   }
 
   return (
-    <div>
-      <HeroBanner
-        eyebrow="Profile"
-        title="Your Profile"
-        description="Manage your details, preferences, and saved addresses."
-        image="https://res.cloudinary.com/dasvdkncm/image/upload/v1784788176/ChatGPT_Image_Jul_23_2026_11_57_14_AM_gbwvsk.png"
+    <div className="min-h-screen bg-[#F4EDE2] text-[#211B17]">
+      {/* ─────────────────────────────────────────────
+        PROFILE HERO
+    ───────────────────────────────────────────── */}
+      <PageHero
+        eyebrow="Your account"
+        title="Your"
+        titleHighlight="profile."
+        description="Manage your personal details, addresses, and account preferences."
+        backgroundImage="https://res.cloudinary.com/dasvdkncm/image/upload/v1784788176/ChatGPT_Image_Jul_23_2026_11_57_14_AM_gbwvsk.png"
+        imageAlt="7ALP profile"
+        leftLabel="7ALP's / Profile"
+        rightLabel="Personal / Delivery"
       />
-
-      <section className="mx-auto max-w-7xl space-y-10 py-12 px-6 xl:px-0">
-        <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
-          {/* ── Identity card ─────────────────────────────────────── */}
+      {/* ─────────────────────────────────────────────
+        ACCOUNT AREA
+    ───────────────────────────────────────────── */}
+      <section className="mx-auto max-w-[1500px] px-5 py-20 sm:px-8 md:py-28 xl:px-16">
+        {/* Overview */}
+        <div className="grid gap-10 lg:grid-cols-[0.65fr_1.35fr]">
+          {/* Identity */}
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="flex flex-col items-center gap-5 border border-[#E3DFD2] bg-white p-8 text-center"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{
+              duration: 0.7,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+            className="relative overflow-hidden bg-[#211B17] p-8 text-[#F4EDE2] md:p-10"
           >
-            <div className="relative flex h-24 w-24 items-center justify-center rounded-full border border-[#B4652F]/40">
-              <div className="flex h-[76px] w-[76px] items-center justify-center rounded-full bg-[#16442C] font-seri text-2xl italic text-white">
+            <span className="font-ibm-mono text-[8px] uppercase tracking-[0.28em] text-[#91847A]">
+              Account
+            </span>
+
+            {/* Initials */}
+            <div className="mt-14 flex h-24 w-24 items-center justify-center border border-[#C56B4E]/50">
+              <span className="font-manrope text-3xl font-medium tracking-[-0.06em] text-[#F4EDE2]">
                 {initials}
-              </div>
-              <Leaf
-                size={16}
-                className="absolute -right-1 -top-1 rotate-45 text-[#B4652F]"
-                fill="#B4652F"
-              />
+              </span>
             </div>
 
-            <div>
-              <p className="font-medium text-xl text-[#201F1B]">
+            <div className="mt-8">
+              <h2 className="font-manrope text-2xl font-medium tracking-[-0.04em]">
                 {customer?.name || "Your Name"}
-              </p>
-              <p className="mt-1 text-sm text-[#86806F]">
+              </h2>
+
+              <p className="mt-2 font-manrope text-sm text-white/50">
                 {customer?.email || "your@email.com"}
               </p>
             </div>
 
-            <div className="w-full pt-2">
-              <Perforation />
-              <p className="pt-4 text-sm tracking-wide text-[#201F1B]">
+            <div className="mt-10 border-t border-white/10 pt-6">
+              <span className="font-ibm-mono text-[8px] uppercase tracking-[0.25em] text-white/35">
+                Registered phone
+              </span>
+
+              <p className="mt-2 font-manrope text-sm text-white/75">
                 {customer?.mobile || "No phone number added"}
               </p>
             </div>
+
+            <div className="absolute bottom-7 right-7 font-ibm-mono text-[8px] text-white/20">
+              7ALP / 01
+            </div>
           </motion.div>
 
-          {/* ── Personal Details ──────────────────────────────────── */}
+          {/* Personal Details */}
           <motion.form
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.05 }}
+            transition={{
+              duration: 0.7,
+              delay: 0.05,
+              ease: [0.22, 1, 0.36, 1],
+            }}
             onSubmit={handleSaveProfile}
-            className="space-y-6 border border-[#E3DFD2] bg-white p-8"
             noValidate
+            className="bg-white p-8 md:p-10"
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Leaf size={16} className="text-[#16442C]" />
-                <h3 className="font-medium text-xl text-[#201F1B] ">
-                  Personal Details
-                </h3>
+            <div className="flex items-start justify-between border-b border-[#D8CCC0] pb-7">
+              <div>
+                <span className="font-ibm-mono text-[8px] uppercase tracking-[0.28em] text-[#C56B4E]">
+                  Personal information
+                </span>
+
+                <h2 className="mt-3 font-manrope text-3xl font-medium tracking-[-0.055em]">
+                  Your details.
+                </h2>
               </div>
-              {!editingProfile ? (
+
+              {!editingProfile && (
                 <button
                   type="button"
                   onClick={() => setEditingProfile(true)}
-                  className="rounded-full border border-[#16442C] whitespace-nowrap px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-[#16442C] transition-colors hover:bg-[#16442C] hover:text-white"
+                  className="border border-[#211B17] px-5 py-2.5 font-manrope text-xs font-medium transition-colors hover:bg-[#211B17] hover:text-[#F4EDE2]"
                 >
-                  Edit Profile
+                  Edit
                 </button>
-              ) : null}
+              )}
             </div>
-            <Perforation />
 
-            <div className="grid gap-6 sm:grid-cols-2">
-              <div className="space-y-1.5">
+            <div className="mt-10 grid gap-8 sm:grid-cols-2">
+              <div>
                 <FieldLabel>Full Name</FieldLabel>
+
                 <input
                   name="name"
                   value={profile.name}
                   onChange={handleProfileChange}
                   disabled={!editingProfile}
-                  placeholder="e.g. Priya Sharma"
+                  placeholder="Your name"
                   className={`${underlineInput} ${
                     profileErrors.name ? errorBorder : ""
                   }`}
                 />
+
                 <FieldError>{profileErrors.name}</FieldError>
               </div>
-              <div className="space-y-1.5">
+
+              <div>
                 <FieldLabel>Email</FieldLabel>
+
                 <input
                   name="email"
                   type="email"
@@ -361,25 +394,29 @@ const CustomerProfile = () => {
                     profileErrors.email ? errorBorder : ""
                   }`}
                 />
+
                 <FieldError>{profileErrors.email}</FieldError>
+              </div>
+
+              <div>
+                <FieldLabel>Phone Number</FieldLabel>
+
+                <input
+                  value={customer?.mobile || ""}
+                  disabled
+                  className={underlineInput}
+                />
               </div>
             </div>
 
-            <div className="max-w-xs space-y-1.5">
-              <FieldLabel>Phone Number</FieldLabel>
-              <input
-                value={customer?.mobile || ""}
-                disabled
-                className={underlineInput}
-              />
-            </div>
+            {profileFormError && (
+              <p className="mt-7 border-l-2 border-red-500 bg-red-50 px-4 py-3 text-sm text-red-600">
+                {profileFormError}
+              </p>
+            )}
 
-            {profileFormError ? (
-              <p className="text-sm text-red-600">{profileFormError}</p>
-            ) : null}
-
-            {editingProfile ? (
-              <div className="flex justify-end gap-3 pt-2">
+            {editingProfile && (
+              <div className="mt-10 flex justify-end gap-3 border-t border-[#D8CCC0] pt-7">
                 <button
                   type="button"
                   onClick={() => {
@@ -391,132 +428,186 @@ const CustomerProfile = () => {
                     setProfileErrors({});
                     setProfileFormError("");
                   }}
-                  className="px-5 py-2.5 text-sm font-medium text-[#86806F] transition-colors hover:text-[#201F1B]"
+                  className="px-5 py-2.5 font-manrope text-sm text-[#756A62] hover:text-[#211B17]"
                 >
                   Cancel
                 </button>
+
                 <button
                   type="submit"
                   disabled={savingProfile}
-                  className="bg-[#16442C] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#0E3220] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="bg-[#211B17] px-7 py-3 font-manrope text-sm font-medium text-[#F4EDE2] transition-colors hover:bg-[#C56B4E] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {savingProfile ? "Saving..." : "Save Changes"}
+                  {savingProfile ? "Saving..." : "Save changes"}
                 </button>
               </div>
-            ) : null}
+            )}
           </motion.form>
         </div>
 
-        {/* ── Address book ─────────────────────────────────────────── */}
+        {/* ─────────────────────────────────────────────
+          ADDRESS BOOK
+      ───────────────────────────────────────────── */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.1 }}
-          className="border border-[#E3DFD2] bg-white p-8"
+          initial={{ opacity: 0, y: 25 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{
+            duration: 0.7,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          className="mt-20"
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Leaf size={16} className="text-[#16442C]" />
-              <h3 className="font-medium text-xl text-[#201F1B]">
-                Delivery Addresses
-              </h3>
+          <div className="flex flex-col gap-6  pb-7 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <span className="font-ibm-mono text-[8px] uppercase tracking-[0.28em] text-[#C56B4E]">
+                Delivery
+              </span>
+
+              <h2 className="mt-3 font-manrope text-[clamp(2.8rem,5vw,5rem)] font-medium leading-[0.9] tracking-[-0.07em]">
+                Your
+                <br />
+                <span className="font-normal text-[#91847A]">addresses.</span>
+              </h2>
             </div>
-            {editingAddressIndex === null ? (
+
+            {editingAddressIndex === null && (
               <button
                 type="button"
                 onClick={openNewAddressForm}
-                className="flex items-center gap-2 rounded-full bg-[#16442C] px-5 py-2 text-xs font-semibold uppercase tracking-wide text-white transition-colors hover:bg-[#0E3220]"
+                className="flex items-center justify-center gap-3 bg-[#211B17] px-6 py-3.5 font-manrope text-sm font-medium text-[#F4EDE2] transition-colors hover:bg-[#C56B4E]"
               >
-                <FiPlus size={14} />
-                Add Address
+                <FiPlus size={15} />
+                Add address
               </button>
-            ) : null}
-          </div>
-          <div className="pt-4">
-            <Perforation />
+            )}
           </div>
 
+          {/* Empty */}
           {addresses.length === 0 && editingAddressIndex === null ? (
-            <div className="flex flex-col items-center gap-2 py-12 text-center">
-              <Leaf size={20} className="text-[#B8B2A0]" />
-              <p className="text-sm text-[#86806F]">
-                No saved addresses yet. Add one to speed up checkout.
+            <div className="py-20">
+              <span className="font-ibm-mono text-[8px] uppercase tracking-[0.25em] text-[#91847A]">
+                Address book / Empty
+              </span>
+
+              <p className="mt-4 max-w-md font-manrope text-lg leading-7 text-[#756A62]">
+                No saved addresses yet. Add one to make your next checkout
+                quicker.
               </p>
             </div>
           ) : (
-            <div className="mt-6 grid gap-5 sm:grid-cols-2">
+            <div className="mt-10 border-t border-[#CFC2B5]">
               {addresses.map((addr, index) => (
                 <div
                   key={`${addr.label}-${index}`}
-                  className="relative border border-[#E3DFD2] bg-[#FBF8F2]/60"
+                  className="relative border-b border-[#CFC2B5] py-8 md:py-10"
                 >
-                  <Perforation />
-                  <div className="space-y-2.5 p-5 text-sm">
-                    <div className="flex items-center justify-between">
-                      <span className="flex items-center gap-1.5 font-serif text-base text-[#201F1B]">
-                        <Leaf size={13} className="text-[#16442C]" />
-                        {addr.label}
-                      </span>
-                      {addr.isDefault ? (
-                        <span className="rounded-full bg-[#B4652F]/10 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-[#B4652F]">
-                          Default
+                  <div className="flex flex-col gap-7 md:flex-row md:items-start md:justify-between">
+                    {/* Address */}
+                    <div>
+                      <div className="flex items-center gap-3">
+                        <span className="font-ibm-mono text-[8px] uppercase tracking-[0.25em] text-[#C56B4E]">
+                          {addr.label}
                         </span>
-                      ) : (
+
+                        {addr.isDefault && (
+                          <span className="font-ibm-mono text-[8px] uppercase tracking-[0.2em] text-[#756A62]">
+                            / Default
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="mt-5 max-w-2xl font-manrope text-base leading-7 text-[#211B17]">
+                        {addr.line1}
+                        {addr.line2 ? `, ${addr.line2}` : ""}
+                        <br />
+                        {addr.city}, {addr.state} - {addr.pincode}
+                        {addr.phone && (
+                          <>
+                            <br />
+                            <span className="text-[#756A62]">{addr.phone}</span>
+                          </>
+                        )}
+                      </p>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-5">
+                      {!addr.isDefault && (
                         <button
                           type="button"
                           onClick={() => handleSetDefault(index)}
-                          className="text-[11px] font-semibold uppercase tracking-wide text-[#16442C] hover:underline"
+                          className="font-ibm-mono text-[8px] uppercase tracking-[0.18em] text-[#756A62] transition-colors hover:text-[#C56B4E]"
                         >
-                          Set as default
+                          Set default
                         </button>
                       )}
-                    </div>
-                    <p className="leading-relaxed text-[#5B564A]">
-                      {addr.line1}
-                      {addr.line2 ? `, ${addr.line2}` : ""}
-                      <br />
-                      {addr.city}, {addr.state} - {addr.pincode}
-                      {addr.phone ? (
-                        <>
-                          <br />
-                          Phone: {addr.phone}
-                        </>
-                      ) : null}
-                    </p>
-                    <div className="flex gap-4 pt-1.5">
+
                       <button
                         type="button"
                         onClick={() => openEditAddressForm(index)}
-                        className="flex items-center gap-1 text-xs font-medium text-[#16442C] hover:underline"
+                        className="flex items-center gap-2 font-manrope text-xs font-medium text-[#211B17] hover:text-[#C56B4E]"
                       >
-                        <FiEdit2 size={12} />
+                        <FiEdit2 size={13} />
                         Edit
                       </button>
+
                       <button
                         type="button"
                         onClick={() => handleDeleteAddress(index)}
-                        className="flex items-center gap-1 text-xs font-medium text-red-500 hover:underline"
+                        className="flex items-center gap-2 font-manrope text-xs font-medium text-red-500"
                       >
-                        <FiTrash2 size={12} />
+                        <FiTrash2 size={13} />
                         Delete
                       </button>
                     </div>
                   </div>
+
+                  <span className="absolute bottom-8 right-0 font-ibm-mono text-[8px] text-[#B8ACA1]">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
                 </div>
               ))}
             </div>
           )}
 
-          {editingAddressIndex !== null ? (
+          {/* ─────────────────────────────────────────────
+            ADDRESS EDITOR
+        ───────────────────────────────────────────── */}
+          {editingAddressIndex !== null && (
             <form
               onSubmit={handleSaveAddress}
-              className="mt-6 space-y-5 border-t border-[#E3DFD2] pt-6"
               noValidate
+              className="mt-10 bg-white p-7 md:p-10"
             >
-              <AddressMapPicker onAddressChange={handleMapAddressChange} />
+              <div className="flex items-start justify-between border-b border-[#D8CCC0] pb-7">
+                <div>
+                  <span className="font-ibm-mono text-[8px] uppercase tracking-[0.28em] text-[#C56B4E]">
+                    {editingAddressIndex === -1
+                      ? "New address"
+                      : "Edit address"}
+                  </span>
 
-              <div className="grid gap-6 sm:grid-cols-2">
-                <div className="space-y-1.5">
+                  <h3 className="mt-3 font-manrope text-2xl font-medium tracking-[-0.05em]">
+                    Delivery details.
+                  </h3>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={closeAddressForm}
+                  className="flex h-9 w-9 items-center justify-center border border-[#D8CCC0] text-[#756A62] hover:border-[#211B17] hover:text-[#211B17]"
+                >
+                  <FiX size={15} />
+                </button>
+              </div>
+
+              <div className="mt-8">
+                <AddressMapPicker onAddressChange={handleMapAddressChange} />
+              </div>
+
+              <div className="mt-10 grid gap-7 sm:grid-cols-2">
+                <div>
                   <FieldLabel>Label</FieldLabel>
                   <input
                     name="label"
@@ -526,8 +617,10 @@ const CustomerProfile = () => {
                     className={underlineInput}
                   />
                 </div>
-                <div className="space-y-1.5">
+
+                <div>
                   <FieldLabel>Phone (optional)</FieldLabel>
+
                   <input
                     name="phone"
                     value={addressForm.phone}
@@ -537,38 +630,41 @@ const CustomerProfile = () => {
                       addressErrors.phone ? errorBorder : ""
                     }`}
                   />
+
                   <FieldError>{addressErrors.phone}</FieldError>
                 </div>
-              </div>
 
-              <div className="space-y-1.5">
-                <FieldLabel>Address Line 1</FieldLabel>
-                <input
-                  name="line1"
-                  value={addressForm.line1}
-                  onChange={handleAddressFieldChange}
-                  placeholder="House no., street, area"
-                  className={`${underlineInput} ${
-                    addressErrors.line1 ? errorBorder : ""
-                  }`}
-                />
-                <FieldError>{addressErrors.line1}</FieldError>
-              </div>
+                <div className="sm:col-span-2">
+                  <FieldLabel>Address Line 1</FieldLabel>
 
-              <div className="space-y-1.5">
-                <FieldLabel>Address Line 2 (optional)</FieldLabel>
-                <input
-                  name="line2"
-                  value={addressForm.line2}
-                  onChange={handleAddressFieldChange}
-                  placeholder="Landmark, apartment, etc."
-                  className={underlineInput}
-                />
-              </div>
+                  <input
+                    name="line1"
+                    value={addressForm.line1}
+                    onChange={handleAddressFieldChange}
+                    placeholder="House no., street, area"
+                    className={`${underlineInput} ${
+                      addressErrors.line1 ? errorBorder : ""
+                    }`}
+                  />
 
-              <div className="grid gap-6 sm:grid-cols-3">
-                <div className="space-y-1.5">
+                  <FieldError>{addressErrors.line1}</FieldError>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <FieldLabel>Address Line 2 (optional)</FieldLabel>
+
+                  <input
+                    name="line2"
+                    value={addressForm.line2}
+                    onChange={handleAddressFieldChange}
+                    placeholder="Landmark, apartment, etc."
+                    className={underlineInput}
+                  />
+                </div>
+
+                <div>
                   <FieldLabel>City</FieldLabel>
+
                   <input
                     name="city"
                     value={addressForm.city}
@@ -577,10 +673,13 @@ const CustomerProfile = () => {
                       addressErrors.city ? errorBorder : ""
                     }`}
                   />
+
                   <FieldError>{addressErrors.city}</FieldError>
                 </div>
-                <div className="space-y-1.5">
+
+                <div>
                   <FieldLabel>State</FieldLabel>
+
                   <input
                     name="state"
                     value={addressForm.state}
@@ -589,10 +688,13 @@ const CustomerProfile = () => {
                       addressErrors.state ? errorBorder : ""
                     }`}
                   />
+
                   <FieldError>{addressErrors.state}</FieldError>
                 </div>
-                <div className="space-y-1.5">
+
+                <div>
                   <FieldLabel>Pincode</FieldLabel>
+
                   <input
                     name="pincode"
                     value={addressForm.pincode}
@@ -602,45 +704,49 @@ const CustomerProfile = () => {
                       addressErrors.pincode ? errorBorder : ""
                     }`}
                   />
+
                   <FieldError>{addressErrors.pincode}</FieldError>
                 </div>
               </div>
 
-              <label className="flex items-center gap-2 text-sm text-[#201F1B]">
+              <label className="mt-8 flex cursor-pointer items-center gap-3 font-manrope text-sm text-[#514740]">
                 <input
                   type="checkbox"
                   name="isDefault"
                   checked={addressForm.isDefault}
                   onChange={handleAddressFieldChange}
-                  className="accent-[#16442C]"
+                  className="accent-[#C56B4E]"
                 />
                 Set as default address
               </label>
 
-              {addressFormError ? (
-                <p className="text-sm text-red-600">{addressFormError}</p>
-              ) : null}
+              {addressFormError && (
+                <p className="mt-6 border-l-2 border-red-500 bg-red-50 px-4 py-3 text-sm text-red-600">
+                  {addressFormError}
+                </p>
+              )}
 
-              <div className="flex justify-end gap-3 border-t border-[#E3DFD2] pt-5">
+              <div className="mt-10 flex justify-end gap-3 border-t border-[#D8CCC0] pt-7">
                 <button
                   type="button"
                   onClick={closeAddressForm}
-                  className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-[#86806F] transition-colors hover:text-[#201F1B]"
+                  className="px-5 py-3 font-manrope text-sm text-[#756A62] hover:text-[#211B17]"
                 >
-                  <FiX size={14} />
                   Cancel
                 </button>
+
                 <button
                   type="submit"
                   disabled={savingAddress}
-                  className="flex items-center gap-2 bg-[#16442C] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#0E3220] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex items-center gap-3 bg-[#211B17] px-7 py-3 font-manrope text-sm font-medium text-[#F4EDE2] transition-colors hover:bg-[#C56B4E] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <FiCheck size={14} />
-                  {savingAddress ? "Saving..." : "Save Address"}
+
+                  {savingAddress ? "Saving..." : "Save address"}
                 </button>
               </div>
             </form>
-          ) : null}
+          )}
         </motion.div>
       </section>
     </div>

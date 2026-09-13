@@ -99,20 +99,12 @@ const CustomerLoginPage = () => {
   return (
     <AuthLayout>
       <AuthCard>
-        <div className="mb-8">
-          <img
-            src="https://res.cloudinary.com/dasvdkncm/image/upload/v1781664574/7_ALP_s_Logo-removebg-preview_e7kr1k.png"
-            alt="7ALP's Logo"
-            className="h-16 w-auto"
-          />
-        </div>
-
         <AuthHeader
-          title="Welcome Back"
+          title="Welcome back."
           subtitle="Login using your registered email address."
         />
 
-        <form className="space-y-6" onSubmit={handleSubmit} noValidate>
+        <form className="space-y-7" onSubmit={handleSubmit} noValidate>
           <div>
             <AuthInput
               name="email"
@@ -123,9 +115,10 @@ const CustomerLoginPage = () => {
               onChange={handleChange}
               onBlur={handleBlur}
             />
-            {error ? (
-              <p className="mt-1.5 text-sm text-red-600">{error}</p>
-            ) : null}
+
+            {error && (
+              <p className="mt-2 font-manrope text-xs text-red-600">{error}</p>
+            )}
           </div>
 
           <AuthButton
@@ -135,18 +128,22 @@ const CustomerLoginPage = () => {
             {loading ? "Sending OTP..." : "Send OTP"}
           </AuthButton>
 
-          <p className="text-center text-sm text-gray-600">
-            Don't have an account?{" "}
+          <div className="border-t border-[#D8CCC0] pt-6 text-center">
+            <p className="font-manrope text-xs text-[#756A62]">
+              Don't have an account?{" "}
+              <Link
+                to="/customer/register"
+                className="font-semibold text-[#211B17] underline decoration-[#C56B4E] underline-offset-4 transition hover:text-[#C56B4E]"
+              >
+                Create Account
+              </Link>
+            </p>
+          </div>
+          <p className="text-center text-xs text-gray-600">
             <Link
-              to="/customer/register"
-              className="font-semibold text-[#0F6B3E] hover:underline"
+              to="/"
+              className="font-semibold text-[#211B17] underline decoration-[#C56B4E] underline-offset-4 transition hover:text-[#C56B4E]"
             >
-              Create Account
-            </Link>
-          </p>
-
-          <p className="text-center text-sm text-gray-600">
-            <Link to="/" className="font-medium text-[#0F6B3E] hover:underline">
               ← Back to Website
             </Link>
           </p>

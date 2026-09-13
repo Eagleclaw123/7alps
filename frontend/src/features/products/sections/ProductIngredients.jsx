@@ -6,7 +6,7 @@ const ICONS = {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.6"
+      strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
       className="h-5 w-5"
@@ -15,12 +15,13 @@ const ICONS = {
       <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
     </svg>
   ),
+
   usage: (
     <svg
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.6"
+      strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
       className="h-5 w-5"
@@ -29,12 +30,13 @@ const ICONS = {
       <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
     </svg>
   ),
+
   storage: (
     <svg
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.6"
+      strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
       className="h-5 w-5"
@@ -54,6 +56,7 @@ const ProductIngredients = ({ product }) => {
 
   const hasUsage =
     Array.isArray(product?.usageSuggestions) && product.usageSuggestions.length;
+
   const hasStorage = Boolean(product?.storageInstructions);
 
   const tabs = [
@@ -65,68 +68,127 @@ const ProductIngredients = ({ product }) => {
   const [active, setActive] = useState(tabs[0].key);
 
   return (
-    <section className="px-6 py-20 xl:px-0">
-      <div className="mx-auto max-w-7xl">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#6B8F3E]">
-          What&apos;s inside
-        </p>
-        <h2 className="mb-10 font-medium text-3xl text-[#22301A]">
-          Grown, gathered, kept honest
-        </h2>
+    <section className="bg-[#F4EDE2] px-5 py-20 sm:px-8 lg:py-28 xl:px-16">
+      <div className="mx-auto max-w-[1600px]">
+        {/* Header */}
+        <div className="mb-14 grid gap-8 lg:grid-cols-[0.75fr_1.25fr] lg:items-end">
+          <div>
+            <div className="mb-6 flex items-center gap-3">
+              <span className="font-ibm-mono text-[10px] uppercase tracking-[0.3em] text-[#A85F43]">
+                02
+              </span>
+              <span className="h-px w-10 bg-[#C56B4E]" />
 
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-[220px_1fr]">
-          {/* Tab rail */}
-          <div className="flex gap-2 overflow-x-auto md:flex-col md:gap-1 md:overflow-visible md:border-l md:border-[#DCE6CE]">
-            {tabs.map((tab) => {
-              const isActive = active === tab.key;
-              return (
-                <button
-                  key={tab.key}
-                  onClick={() => setActive(tab.key)}
-                  className={`relative flex shrink-0 items-center gap-3 px-4 py-3 text-left text-sm transition-colors md:-ml-px md:border-l-2 md:px-5 ${
-                    isActive
-                      ? "border-b-2 border-[#4C7A1F] font-semibold text-[#22301A] md:border-b-0 md:border-l-[#4C7A1F]"
-                      : "border-b-2 border-transparent text-gray-500 hover:text-[#22301A] md:border-l-transparent"
-                  }`}
-                >
-                  <span
-                    className={isActive ? "text-[#4C7A1F]" : "text-gray-400"}
-                  >
-                    {ICONS[tab.key]}
-                  </span>
-                  {tab.label}
-                </button>
-              );
-            })}
+              <span className="font-ibm-mono text-[9px] uppercase tracking-[0.3em] text-[#C56B4E]">
+                What's inside
+              </span>
+            </div>
+
+            <h2 className="font-manrope text-[clamp(3.5rem,6vw,6.5rem)] font-medium leading-[1.0] tracking-[-0.06em] text-[#211B17]">
+              Grown.
+              <br />
+              Gathered.
+              <br />
+              <span className="text-[#C56B4E]">Kept honest.</span>
+            </h2>
           </div>
 
-          {/* Content panel */}
-          <div className="min-h-[180px] rounded-2xl border border-[#EAF0E2] bg-[#FBFCF9] p-8">
+          <p className="max-w-xl font-manrope text-sm leading-7 text-[#756A62] lg:pb-2 lg:text-base">
+            Transparency matters. Explore what's inside your product, how to use
+            it, and how to keep it at its best.
+          </p>
+        </div>
+
+        {/* Content */}
+        <div className="grid border-t border-[#D8CCC0] lg:grid-cols-[280px_1fr]">
+          {/* Navigation */}
+          <div className="border-b border-[#D8CCC0] lg:border-b-0 lg:border-r lg:border-[#D8CCC0] lg:py-8">
+            <div className="flex gap-2 overflow-x-auto lg:flex-col lg:gap-0 lg:overflow-visible">
+              {tabs.map((tab, index) => {
+                const isActive = active === tab.key;
+
+                return (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    onClick={() => setActive(tab.key)}
+                    className={`group flex min-w-max items-center gap-4 px-4 py-5 text-left transition-all lg:px-6 ${
+                      isActive
+                        ? "text-[#211B17]"
+                        : "text-[#91847A] hover:text-[#211B17]"
+                    }`}
+                  >
+                    <span
+                      className={`font-ibm-mono text-[8px] ${
+                        isActive ? "text-[#C56B4E]" : "text-[#B9ACA2]"
+                      }`}
+                    >
+                      0{index + 1}
+                    </span>
+
+                    <span
+                      className={`transition-transform duration-300 ${
+                        isActive ? "translate-x-1 text-[#C56B4E]" : ""
+                      }`}
+                    >
+                      {ICONS[tab.key]}
+                    </span>
+
+                    <span className="font-manrope text-sm font-medium">
+                      {tab.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="min-h-[300px] px-2 py-10 sm:px-8 lg:px-14 lg:py-14">
             {active === "ingredients" && (
-              <p className="text-[15px] leading-8 text-gray-600">
-                {ingredients}
-              </p>
+              <div className="max-w-3xl">
+                <p className="mb-6 font-ibm-mono text-[8px] uppercase tracking-[0.25em] text-[#91847A]">
+                  Ingredients
+                </p>
+
+                <p className="font-manrope text-xl leading-9 text-[#211B17] md:text-2xl md:leading-10">
+                  {ingredients}
+                </p>
+              </div>
             )}
 
             {active === "usage" && hasUsage && (
-              <ul className="space-y-4">
-                {product.usageSuggestions.map((suggestion, i) => (
-                  <li key={suggestion} className="flex items-start gap-4">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#EAF0E2] text-xs font-semibold text-[#4C7A1F]">
-                      {i + 1}
-                    </span>
-                    <span className="pt-0.5 text-[15px] leading-7 text-gray-600">
-                      {suggestion}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              <div className="max-w-3xl">
+                <p className="mb-7 font-ibm-mono text-[8px] uppercase tracking-[0.25em] text-[#91847A]">
+                  How to use
+                </p>
+
+                <div className="divide-y divide-[#D8CCC0]">
+                  {product.usageSuggestions.map((suggestion, i) => (
+                    <div key={suggestion} className="flex gap-6 py-5">
+                      <span className="font-ibm-mono text-[9px] text-[#C56B4E]">
+                        0{i + 1}
+                      </span>
+
+                      <p className="font-manrope text-[15px] leading-7 text-[#514740]">
+                        {suggestion}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
 
             {active === "storage" && hasStorage && (
-              <p className="text-[15px] leading-8 text-gray-600">
-                {product.storageInstructions}
-              </p>
+              <div className="max-w-3xl">
+                <p className="mb-6 font-ibm-mono text-[8px] uppercase tracking-[0.25em] text-[#91847A]">
+                  Storage
+                </p>
+
+                <p className="font-manrope text-xl leading-9 text-[#211B17] md:text-2xl md:leading-10">
+                  {product.storageInstructions}
+                </p>
+              </div>
             )}
           </div>
         </div>

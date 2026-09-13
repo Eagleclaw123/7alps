@@ -1,12 +1,3 @@
-/**
- * NOTE: this file wasn't part of the code you shared — reconstructed from
- * the screenshot's column layout (Product / In Stock / Price / Quantity /
- * Total). Grid columns match CartItem's so everything lines up.
- *
- * Hidden below `sm` — CartItem shows inline labels ("Price:", "Total:", etc.)
- * in its mobile card layout instead, so a separate header row isn't needed
- * once it's no longer a table.
- */
 const CartTableHeader = ({
   columns = ["Product", "In Stock", "Price", "Quantity", "Total"],
   showTotal = true,
@@ -17,10 +8,15 @@ const CartTableHeader = ({
 
   return (
     <div
-      className={`hidden px-6 pb-3 pt-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#86806F] sm:grid ${gridClass} sm:items-center sm:gap-4`}
+      className={`hidden border-b border-[#D8CCC0] bg-[#EAE0D4] px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#756A62] sm:grid ${gridClass} sm:items-center`}
     >
-      {columns.map((column) => (
-        <span key={column}>{column}</span>
+      {columns.map((column, index) => (
+        <span
+          key={column}
+          className={index > 0 ? "border-l border-[#D8CCC0] pl-5" : ""}
+        >
+          {column}
+        </span>
       ))}
     </div>
   );

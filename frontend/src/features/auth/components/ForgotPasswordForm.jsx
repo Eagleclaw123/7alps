@@ -26,14 +26,6 @@ const ForgotPasswordForm = ({
 
   return (
     <AuthCard>
-      <div className="mb-8">
-        <img
-          src="https://res.cloudinary.com/dasvdkncm/image/upload/v1781664574/7_ALP_s_Logo-removebg-preview_e7kr1k.png"
-          alt="7ALP's Logo"
-          className="h-16 w-auto"
-        />
-      </div>
-
       <AuthHeader title={title} subtitle={subtitle} />
 
       <form className="space-y-6" onSubmit={handleSubmit}>
@@ -51,11 +43,11 @@ const ForgotPasswordForm = ({
           {loading ? "Sending..." : "Send Reset Link"}
         </AuthButton>
 
-        <p className="text-center text-sm text-gray-600">
+        <p className="text-center text-xs text-gray-600">
           Remember your password?{" "}
           <Link
             to={loginPath}
-            className="font-semibold text-[#0F6B3E] hover:underline"
+            className="font-semibold text-[#211B17] underline decoration-[#C56B4E] underline-offset-4 transition hover:text-[#C56B4E]"
           >
             Back to Login
           </Link>

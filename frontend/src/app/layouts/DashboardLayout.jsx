@@ -10,7 +10,7 @@ const DashboardLayout = ({ Sidebar, Header }) => {
 
       <div
         className={`transition-all duration-300 ${
-          collapsed ? "lg:ml-[88px]" : "lg:ml-[280px]"
+          collapsed ? "lg:ml-[80px]" : "lg:ml-[230px]"
         }`}
       >
         <Header />

@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { IoIosStar, IoIosStarHalf, IoIosStarOutline } from "react-icons/io";
+import { GoArrowRight } from "react-icons/go";
+import { FiMinus, FiPlus } from "react-icons/fi";
 
 import { addToCart } from "../../../store/slices/cartSlice";
-import { useNavigate } from "react-router-dom";
 
 const ProductInfo = ({ product }) => {
   const dispatch = useDispatch();
@@ -31,8 +33,12 @@ const ProductInfo = ({ product }) => {
         productId: product.id,
         variantLabel: selectedVariant.label,
         quantity,
+        name: product.ProductName,
+        image: product.ProductImage,
+        price: Number(selectedVariant.price ?? product.ProductPrice ?? 0),
       }),
     );
+
     setIsAdded(true);
   };
 
@@ -75,162 +81,187 @@ const ProductInfo = ({ product }) => {
   };
 
   return (
-    <div>
-      <div className="space-y-4">
-        <span className="rounded-full bg-[#F3F8F2] px-4 py-2 text-sm text-[#0F6B3E] inline-block">
-          {product.ProductCategory}
-        </span>
-        <h1 className="text-5xl font-semibold">{product.ProductName}</h1>
-        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
-          {/* Rating */}
-          <div className="flex items-center gap-2">
-            {ratingCount > 0 ? (
-              <>
-                <div className="flex items-center text-[#E6A43A]">
-                  {[...Array(fullStars)].map((_, index) => (
-                    <IoIosStar key={`full-${index}`} />
-                  ))}
+    <div className="max-w-xl">
+      {/* Category */}
+      <p className="font-ibm-mono text-[9px] uppercase tracking-[0.3em] text-[#C56B4E]">
+        {product.ProductCategory}
+      </p>
 
-                  {hasHalfStar && <IoIosStarHalf />}
+      {/* Name */}
+      <h1 className="mt-5 font-manrope text-[clamp(2.8rem,5vw,5.2rem)] font-medium leading-[0.92] tracking-[-0.07em] text-[#211B17]">
+        {product.ProductName}
+      </h1>
 
-                  {[...Array(emptyStars)].map((_, index) => (
-                    <IoIosStarOutline key={`empty-${index}`} />
-                  ))}
-                </div>
+      {/* Rating */}
+      <div className="mt-6 flex flex-wrap items-center gap-4">
+        {ratingCount > 0 ? (
+          <>
+            <div className="flex text-[#C56B4E]">
+              {[...Array(fullStars)].map((_, index) => (
+                <IoIosStar key={`full-${index}`} />
+              ))}
 
-                <span className="font-medium text-[#2C2C2C]">
-                  {rating.toFixed(1)} ({ratingCount})
-                </span>
-              </>
-            ) : (
-              <span className="rounded-full bg-[#F3F8F2] px-3 py-1 text-xs font-medium text-[#0F6B3E]">
-                New
-              </span>
-            )}
-          </div>
+              {hasHalfStar && <IoIosStarHalf />}
 
-          {/* Divider */}
-          <div className="h-5 w-px bg-gray-300" />
+              {[...Array(emptyStars)].map((_, index) => (
+                <IoIosStarOutline key={`empty-${index}`} />
+              ))}
+            </div>
 
-          {/* Stock */}
-          <div className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#047B22] mt-1" />
-
-            <span className="font-medium text-[#047B22]">
-              {selectedVariant && selectedVariant.stock > 0
-                ? "In Stock"
-                : "Out of Stock"}
+            <span className="font-manrope text-xs text-[#756A62]">
+              {rating.toFixed(1)} · {ratingCount} reviews
             </span>
-          </div>
-        </div>
+          </>
+        ) : (
+          <span className="border border-[#D8CCC0] px-3 py-1 font-ibm-mono text-[8px] uppercase tracking-[0.2em] text-[#756A62]">
+            New arrival
+          </span>
+        )}
+
+        <span className="h-4 w-px bg-[#D8CCC0]" />
+
+        <span className="flex items-center gap-2 font-manrope text-xs text-[#756A62]">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#C56B4E]" />
+
+          {selectedVariant?.stock > 0 ? "In stock" : "Currently unavailable"}
+        </span>
+      </div>
+
+      {/* Price */}
+      <div className="mt-8 border-y border-[#D8CCC0] py-6">
         <div className="flex items-end gap-3">
-          <span className="text-3xl font-semibold text-[#0F6B3E]">
+          <span className="font-manrope text-3xl font-medium text-[#211B17]">
             ₹{selectedVariant?.price ?? product.ProductPrice}
           </span>
 
           {selectedVariant?.mrp > selectedVariant?.price && (
             <>
-              <span className="text-xl text-gray-400 line-through">
+              <span className="font-manrope text-lg text-[#91847A] line-through">
                 ₹{selectedVariant.mrp}
               </span>
 
-              <span className="rounded-full bg-[#E9F8EE] px-2 py-1 text-xs font-semibold text-[#047B22]">
+              <span className="font-ibm-mono text-[9px] uppercase tracking-[0.15em] text-[#C56B4E]">
                 {Math.round(
                   ((selectedVariant.mrp - selectedVariant.price) /
                     selectedVariant.mrp) *
                     100,
                 )}
-                % OFF
+                % off
               </span>
             </>
           )}
         </div>
-        <p className="text-gray-600">
-          {product.description || product.ProductDescription}
-        </p>
+      </div>
 
-        {variants.length ? (
-          <div className="space-y-5">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <p className="text-lg font-semibold text-[#2C2C2C]">
-                Choose Weight
-              </p>
-            </div>
+      {/* Description */}
+      <p className="mt-7 font-manrope text-sm leading-7 text-[#756A62] md:text-[15px]">
+        {product.description || product.ProductDescription}
+      </p>
 
-            {/* Variant Options */}
-            <div className="flex flex-wrap gap-3">
-              {variants.map((variant) => {
-                const isSelected = selectedVariant?.label === variant.label;
+      {/* Variants */}
+      {variants.length > 0 && (
+        <div className="mt-9">
+          <div className="mb-4 flex items-center justify-between">
+            <p className="font-manrope text-sm font-medium text-[#211B17]">
+              Choose weight
+            </p>
 
-                return (
-                  <button
-                    key={variant.label}
-                    type="button"
-                    onClick={() => {
-                      setSelectedVariant(variant);
-                      setIsAdded(false);
-                    }}
-                    className={`relative w-fit rounded-full border-2 px-4 py-2 transition-all duration-200 ${
-                      isSelected
-                        ? "border-[#047B22] bg-[#F4FBF6]"
-                        : "border-gray-200 bg-white hover:border-[#047B22]/50 hover:bg-[#F8FAF8]"
-                    }`}
-                  >
-                    <span
-                      className={`font-semibold ${
-                        isSelected ? "text-[#047B22]" : "text-[#2C2C2C]"
-                      }`}
-                    >
-                      {formatWeight(variant.label)}
-                    </span>
-
-                    {isSelected ? (
-                      <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#047B22] text-[10px] font-bold text-white">
-                        ✓
-                      </span>
-                    ) : null}
-                  </button>
-                );
-              })}
-            </div>
+            <span className="font-ibm-mono text-[8px] uppercase tracking-[0.2em] text-[#91847A]">
+              Size
+            </span>
           </div>
-        ) : null}
 
-        <div className="mt-8 flex items-center gap-5">
+          <div className="flex flex-wrap gap-3">
+            {variants.map((variant) => {
+              const isSelected = selectedVariant?.label === variant.label;
+
+              return (
+                <button
+                  key={variant.label}
+                  type="button"
+                  onClick={() => {
+                    setSelectedVariant(variant);
+                    setIsAdded(false);
+                  }}
+                  className={`relative min-w-[92px] border px-5 py-3 text-left transition-all duration-300 ${
+                    isSelected
+                      ? "border-[#211B17] bg-[#211B17] text-[#F4EDE2]"
+                      : "border-[#D8CCC0] bg-transparent text-[#211B17] hover:border-[#756A62]"
+                  }`}
+                >
+                  <span className="font-manrope text-sm font-medium">
+                    {formatWeight(variant.label)}
+                  </span>
+
+                  {isSelected && (
+                    <span className="absolute right-2 top-1 text-[8px] text-[#C56B4E]">
+                      ✓
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Quantity */}
+      <div className="mt-9 flex items-center justify-between border-y border-[#D8CCC0] py-5">
+        <span className="font-manrope text-sm font-medium">Quantity</span>
+
+        <div className="flex items-center border border-[#D8CCC0]">
           <button
+            type="button"
             onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-            className="h-12 w-12 rounded-xl border"
+            className="flex h-10 w-10 items-center justify-center text-[#211B17] transition hover:bg-[#EAE0D4]"
           >
-            -
+            <FiMinus size={14} />
           </button>
 
-          <span className="text-xl">{quantity}</span>
+          <span className="flex h-10 w-10 items-center justify-center border-x border-[#D8CCC0] font-manrope text-sm">
+            {quantity}
+          </span>
 
           <button
+            type="button"
             onClick={() => setQuantity((q) => q + 1)}
-            className="h-12 w-12 rounded-xl border"
+            className="flex h-10 w-10 items-center justify-center text-[#211B17] transition hover:bg-[#EAE0D4]"
           >
-            +
+            <FiPlus size={14} />
           </button>
         </div>
+      </div>
 
-        <div className="mt-8 flex gap-4">
-          <button
-            onClick={handleAddToCart}
-            disabled={!selectedVariant || selectedVariant.stock <= 0}
-            className="rounded-xl bg-[#0F6B3E] px-8 py-4 text-white disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isAdded ? "Added to Cart" : "Add to Cart"}
-          </button>
-          <button
-            onClick={handleBuyNow}
-            disabled={!selectedVariant || selectedVariant.stock <= 0}
-            className="rounded-xl border px-8 py-4 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            Buy Now
-          </button>{" "}
-        </div>
+      {/* Actions */}
+      <div className="mt-7 grid grid-cols-2 gap-3">
+        <button
+          onClick={handleAddToCart}
+          disabled={!selectedVariant || selectedVariant.stock <= 0}
+          className="group flex items-center justify-between bg-[#211B17] px-5 py-4 font-manrope text-sm font-medium text-[#F4EDE2] transition hover:bg-[#C56B4E] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <span>{isAdded ? "Added to Cart" : "Add to Cart"}</span>
+
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#F4EDE2] text-[#211B17] transition-transform group-hover:translate-x-1">
+            <GoArrowRight size={14} />
+          </span>
+        </button>
+
+        <button
+          onClick={handleBuyNow}
+          disabled={!selectedVariant || selectedVariant.stock <= 0}
+          className="border border-[#211B17] px-5 py-4 font-manrope text-sm font-medium text-[#211B17] transition hover:bg-[#211B17] hover:text-[#F4EDE2] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Buy Now
+        </button>
+      </div>
+
+      {/* Trust line */}
+      <div className="mt-7 flex items-center gap-3">
+        <span className="h-px w-8 bg-[#C56B4E]" />
+
+        <p className="font-ibm-mono text-[8px] uppercase tracking-[0.2em] text-[#91847A]">
+          Carefully sourced · Quality assured
+        </p>
       </div>
     </div>
   );

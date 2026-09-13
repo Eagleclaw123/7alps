@@ -7,33 +7,47 @@ const ProductGallery = ({ product }) => {
   if (!images.length) return null;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
       {/* Main image */}
-      <div className="overflow-hidden rounded-2xl bg-[#F8FAF8] flex flex-col items-center justify-center h-[500px]">
+      <div className="relative flex min-h-[520px] items-center justify-center overflow-hidden bg-[#EAE0D4] md:min-h-[620px]">
         <img
           src={images[activeIndex]}
           alt={product.ProductName}
-          className="h-[400px] w-[500px] object-cover rounded-xl"
+          className="h-full max-h-[590px] w-full object-contain p-8 transition-opacity duration-500 md:p-12"
         />
+
+        <div className="pointer-events-none absolute bottom-6 left-6">
+          <span className="font-ibm-mono text-[8px] uppercase tracking-[0.25em] text-[#756A62]">
+            Pure / Botanical / Natural
+          </span>
+        </div>
+
+        <div className="pointer-events-none absolute right-6 top-6">
+          <span className="font-ibm-mono text-[8px] text-[#91847A]">
+            {String(activeIndex + 1).padStart(2, "0")} /{" "}
+            {String(images.length).padStart(2, "0")}
+          </span>
+        </div>
       </div>
 
-      {/* Thumbnail rail */}
-      <div className="flex flex-row gap-2 overflow-x-auto pb-1">
+      {/* Thumbnails */}
+      <div className="flex gap-3 overflow-x-auto pb-1">
         {images.map((img, i) => (
           <button
             key={i}
+            type="button"
             onMouseEnter={() => setActiveIndex(i)}
             onClick={() => setActiveIndex(i)}
-            className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 bg-[#F8FAF8] transition-colors ${
+            className={`relative h-20 w-20 shrink-0 overflow-hidden bg-[#EAE0D4] transition-all duration-300 ${
               activeIndex === i
-                ? "border-neutral-900"
-                : "border-transparent hover:border-neutral-300"
+                ? "ring-1 ring-[#211B17]"
+                : "opacity-60 hover:opacity-100"
             }`}
           >
             <img
               src={img}
               alt={`${product.ProductName} thumbnail ${i + 1}`}
-              className="h-full w-full object-cover"
+              className="h-full w-full object-contain p-2"
             />
           </button>
         ))}

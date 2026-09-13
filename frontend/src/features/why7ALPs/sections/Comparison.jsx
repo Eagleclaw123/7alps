@@ -36,77 +36,166 @@ const rows = [
 
 const Comparison = () => {
   return (
-    <section className="relative mt-5 bg-[url('https://res.cloudinary.com/dasvdkncm/image/upload/v1782808666/f910f2fa731e472213b10164fc8561d3a17cb4c0_cszg6g.png')] bg-cover bg-center bg-no-repeat px-6 py-20 xl:px-0">
-      <div className="absolute inset-0 bg-gradient-to-b from-[#1F2A1A]/85 via-[#1F2A1A]/75 to-[#1F2A1A]/85" />
+    <section className="relative overflow-hidden bg-[#211B17] px-5 py-24 text-[#F4EDE2] sm:px-8 lg:py-32 xl:px-16">
+      {/* Subtle background image */}
+      <div className="absolute inset-0">
+        <img
+          src="https://res.cloudinary.com/dasvdkncm/image/upload/v1782808666/f910f2fa731e472213b10164fc8561d3a17cb4c0_cszg6g.png"
+          alt=""
+          aria-hidden="true"
+          className="h-full w-full object-cover opacity-15"
+        />
 
-      <div className="relative mx-auto max-w-7xl">
+        <div className="absolute inset-0 bg-[#211B17]/85" />
+      </div>
+
+      <div className="relative mx-auto max-w-[1500px]">
+        {/* Heading */}
         <motion.div
-          className="mx-auto max-w-xl space-y-4 text-center"
+          initial={{ opacity: 0, y: 25 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{
+            duration: 0.8,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          className="grid gap-10 border-b border-white/15 pb-12 lg:grid-cols-[1fr_0.42fr] lg:items-end"
+        >
+          <div>
+            <div className="mb-6 flex items-center gap-3">
+              <span className="font-ibm-mono text-[10px] uppercase tracking-[0.3em] text-[#A85F43]">
+                02
+              </span>
+              <span className="h-px w-10 bg-[#C56B4E]" />
+
+              <span className="font-ibm-mono text-[9px] uppercase tracking-[0.3em] text-[#C56B4E]">
+                An honest comparison
+              </span>
+            </div>
+
+            <h2 className="max-w-5xl font-manrope text-[clamp(3.5rem,6vw,6.5rem)] font-medium leading-[1.0] tracking-[-0.075em]">
+              Look closer.
+              <br />
+              <span className="font-normal text-[#C56B4E]">
+                The difference is there.
+              </span>
+            </h2>
+          </div>
+
+          <p className="max-w-md font-manrope text-sm leading-7 text-[#B7AAA0] md:text-base">
+            Two powders can look similar on a shelf. Their journey from field to
+            finished product can be very different.
+          </p>
+        </motion.div>
+
+        {/* Comparison header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, delay: 0.1 }}
+          className="mt-14 grid border-b border-white/15 pb-5 md:grid-cols-[1fr_1fr_1fr]"
+        >
+          <div className="hidden md:block">
+            <span className="font-ibm-mono text-[8px] uppercase tracking-[0.25em] text-[#91847A]">
+              What to check
+            </span>
+          </div>
+
+          <div className="border-l border-white/10 pl-5 md:pl-8">
+            <span className="font-ibm-mono text-[8px] uppercase tracking-[0.25em] text-[#C56B4E]">
+              7ALP&apos;s approach
+            </span>
+          </div>
+
+          <div className="border-l border-white/10 pl-5 md:pl-8">
+            <span className="font-ibm-mono text-[8px] uppercase tracking-[0.25em] text-[#91847A]">
+              Conventional powders
+            </span>
+          </div>
+        </motion.div>
+
+        {/* Rows */}
+        <div>
+          {rows.map((row, index) => (
+            <motion.div
+              key={row.label}
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{
+                duration: 0.55,
+                delay: index * 0.06,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              className="grid border-b border-white/10 md:grid-cols-[1fr_1fr_1fr]"
+            >
+              {/* Label */}
+              <div className="flex items-center gap-4 py-7 md:py-8">
+                <span className="font-ibm-mono text-[9px] text-[#C56B4E]">
+                  0{index + 1}
+                </span>
+
+                <span className="font-manrope text-sm font-medium text-[#F4EDE2] md:text-base">
+                  {row.label}
+                </span>
+              </div>
+
+              {/* 7ALP */}
+              <div className="flex items-start gap-4 border-l border-white/10 py-7 pl-5 md:py-8 md:pl-8">
+                <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center border border-[#C56B4E]/50">
+                  <Check
+                    size={12}
+                    strokeWidth={1.8}
+                    className="text-[#C56B4E]"
+                  />
+                </div>
+
+                <span className="max-w-sm font-manrope text-sm leading-6 text-[#D8CCC0]">
+                  {row.us}
+                </span>
+              </div>
+
+              {/* Conventional */}
+              <div className="flex items-start gap-4 border-l border-white/10 py-7 pl-5 md:py-8 md:pl-8">
+                <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center border border-white/15">
+                  <X size={12} strokeWidth={1.5} className="text-[#91847A]" />
+                </div>
+
+                <span className="max-w-sm font-manrope text-sm leading-6 text-[#91847A]">
+                  {row.them}
+                </span>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Bottom statement */}
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
+          className="mt-16 grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end"
         >
-          <div className="flex items-center justify-center gap-2">
-            <div className="h-1.5 w-1.5 rounded-full bg-[#C98E63]" />
-            <p className="font-ibm-mono text-[13px] font-semibold uppercase tracking-[0.2em] text-[#C98E63] sm:text-sm">
-              An honest comparison
+          <div>
+            <p className="max-w-3xl font-manrope text-2xl font-medium leading-tight tracking-[-0.04em] text-[#F4EDE2] md:text-3xl">
+              The difference isn&apos;t always visible.
+              <br />
+              <span className="font-normal text-[#91847A]">
+                That&apos;s why we believe it should be explainable.
+              </span>
             </p>
           </div>
 
-          <h2 className="font-semibold text-[24px] leading-tight text-[#FAF6EF] sm:text-[28px] md:text-[36px] xl:text-[40px]">
-            7ALP vs the average powder on the shelf
-          </h2>
+          <div className="flex items-center gap-3">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#C56B4E]" />
 
-          <p className="text-[14px] leading-6 text-[#EFE6D8]/80 sm:text-[15px] sm:leading-7 md:text-[18px]">
-            Same category, very different practices. Here&apos;s where the gap
-            actually is.
-          </p>
-        </motion.div>
-
-        <div className="mt-10 overflow-hidden rounded-xl border border-[#EFE6D8]/15 sm:mt-12">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[600px] border-collapse text-left">
-              <thead>
-                <tr className="bg-[#1F2A1A]">
-                  <th className="px-4 py-6 font-ibm-mono text-xs font-semibold uppercase tracking-wider text-[#EFE6D8]/70 sm:px-6 sm:text-sm">
-                    What to check
-                  </th>
-                  <th className="px-4 py-6 font-ibm-mono text-xs font-semibold uppercase tracking-wider text-[#EFE6D8] sm:px-6 sm:text-sm">
-                    We 7ALP
-                  </th>
-                  <th className="px-4 py-6 font-ibm-mono text-xs font-semibold uppercase tracking-wider text-[#EFE6D8]/70 sm:px-6 sm:text-sm">
-                    Conventional powders
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row, i) => (
-                  <tr
-                    key={row.label}
-                    className={i % 2 === 0 ? "bg-[#FAF6EF]" : "bg-white"}
-                  >
-                    <td className="px-4 py-7 text-sm font-medium text-[#3F4A2E] sm:px-6 sm:text-[15px]">
-                      {row.label}
-                    </td>
-                    <td className="bg-[#EFE6D8]/60 px-4 py-7 text-sm text-[#3F4A2E] sm:px-6 sm:text-[15px]">
-                      <div className="flex items-start gap-2">
-                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#5B7A3A]" />
-                        <span>{row.us}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-7 text-sm text-[#6B7259] sm:px-6 sm:text-[15px]">
-                      <div className="flex items-start gap-2">
-                        <X className="mt-0.5 h-4 w-4 shrink-0 text-[#B9714A]" />
-                        <span>{row.them}</span>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <span className="font-ibm-mono text-[8px] uppercase tracking-[0.25em] text-[#91847A]">
+              Transparency / Process / Proof
+            </span>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

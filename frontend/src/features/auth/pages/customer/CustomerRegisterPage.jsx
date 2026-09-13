@@ -93,15 +93,11 @@ const CustomerRegisterPage = () => {
     <AuthLayout>
       <AuthCard>
         <AuthHeader
-          title="Create Account"
+          title="Create account."
           subtitle="Join 7ALP's and start your wellness journey."
         />
 
-        <form
-          className="grid grid-cols-1 gap-5 md:grid-cols-2"
-          onSubmit={handleSubmit}
-          noValidate
-        >
+        <form className="space-y-6" onSubmit={handleSubmit} noValidate>
           <div>
             <AuthInput
               name="name"
@@ -111,9 +107,12 @@ const CustomerRegisterPage = () => {
               onChange={handleChange}
               onBlur={handleBlur}
             />
-            {fieldErrors.name ? (
-              <p className="mt-1.5 text-sm text-red-600">{fieldErrors.name}</p>
-            ) : null}
+
+            {fieldErrors.name && (
+              <p className="mt-2 font-manrope text-xs text-red-600">
+                {fieldErrors.name}
+              </p>
+            )}
           </div>
 
           <div>
@@ -126,29 +125,33 @@ const CustomerRegisterPage = () => {
               onChange={handleChange}
               onBlur={handleBlur}
             />
-            {fieldErrors.email ? (
-              <p className="mt-1.5 text-sm text-red-600">
+
+            {fieldErrors.email && (
+              <p className="mt-2 font-manrope text-xs text-red-600">
                 {fieldErrors.email}
               </p>
-            ) : null}
+            )}
           </div>
 
-          {formError ? (
-            <p className="md:col-span-2 text-sm text-red-600">{formError}</p>
-          ) : null}
+          {formError && (
+            <p className="font-manrope text-xs text-red-600">{formError}</p>
+          )}
 
-          <div className="md:col-span-2">
-            <AuthButton type="submit" disabled={loading || !isValid}>
-              {loading ? "Sending OTP..." : "Create Account"}
-            </AuthButton>
+          <AuthButton type="submit" disabled={loading || !isValid}>
+            {loading ? "Sending OTP..." : "Create Account"}
+          </AuthButton>
+
+          <div className="border-t border-[#D8CCC0] pt-6 text-center">
+            <p className="font-manrope text-xs text-[#756A62]">
+              Already have an account?{" "}
+              <Link
+                to="/customer/login"
+                className="font-semibold text-[#211B17] underline decoration-[#C56B4E] underline-offset-4 transition hover:text-[#C56B4E]"
+              >
+                Login
+              </Link>
+            </p>
           </div>
-
-          <p className="md:col-span-2 text-center text-sm text-gray-600">
-            Already have an account?{" "}
-            <Link to="/customer/login" className="font-semibold text-[#0F6B3E]">
-              Login
-            </Link>
-          </p>
         </form>
       </AuthCard>
     </AuthLayout>

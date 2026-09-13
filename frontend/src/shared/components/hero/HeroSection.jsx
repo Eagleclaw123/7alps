@@ -1,14 +1,17 @@
 import { motion } from "framer-motion";
-import { GoArrowRight } from "react-icons/go";
+import { GoArrowRight, GoArrowUpRight } from "react-icons/go";
 import { BsCheck2 } from "react-icons/bs";
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
+  hidden: {
+    opacity: 0,
+    y: 24,
+  },
   show: {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.8,
+      duration: 0.75,
       ease: [0.22, 1, 0.36, 1],
     },
   },
@@ -17,7 +20,7 @@ const fadeUp = {
 const HeroSection = ({
   backgroundImage,
   badgeText,
-  badgeColor = "#047B22",
+  badgeColor = "#C56B4E",
   heading,
   headingHighlight,
   description,
@@ -25,134 +28,186 @@ const HeroSection = ({
   highlights = [],
   values = [],
   additionalContent,
-  containerHeight = "h-[90vh] md:h-[70vh] xl:h-screen",
-  overlayColor = "bg-black/50",
-  textColor = "text-white",
-  headingSize = "text-[26px] md:text-4xl xl:text-[46px]",
+  containerHeight = "h-screen",
+  overlayColor = "",
+  textColor = "text-[#211B17]",
+  headingSize = "",
   contentMaxWidth = "max-w-2xl",
 }) => {
   return (
-    <section className={`relative overflow-hidden ${containerHeight}`}>
-      {/* Background Image */}
-      <img
-        src={backgroundImage}
-        alt="Hero Background"
-        className="absolute inset-0 h-full w-full object-cover"
-      />
+    <section
+      className={`relative overflow-hidden bg-[#F4EDE2] ${containerHeight}`}
+    >
+      {/* IMAGE SIDE */}
+      <div className="absolute inset-y-0 right-0 w-full lg:w-[57%]">
+        <img
+          src={backgroundImage}
+          alt="7ALP herbal powder ingredients"
+          className="h-full w-full object-cover object-center"
+        />
 
-      {/* Overlay */}
-      <div className={`absolute inset-0 ${overlayColor}`} />
+        {/* Image treatment */}
+        <div className="absolute inset-0 bg-black/10" />
 
-      {/* Content */}
-      <div className="relative z-10 flex h-full items-end pb-10">
-        <div className="mx-auto w-full max-w-7xl px-6 xl:px-0">
+        <div className="absolute inset-y-0 left-0 hidden w-48 bg-gradient-to-r from-[#F4EDE2] to-transparent lg:block" />
+
+        <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-black/5" />
+      </div>
+
+      {/* LEFT CONTENT */}
+      <div className="relative z-10 flex h-full items-center">
+        <div className="mx-auto w-full max-w-[1600px] px-5 pt-28 sm:px-8 lg:px-12 xl:px-16">
           <motion.div
             variants={fadeUp}
             initial="hidden"
             animate="show"
-            className={contentMaxWidth}
+            className="max-w-[720px] lg:w-[48%]"
           >
-            {/* Badge */}
+            {/* Eyebrow */}
             {badgeText && (
-              <div className="flex items-center gap-2">
-                <div
-                  className="h-2 w-2 rounded-full"
+              <div className="mb-7 flex items-center gap-3">
+                <span
+                  className="h-[1px] w-10"
                   style={{ backgroundColor: badgeColor }}
                 />
-                <p
-                  className="text-[18px] font-ibm-mono font-semibold"
+
+                <span
+                  className="font-ibm-mono text-[9px] uppercase tracking-[0.3em]"
                   style={{ color: badgeColor }}
                 >
                   {badgeText}
-                </p>
+                </span>
               </div>
             )}
 
             {/* Heading */}
             {heading && (
               <h1
-                className={`mt-4 ${headingSize} font-semibold leading-tight ${textColor}`}
+                className={`font-manrope text-[clamp(3.5rem,6vw,6.5rem)] font-medium leading-[1.0] tracking-[-0.075em] ${textColor}`}
               >
                 {heading}
+
                 {headingHighlight && (
-                  <span style={{ color: badgeColor }}> {headingHighlight}</span>
+                  <>
+                    <br />
+
+                    <span className="font-normal" style={{ color: badgeColor }}>
+                      {headingHighlight}
+                    </span>
+                  </>
                 )}
               </h1>
             )}
 
             {/* Description */}
             {description && (
-              <p
-                className={`mt-6 text-[18px] xl:text-[20px] max-w-xl ${textColor}/80`}
-              >
+              <p className="mt-8 max-w-lg font-manrope text-sm leading-7 text-[#756A62] md:text-base">
                 {description}
               </p>
             )}
 
-            {/* Buttons */}
+            {/* CTA */}
             {buttons.length > 0 && (
-              <div className="flex gap-6 items-center flex-wrap mt-6">
+              <div className="mt-9 flex flex-wrap gap-4">
                 {buttons.map((button, index) => (
                   <button
                     key={index}
                     onClick={button.onClick}
-                    className={`rounded-lg px-6 py-3 font-medium transition-all ${
-                      button.variant === "secondary"
-                        ? "bg-white text-black hover:bg-gray-100"
-                        : "bg-[#008521] text-white hover:bg-[#006b1a]"
-                    }`}
+                    className="group inline-flex items-center gap-4 bg-[#211B17] px-7 py-4 font-manrope text-sm font-medium text-[#F4EDE2] transition-all duration-300 hover:bg-[#C56B4E]"
                   >
                     {button.label}
+
                     {button.showArrow !== false && (
-                      <GoArrowRight className="inline ml-2" />
+                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#F4EDE2] text-[#211B17] transition-transform duration-300 group-hover:translate-x-1">
+                        <GoArrowRight size={14} />
+                      </span>
                     )}
                   </button>
                 ))}
               </div>
             )}
 
-            {/* Highlights */}
-            {highlights.length > 0 && (
-              <div className="mt-8 flex flex-wrap gap-14 text-white">
-                {highlights.map(({ icon: Icon, title, subtitle }, index) => (
-                  <div
-                    key={title}
-                    className={`flex flex-col items-center gap-3 text-center text-white ${
-                      index !== highlights.length - 1
-                        ? "border-black/20 pr-6"
-                        : ""
-                    }`}
-                  >
-                    <Icon size={28} />
-                    <p className="text-sm">
-                      {title}
-                      <br />
-                      {subtitle}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-
+            {/* Values */}
             {values.length > 0 && (
-              <div className="mt-8 flex flex-wrap gap-4">
+              <div className="mt-8 flex flex-wrap gap-3">
                 {values.map((title) => (
                   <div
                     key={title}
-                    className="flex items-center gap-2 rounded-full border border-[#E7E7E7] bg-[#606E32] px-4 py-3 text-white"
+                    className="flex items-center gap-2 border border-[#D8CCC0] bg-white/40 px-4 py-3"
                   >
-                    <BsCheck2 className="text-lg flex-shrink-0" />
-                    <span className="text-sm font-medium">{title}</span>
+                    <BsCheck2
+                      className="shrink-0"
+                      style={{ color: badgeColor }}
+                    />
+
+                    <span className="font-manrope text-xs text-[#514740]">
+                      {title}
+                    </span>
                   </div>
                 ))}
               </div>
             )}
 
-            {/* Additional Content */}
+            {/* Highlights */}
+            {highlights.length > 0 && (
+              <div className="mt-10 flex flex-wrap gap-8  pt-6">
+                {highlights.map(({ icon: Icon, title, subtitle }) => (
+                  <div key={title} className="flex items-center gap-3">
+                    {Icon && <Icon size={22} style={{ color: badgeColor }} />}
+
+                    <div>
+                      <p className="font-manrope text-sm font-medium text-[#211B17]">
+                        {title}
+                      </p>
+
+                      {subtitle && (
+                        <p className="mt-0.5 font-manrope text-xs text-[#8A7D74]">
+                          {subtitle}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {additionalContent && (
               <div className="mt-8">{additionalContent}</div>
             )}
           </motion.div>
+        </div>
+      </div>
+
+      {/* IMAGE LABEL */}
+      <div className="absolute bottom-7 right-7 z-20 hidden md:block">
+        <div className="flex items-center gap-3 border border-white/30 bg-black/20 px-4 py-3 backdrop-blur-md">
+          <span
+            className="h-1.5 w-1.5 rounded-full"
+            style={{ backgroundColor: badgeColor }}
+          />
+
+          <span className="font-ibm-mono text-[8px] uppercase tracking-[0.2em] text-white/80">
+            Pure / Botanical / Natural
+          </span>
+        </div>
+      </div>
+
+      {/* Bottom information */}
+      <div className="absolute bottom-0 left-0 z-20 hidden w-[43%] border-t border-[#D8CCC0] lg:block">
+        <div className="flex items-center justify-between px-12 py-4 xl:px-16">
+          <span className="font-ibm-mono text-[8px] uppercase tracking-[0.2em] text-[#91847A]">
+            7ALP's / Natural wellness
+          </span>
+
+          <div className="flex items-center gap-3">
+            <span className="h-1 w-1 rounded-full bg-[#C56B4E]" />
+
+            <span className="font-ibm-mono text-[8px] uppercase tracking-[0.2em] text-[#91847A]">
+              Farm to formulation
+            </span>
+
+            <GoArrowUpRight size={12} className="text-[#C56B4E]" />
+          </div>
         </div>
       </div>
     </section>

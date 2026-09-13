@@ -12,12 +12,13 @@ const GlobalTradeHero = () => {
     <HeroSection
       backgroundImage="https://res.cloudinary.com/dasvdkncm/image/upload/v1784523969/61766_b4ssw2.jpg"
       badgeText="Global trade · export division"
-      badgeColor="white"
-      heading="Indian roots. Worldwide reach."
-      description="From our facility in Udaipur, 7ALP ships single-origin Ayurvedic powders to retailers, distributors and importers across five regions — with the documentation, traceability and cold-chain care that international trade demands."
+      badgeColor="#C56B4E"
+      heading="Indian roots."
+      headingHighlight="Worldwide reach."
+      description="From carefully sourced Indian botanicals to international markets, we make premium herbal ingredients easier to source, trust, and bring to customers around the world."
       buttons={buttons}
-      textColor="text-white"
-      overlayColor="bg-black/20"
+      containerHeight="min-h-[720px] h-screen"
+      textColor="text-[#211B17]"
     />
   );
 };

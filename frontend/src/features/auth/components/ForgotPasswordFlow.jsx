@@ -31,7 +31,9 @@ const ForgotPasswordFlow = ({
       await forgotPasswordFn(email);
       setStep("otp");
     } catch (err) {
-      setError(err?.response?.data?.message || "Failed to send OTP. Try again.");
+      setError(
+        err?.response?.data?.message || "Failed to send OTP. Try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -93,29 +95,37 @@ const ForgotPasswordFlow = ({
   }
 
   if (step === "otp") {
-    return (
-      <AuthCard>
-        <AuthHeader
-          title="Enter Verification Code"
-          subtitle={`We sent a 6-digit code to ${email}`}
-        />
-        <div className="space-y-6">
-          <OTPInput onChange={setOtp} />
-          {error && <p className="text-center text-sm text-red-600">{error}</p>}
-          <AuthButton onClick={handleVerifyOtp} disabled={loading}>
-            {loading ? "Verifying..." : "Verify Code"}
-          </AuthButton>
+    <AuthCard>
+      <AuthHeader
+        title="Enter the code."
+        subtitle={`We sent a 6-digit code to ${email}`}
+      />
+
+      <div className="space-y-8">
+        <OTPInput onChange={setOtp} />
+
+        {error && (
+          <p className="text-center font-manrope text-xs text-red-600">
+            {error}
+          </p>
+        )}
+
+        <AuthButton onClick={handleVerifyOtp} disabled={loading}>
+          {loading ? "Verifying..." : "Verify Code"}
+        </AuthButton>
+
+        <div className="border-t border-[#D8CCC0] pt-6 text-center">
           <button
             type="button"
             onClick={handleSendOtp}
             disabled={loading}
-            className="w-full text-center text-sm font-semibold text-[#0F6B3E] hover:underline"
+            className="font-ibm-mono text-[9px] uppercase tracking-[0.2em] text-[#211B17] underline decoration-[#C56B4E] underline-offset-4"
           >
             Resend Code
           </button>
         </div>
-      </AuthCard>
-    );
+      </div>
+    </AuthCard>;
   }
 
   return (

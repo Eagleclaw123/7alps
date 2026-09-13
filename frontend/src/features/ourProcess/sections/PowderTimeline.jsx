@@ -8,38 +8,40 @@ const steps = [
     description:
       "We work with named growers and harvest each herb at its peak — bhringraj before it flowers, amla when fully ripe. One herb, one origin, every time.",
     image:
-      "https://res.cloudinary.com/dasvdkncm/image/upload/v1782816710/1f4bbdb06af238b765a3294bd707d4dc1468270e_q2bwoq.png",
+      "https://miro.medium.com/v2/resize%3Afit%3A1400/1%2A7ktvBf-X5rVyGJXcn1tmPg.png",
     info: [
       { label: "Origin", value: "Named farms" },
       { label: "Harvest", value: "At peak only" },
     ],
   },
+
   {
     number: "02",
-    label: "CLean",
+    label: "Clean",
     title: "Cleaning & sorting",
     description:
       "Each lot is hand-sorted to remove stalks, stones and grit, then triple-washed in filtered water. Anything that isn't the herb itself gets taken out here.",
     image:
-      "https://res.cloudinary.com/dasvdkncm/image/upload/v1782816711/f475961aa98a0b9edcba18dad84155dd103eb0ad_eliuuw.png",
+      "https://www.agroherbal.net/assets/images/slider/slide-img/2-1-960x741.jpg",
     info: [
-      { label: "Origin", value: "Hand-sorted" },
-      { label: "Harvest", value: "Triple, filtered" },
+      { label: "Method", value: "Hand-sorted" },
+      { label: "Process", value: "Triple, filtered" },
     ],
   },
+
   {
     number: "03",
     label: "Dry",
     title: "Low-heat shade-drying",
     description:
-      "Herbs dry slowly on racks below 40 °C, out of direct sun. It takes longer, but it keeps the volatile oils and active compounds that high-heat drying destroys.",
-    image:
-      "https://res.cloudinary.com/dasvdkncm/image/upload/v1782816711/012bdd6071c189861fca2d1e8482659dd34f333b_vkzhtk.png",
+      "Herbs dry slowly on racks below 40 °C, out of direct sun. It takes longer, but it keeps the volatile oils and active compounds that high-heat drying destroys.",
+    image: "https://teriin.org/sites/default/files/inline-images/NMHS_1.jpg",
     info: [
-      { label: "Origin", value: "< 40 °C" },
-      { label: "Harvest", value: "24–48 hrs" },
+      { label: "Temperature", value: "< 40 °C" },
+      { label: "Duration", value: "24–48 hrs" },
     ],
   },
+
   {
     number: "04",
     label: "Grind",
@@ -47,12 +49,13 @@ const steps = [
     description:
       "Dried herbs are ground in small batches on low-RPM stone mills. Slow grinding keeps the powder cool, so heat from friction never cooks the herb a second time.",
     image:
-      "https://images.unsplash.com/photo-1556228720-195a672e8a03?q=80&w=900&auto=format&fit=crop",
+      "https://ueeshop.ly200-cdn.com/u_file/UPAW/UPAW894/2409/products/02/7df1926c13.png",
     info: [
-      { label: "Origin", value: "Low-RPM stone" },
-      { label: "Harvest", value: "Small lots" },
+      { label: "Method", value: "Low-RPM stone" },
+      { label: "Production", value: "Small lots" },
     ],
   },
+
   {
     number: "05",
     label: "Sieve",
@@ -60,12 +63,13 @@ const steps = [
     description:
       "Every powder passes through fine 80-mesh sieves so the texture is silky and consistent — no gritty bits, no clumps. Oversized particles go back to be reground.",
     image:
-      "https://res.cloudinary.com/dasvdkncm/image/upload/v1782816710/c57e10a175ab7f474d1ccc9c1e21fb49d7cd8238_yk0kap.png",
+      "https://butterflyayurveda.com/cdn/shop/files/vibro-shifter-2_e5178d93-2838-43e8-893e-f7706bb067bb.png?v=1718364719&width=3840",
     info: [
-      { label: "Origin", value: "80-mesh" },
-      { label: "Harvest", value: "Until uniform" },
+      { label: "Mesh", value: "80-mesh" },
+      { label: "Result", value: "Uniform" },
     ],
   },
+
   {
     number: "06",
     label: "Blend",
@@ -73,25 +77,26 @@ const steps = [
     description:
       "For multi-herb formulas, graded powders are weighed to exact ratios and blended slowly until perfectly even — so every spoonful is the same as the last.",
     image:
-      "https://res.cloudinary.com/dasvdkncm/image/upload/v1782816710/b7b02e134f78b096d593731d0b94c7037ef5d3a2_es62yf.png",
+      "https://www.lebenformulation.com/Images/products/herbal/manual_hand_blending.png",
     info: [
-      { label: "Origin", value: "Weighed exact" },
-      { label: "Harvest", value: "Slow, even" },
+      { label: "Method", value: "Exact ratios" },
+      { label: "Process", value: "Slow, even" },
     ],
   },
+
   {
     number: "07",
     label: "Test",
     title: "Lab-test & verify",
     description:
       "Each batch is tested for purity, moisture, microbial safety and heavy metals before it's cleared. Nothing ships without a passing certificate of analysis.",
-    image:
-      "https://res.cloudinary.com/dasvdkncm/image/upload/v1782816712/76561b782194a728acc60e18736d701a7d6ec9ca_wcokg3.png",
+    image: "https://www.kelvinlabs.in/images/cctv.jpg",
     info: [
-      { label: "Origin", value: "Metals · microbes" },
-      { label: "Harvest", value: "COA per lot" },
+      { label: "Testing", value: "Metals · microbes" },
+      { label: "Verification", value: "COA per lot" },
     ],
   },
+
   {
     number: "08",
     label: "Pack",
@@ -99,114 +104,187 @@ const steps = [
     description:
       "Cleared powder is sealed in airtight, light-proof packaging within hours, then stamped with its lot code and dispatch date — so you can trace it right back to the field.",
     image:
-      "https://res.cloudinary.com/dasvdkncm/image/upload/v1782816710/132cb35127bd0d9d0b1116d1a68f1eccd2eecd1e_jxadbd.png",
+      "https://s.alicdn.com/@sc04/kf/Hc598422e4b5b4a9797ed160078535fbcZ/High-Speed-Automatic-Small-Food-Bagging-Fine-Herbal-Corn-Milk-Rice-Matcha-Tea-Powder-Vffs-Packaging-Machine-Professing-Line.jpg",
     info: [
-      { label: "Origin", value: "Airtight, opaque" },
-      { label: "Harvest", value: "Lot + date" },
+      { label: "Packaging", value: "Airtight, opaque" },
+      { label: "Traceability", value: "Lot + date" },
     ],
   },
 ];
-
 const PowderTimeline = () => {
   return (
-    <section className="bg-[#C8D7C2] py-16 px-6 xl:px-0">
-      <div className="mx-auto max-w-5xl">
+    <section className="bg-[#EAE0D4] px-5 py-24 sm:px-8 lg:py-32 xl:px-16">
+      <div className="mx-auto max-w-[1500px]">
+        {/* Intro */}
         <motion.div
-          className="max-w-xl space-y-4 mx-auto text-center"
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 25 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
+          transition={{
+            duration: 0.8,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          className="grid gap-8 border-b border-[#CFC1B4] pb-12 lg:grid-cols-[1fr_0.65fr] lg:items-end"
         >
-          <div className="flex items-center justify-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-[#047B22]" />
-            <p className="font-ibm-mono text-[13px] font-semibold uppercase tracking-[0.2em] text-[#047B22] sm:text-sm">
-              The eight steps
-            </p>
+          <div>
+            <div className="mb-6 flex items-center gap-3">
+              <span className="font-ibm-mono text-[10px] uppercase tracking-[0.3em] text-[#A85F43]">
+                02
+              </span>
+              <span className="h-px w-10 bg-[#C56B4E]" />
+
+              <span className="font-ibm-mono text-[9px] uppercase tracking-[0.3em] text-[#C56B4E]">
+                The eight steps
+              </span>
+            </div>
+
+            <h2 className="max-w-4xl font-manrope text-[clamp(3.5rem,6vw,6.5rem)] font-medium leading-[1.0] tracking-[-0.075em] text-[#211B17]">
+              From field
+              <br />
+              <span className="font-normal text-[#C56B4E]">
+                to fine powder.
+              </span>
+            </h2>
           </div>
 
-          <h2 className="font-semibold text-[26px] leading-tight sm:text-[30px] md:text-[38px] xl:text-[42px]">
-            From a field of herbs to a fine, true powder
-          </h2>
-
-          <p className="text-[14px] leading-6 sm:leading-7 text-gray-600 sm:text-[15px] md:text-[18px] xl:text-[20px]">
+          <p className="max-w-md font-manrope text-sm leading-7 text-[#756A62] md:text-base">
             Follow a single batch through everything we do to it — and
             everything we deliberately don't.
           </p>
         </motion.div>
 
         {/* Timeline */}
-        <div className="relative mt-12 sm:mt-16">
-          {/* Vertical line: left-aligned on mobile, centered on desktop */}
-          <div className="absolute bottom-0 top-0 left-4 w-px bg-[#0E2C16]/30 sm:left-1/2 sm:-translate-x-1/2" />
+        <div className="relative mt-16 lg:mt-24">
+          {/* Connecting line */}
+          <div className="absolute bottom-0 left-[22px] top-0 w-px bg-[#BDAFA2] lg:left-1/2 lg:-translate-x-1/2" />
 
-          <div className="space-y-10 sm:space-y-14">
-            {steps.map((step, i) => {
-              const isEven = i % 2 === 0;
+          <div className="space-y-16 lg:space-y-28">
+            {steps.map((step, index) => {
+              const isEven = index % 2 === 0;
+
               return (
-                <div key={step.number} className="relative">
-                  {/* Marker dot with step number */}
-                  <div className="absolute left-4 top-2 z-10 flex h-8 w-8 -translate-x-1/2 items-center justify-center rounded-full border-3 border-[#8BA580] bg-white sm:left-1/2 sm:h-16 sm:w-16">
-                    <span className="font-ibm-mono text-xs font-semibold text-[#0E2C16] sm:text-sm">
+                <motion.article
+                  key={step.number}
+                  initial={{
+                    opacity: 0,
+                    y: 35,
+                  }}
+                  whileInView={{
+                    opacity: 1,
+                    y: 0,
+                  }}
+                  viewport={{
+                    once: true,
+                    margin: "-80px",
+                  }}
+                  transition={{
+                    duration: 0.75,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                  className="relative"
+                >
+                  {/* Timeline marker */}
+                  <div className="absolute left-[22px] top-5 z-10 flex h-11 w-11 -translate-x-1/2 items-center justify-center rounded-full border border-[#C56B4E] bg-[#EAE0D4] lg:left-1/2 lg:h-14 lg:w-14">
+                    <span className="font-ibm-mono text-[9px] tracking-[0.1em] text-[#C56B4E]">
                       {step.number}
                     </span>
                   </div>
 
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6 }}
-                    className={`flex w-full pl-12 sm:pl-0 ${
-                      isEven ? "sm:justify-start" : "sm:justify-end"
+                  <div
+                    className={`grid pl-12 lg:grid-cols-2 lg:gap-16 lg:pl-0 ${
+                      isEven ? "" : "lg:[direction:rtl]"
                     }`}
                   >
+                    {/* Image */}
                     <div
-                      className={`w-full sm:w-[calc(50%-32px)] ${
-                        isEven ? "sm:pr-8" : "sm:pl-8"
+                      className={`overflow-hidden lg:[direction:ltr] ${
+                        isEven ? "lg:pr-8" : "lg:pl-8"
                       }`}
                     >
-                      <div className="overflow-hidden rounded-2xl bg-white shadow-sm p-4">
+                      <div className="group relative aspect-[4/3] overflow-hidden bg-[#D8CCC0]">
                         <img
                           src={step.image}
                           alt={step.title}
-                          className="h-48 w-full object-cover sm:h-48"
+                          className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
                         />
 
-                        <div className="py-5">
-                          <p className="font-ibm-mono text-xs font-semibold uppercase tracking-wide text-gray-500 sm:text-sm">
-                            Step {step.number} · {step.label}
-                          </p>
+                        <div className="absolute inset-0 bg-[#211B17]/5 transition-colors duration-500 group-hover:bg-transparent" />
 
-                          <h3 className="mt-2 text-xl font-semibold text-black sm:text-2xl">
-                            {step.title}
-                          </h3>
-
-                          <p className="mt-3 text-sm leading-6 text-gray-600 sm:text-[15px]">
-                            {step.description}
-                          </p>
-
-                          <div className="mt-5 pt-5 block sm:hidden lg:grid grid grid-cols-2 gap-4 border-t border-gray-200 ">
-                            {step.info.map((item) => (
-                              <div key={item.label}>
-                                <p className="font-ibm-mono text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                  {item.label}
-                                </p>
-                                <p className="mt-1 text-base font-semibold text-black sm:text-[16px]">
-                                  {item.value}
-                                </p>
-                              </div>
-                            ))}
-                          </div>
+                        <div className="absolute bottom-5 left-5">
+                          <span className="bg-[#F4EDE2]/90 px-3 py-2 font-ibm-mono text-[8px] uppercase tracking-[0.2em] text-[#514740] backdrop-blur-sm">
+                            Step {step.number}
+                          </span>
                         </div>
                       </div>
                     </div>
-                  </motion.div>
-                </div>
+
+                    {/* Content */}
+                    <div
+                      className={`flex items-center lg:[direction:ltr] ${
+                        isEven ? "lg:pl-8" : "lg:pr-8"
+                      }`}
+                    >
+                      <div className="pt-7 lg:pt-0">
+                        <span className="font-ibm-mono text-[9px] uppercase tracking-[0.25em] text-[#C56B4E]">
+                          {step.label}
+                        </span>
+
+                        <h3 className="mt-4 max-w-lg font-manrope text-3xl font-medium leading-[0.98] tracking-[-0.055em] text-[#211B17] md:text-4xl">
+                          {step.title}
+                        </h3>
+
+                        <p className="mt-5 max-w-lg font-manrope text-sm leading-7 text-[#756A62] md:text-base">
+                          {step.description}
+                        </p>
+
+                        {/* Info */}
+                        <div className="mt-8 grid max-w-lg grid-cols-2 border-t border-[#CFC1B4]">
+                          {step.info.map((item) => (
+                            <div
+                              key={item.label}
+                              className="border-b border-[#CFC1B4] py-4 first:mr-4"
+                            >
+                              <p className="font-ibm-mono text-[8px] uppercase tracking-[0.2em] text-[#91847A]">
+                                {item.label}
+                              </p>
+
+                              <p className="mt-2 font-manrope text-sm font-medium text-[#211B17]">
+                                {item.value}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.article>
               );
             })}
           </div>
         </div>
+
+        {/* Closing statement */}
+        <motion.div
+          initial={{ opacity: 0, y: 25 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="mt-24 border-t border-[#CFC1B4] pt-10 lg:mt-32"
+        >
+          <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+            <p className="max-w-2xl font-manrope text-2xl font-medium leading-tight tracking-[-0.04em] text-[#211B17] md:text-3xl">
+              Eight deliberate steps.
+              <br />
+              <span className="font-normal text-[#756A62]">
+                One honest ingredient.
+              </span>
+            </p>
+
+            <span className="font-ibm-mono text-[8px] uppercase tracking-[0.25em] text-[#91847A]">
+              Farm / Process / Formula
+            </span>
+          </div>
+        </motion.div>
       </div>
     </section>
   );

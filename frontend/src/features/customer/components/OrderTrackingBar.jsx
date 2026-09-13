@@ -2,77 +2,99 @@ import { Check, X } from "lucide-react";
 
 const OrderTrackingBar = ({ status, TRACKING_STEPS }) => {
   const isCancelled = status === "Cancelled";
+
   const currentIndex = TRACKING_STEPS.indexOf(status);
-  // If status isn't a tracking step (e.g. Cancelled), fall back to -1 so
-  // nothing after "Confirmed" appears complete.
+
+  // Keep existing fallback behavior for non-tracking statuses.
   const activeIndex = currentIndex === -1 ? 0 : currentIndex;
 
   return (
-    <div className="w-full px-1 py-2">
-      <div className="flex items-center">
+    <div className="w-full py-3">
+      <div className="flex items-start">
         {TRACKING_STEPS.map((step, index) => {
           const isCompleted = !isCancelled && index < activeIndex;
+
           const isCurrent = !isCancelled && index === activeIndex;
+
           const isLast = index === TRACKING_STEPS.length - 1;
 
-          const circleState = isCancelled
-            ? index === 0
-              ? "cancelled-done"
-              : "cancelled-pending"
-            : isCompleted || isCurrent
-              ? "done"
-              : "pending";
+          const isCancelledOrigin = isCancelled && index === 0;
+
+          const isPending = !isCompleted && !isCurrent && !isCancelledOrigin;
 
           return (
             <div
               key={step}
-              className={`flex items-center ${isLast ? "" : "flex-1"}`}
+              className={`flex min-w-0 items-start ${isLast ? "" : "flex-1"}`}
             >
-              <div className="flex flex-col items-center">
+              {/* Step */}
+              <div className="flex min-w-[58px] flex-col items-center">
+                {/* Marker */}
                 <div
-                  className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-                    circleState === "done"
-                      ? "border-[#047B22] bg-[#047B22] text-white"
-                      : circleState === "cancelled-done"
-                        ? "border-red-500 bg-red-500 text-white"
-                        : circleState === "cancelled-pending"
-                          ? "border-red-200 bg-white text-red-200"
-                          : "border-gray-200 bg-white text-gray-300"
-                  }`}
+                  className={`
+                    relative flex h-9 w-9 items-center justify-center
+                    border transition-all duration-500
+                    ${
+                      isCompleted || isCurrent
+                        ? "border-[#211B17] bg-[#211B17] text-[#F4EDE2]"
+                        : isCancelledOrigin
+                          ? "border-[#C56B4E] bg-[#C56B4E] text-white"
+                          : "border-[#D8CCC0] bg-[#F4EDE2] text-[#91847A]"
+                    }
+                  `}
                 >
-                  {circleState === "done" && <Check className="h-3.5 w-3.5" />}
-                  {circleState === "cancelled-done" && (
-                    <X className="h-3.5 w-3.5" />
+                  {isCompleted || isCurrent ? (
+                    <Check className="h-3.5 w-3.5" strokeWidth={1.8} />
+                  ) : isCancelledOrigin ? (
+                    <X className="h-3.5 w-3.5" strokeWidth={1.8} />
+                  ) : (
+                    <span className="h-1.5 w-1.5 rounded-full bg-current" />
                   )}
-                  {(circleState === "pending" ||
-                    circleState === "cancelled-pending") && (
-                    <span className="h-2 w-2 rounded-full bg-current" />
-                  )}
+
+                  {/* Current status indicator */}
+                  {isCurrent && !isCancelled ? (
+                    <span className="absolute -right-1 -top-1 h-2 w-2 bg-[#C56B4E]" />
+                  ) : null}
                 </div>
+
+                {/* Label */}
                 <span
-                  className={`mt-1.5 whitespace-nowrap text-[11px] font-medium ${
-                    circleState === "done"
-                      ? "text-[#047B22]"
-                      : circleState === "cancelled-done"
-                        ? "text-red-500"
-                        : "text-gray-400"
-                  }`}
+                  className={`
+                    mt-3 whitespace-nowrap
+                    font-ibm-mono text-[8px]
+                    uppercase tracking-[0.14em]
+                    transition-colors duration-300
+                    ${
+                      isCompleted || isCurrent
+                        ? "text-[#211B17]"
+                        : isCancelledOrigin
+                          ? "text-[#C56B4E]"
+                          : "text-[#91847A]"
+                    }
+                  `}
                 >
                   {isCancelled && index === 0 ? "Cancelled" : step}
                 </span>
               </div>
 
-              {!isLast && (
-                <div
-                  className={`mx-2 h-0.5 flex-1 rounded-full ${
-                    isCancelled
-                      ? "bg-red-100"
-                      : index < activeIndex
-                        ? "bg-[#047B22]"
-                        : "bg-gray-200"
-                  }`}
-                />
-              )}
+              {/* Connector */}
+              {!isLast ? (
+                <div className="relative mx-3 mt-[18px] h-px flex-1 overflow-hidden bg-[#D8CCC0]">
+                  <div
+                    className={`
+                      absolute inset-y-0 left-0 transition-all
+                      duration-700
+                      ${
+                        isCancelled
+                          ? "w-0 bg-[#C56B4E]"
+                          : index < activeIndex
+                            ? "w-full bg-[#211B17]"
+                            : "w-0"
+                      }
+                    `}
+                  />
+                </div>
+              ) : null}
             </div>
           );
         })}
