@@ -143,6 +143,26 @@
     margin-left: 8px;
     vertical-align: middle;
   }
+  .step {
+    display: flex;
+    gap: 12px;
+    margin: 14px 0;
+    break-inside: avoid;
+  }
+  .step .num {
+    flex: 0 0 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #047B22;
+    color: white;
+    font-size: 12px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .step .body { flex: 1; }
+  .step .body h3 { margin-top: 0; }
 </style>
 </head>
 <body>
@@ -275,7 +295,7 @@
   <li><b>Wishlist<span class="badge-new">new</span></b> — heart icon on any product card (listing pages, product detail, related products); toggles instantly, redirects a guest to login. Dedicated <code>/customer/wishlist</code> page lists everything saved.</li>
   <li><b>Cart</b> — guest cart in localStorage; merges into the server cart automatically on login. Decreasing quantity below 1 now removes the item instead of silently doing nothing<span class="badge-fixed">fixed</span>.</li>
   <li><b>Buy Now<span class="badge-fixed">fixed</span></b> — purchasing directly from a product page no longer touches the cart at all; checkout shows only that one item, and the customer's actual cart is left completely untouched.</li>
-  <li><b>Checkout</b> — shipping address form with an embedded Google Maps picker, auto-filled from the customer's default saved address; choice of <b>Cash on Delivery</b> or <b>Pay Online (Razorpay)</b>. If the resolved delivery state isn't on the admin's serviceable-states allow-list, a red banner explains the order can't be placed and the Place Order/Pay button disables<span class="badge-new">new</span> — see Section 8.</li>
+  <li><b>Checkout</b> — shipping address form with an embedded Google Maps picker, auto-filled from the customer's default saved address; choice of <b>Cash on Delivery</b> or <b>Pay Online (Razorpay)</b> — COD only shown at all if the admin has it enabled<span class="badge-new">new</span> (Section 9). If the resolved delivery state isn't on the admin's serviceable-states allow-list, a red banner explains the order can't be placed and the Place Order/Pay button disables<span class="badge-new">new</span> — see Section 8.</li>
   <li><b>Orders</b> — history with status, itemized breakdown (product photo + expected delivery date per item), shipping address, broadened search (ID/product/status/address/date), and an "Order Again" button that re-adds every item from a past order to the cart<span class="badge-new">new</span>.</li>
   <li><b>Profile</b> — editable name only (email is the verified account identity set at signup, and is no longer editable from the profile page<span class="badge-fixed">changed</span>; mobile was already locked); a real address book (add/edit/delete/set-default), each entry fillable via the same map picker. The only (or first) saved address is now always guaranteed to be the default<span class="badge-fixed">fixed</span>.</li>
   <li><b>Reviews</b> — logged-in customers can rate &amp; review a product from the product page, and are now also prompted with a "Rate this product" link on delivered order items<span class="badge-new">new</span> (skipped once already reviewed); reviews are held as <code>Pending</code> until an admin publishes them.</li>
@@ -283,7 +303,7 @@
 
 <h3>Admin console</h3>
 <ul>
-  <li><b>Dashboard</b> — live counts: customers, orders, products, revenue; plus a <b>Delivery Settings</b> card to set the expected-delivery window (in days), and a <b>Serviceable States</b> card<span class="badge-new">new</span> to restrict which Indian states/UTs the store accepts orders from — see Section 8.</li>
+  <li><b>Dashboard</b> — live counts: customers, orders, products, revenue; plus a <b>Delivery Settings</b> card, a <b>Cash on Delivery</b> toggle<span class="badge-new">new</span> (Section 9), and a <b>Serviceable States</b> card<span class="badge-new">new</span> to restrict which Indian states/UTs the store accepts orders from — see Section 8.</li>
   <li><b>Products</b> — full CRUD, multiple variants per product (label/price/MRP/stock), multi-image upload to Cloudflare R2, plus an admin-set display rating (average + count)<span class="badge-new">new</span> — see Section 5.</li>
   <li><b>Categories</b> — add/edit/activate/delete; delete is blocked if products still reference the category, with a clear error explaining why.</li>
   <li><b>Orders<span class="badge-fixed">rebuilt</span></b> — every order (storefront and B2B) in one place; now paginated and searched server-side (order ID, customer, product, address, payment, status) instead of fetching the entire order collection on every load; inline status changes (Confirmed &rarr; Processing &rarr; Shipped &rarr; Delivered/Cancelled); expected delivery date per order.</li>
@@ -310,7 +330,7 @@
 <p>Two related bugs were fixed as part of this: the product detail page's star rating used to be hardcoded to 5 stars for every product regardless of its actual rating, and the catalog's "Sort by Rating" was a silent no-op because the backend had neither a rating field to sort by nor a query-param-aware sort at all.</p>
 
 <h2 class="section">6. Payments</h2>
-<p>Cash on Delivery is the default and always available. <b>Razorpay is fully live and has been verified with a real completed test transaction</b> — order creation, the checkout modal, signature verification, and order confirmation all work end to end. If <code>RAZORPAY_KEY_ID</code>/<code>RAZORPAY_KEY_SECRET</code> in <code>backend/.env</code> are ever blanked out, attempting to pay online returns a clear "not configured yet" error rather than failing silently — it never crashes the server either way.</p>
+<p>Cash on Delivery is on by default and can be switched off entirely by the admin<span class="badge-new">new</span> (Section 9), leaving Pay Online as the only option. <b>Razorpay is fully live and has been verified with a real completed test transaction</b> — order creation, the checkout modal, signature verification, and order confirmation all work end to end. If <code>RAZORPAY_KEY_ID</code>/<code>RAZORPAY_KEY_SECRET</code> in <code>backend/.env</code> are ever blanked out, attempting to pay online returns a clear "not configured yet" error rather than failing silently — it never crashes the server either way.</p>
 <div class="callout info">
   <b>How it works:</b> the backend computes the charge amount itself — from the customer's live server-side cart for a normal checkout, or from the specific item(s) requested for a Buy Now purchase — it never trusts a client-supplied amount, which is the standard payment-security practice (a client could otherwise tamper with what it pays). <code>POST /customer/payments/razorpay-order</code> creates the Razorpay order sized to that amount; the frontend opens Razorpay's Standard Checkout modal with it; on success, <code>POST /customer/payments/razorpay-verify</code> checks the HMAC-SHA256 signature Razorpay returns before creating the real order, decrementing stock, and (for a cart checkout) clearing the cart.
 </div>
@@ -339,7 +359,7 @@
 <h2 class="section">8. Serviceable States (Delivery Area Restriction)<span class="badge-new">new</span></h2>
 <p>The admin can restrict which Indian states/UTs the store accepts orders from. When the restriction is off (the default), orders are accepted from anywhere, exactly as before this feature existed.</p>
 <h3>Admin configuration</h3>
-<p>On the <code>/admin</code> dashboard, the <b>Serviceable States</b> card lets the admin toggle "Restrict orders to selected states" and check off any combination of the 28 states + 8 union territories. Turning the toggle on is blocked (both client- and server-side) until at least one state is checked, so the admin can't accidentally lock out every customer with an empty allow-list.</p>
+<p>On the <code>/admin</code> dashboard, the <b>Serviceable States</b> card lets the admin toggle "Restrict orders to selected states" and check off any combination of the 28 states + 8 union territories. Turning the toggle on is blocked (both client- and server-side) until at least one state is checked, so the admin can't accidentally lock out every customer with an empty allow-list. A checked box means "we ship here" — unchecked blocks orders from that state. The card also shows Check-all/Clear-all shortcuts, tints checked rows, and a live "Shipping to X of Y — Z blocked" summary, added after an early test accidentally left nearly every state checked because the original copy read ambiguously.</p>
 <h3>Customer enforcement</h3>
 <p>The restriction is enforced at two layers:</p>
 <ul>
@@ -357,7 +377,28 @@
   <tr><td>Shared logic</td><td><code>backend/utils/serviceability.js</code> — one <code>assertStateServiceable()</code> helper used identically by the COD and both Razorpay steps, so all three paths can never drift out of sync</td></tr>
 </table>
 
-<h2 class="section">9. Testing Reference</h2>
+<h2 class="section">9. Cash on Delivery Toggle<span class="badge-new">new</span></h2>
+<p>The admin can turn Cash on Delivery off entirely, leaving Pay Online (Razorpay) as the only checkout option — for example while COD fulfillment isn't ready in a given phase of the rollout. Default is on, matching all prior behavior.</p>
+<div class="step"><div class="num">1</div><div class="body">
+<h3>Toggle it</h3>
+<p>The <b>Cash on Delivery</b> card on the <code>/admin</code> dashboard (next to Delivery Settings) has a single "Accept Cash on Delivery" switch. Saving calls the same <code>PATCH /api/v1/admin/settings</code> endpoint used by Delivery Settings and Serviceable States, extended with one more independent field, <code>codEnabled</code>.</p>
+</div></div>
+<div class="step"><div class="num">2</div><div class="body">
+<h3>Checkout reacts immediately</h3>
+<p>When off, the Cash on Delivery radio option is hidden entirely at <code>/checkout</code> — a customer only ever sees Pay Online. If a customer had COD selected before the setting changed mid-session, the page silently switches their selection to Pay Online rather than leaving a hidden, stale choice active.</p>
+</div></div>
+<div class="step"><div class="num">3</div><div class="body">
+<h3>Server-side, not just hidden in the UI</h3>
+<p><code>POST /customer/orders</code> — the only endpoint that ever creates a COD order (Razorpay orders are created and verified through its own separate routes) — checks <code>Settings.codEnabled</code> and returns <code>400</code> with "Cash on Delivery is currently unavailable. Please pay online instead." if it's off, so the restriction can't be bypassed by calling the API directly even while the toggle is off.</p>
+</div></div>
+<table>
+  <tr><th>Field</th><th>Detail</th></tr>
+  <tr><td>Data model</td><td><code>Settings.codEnabled</code> (Boolean, default <code>true</code>) — same singleton document as Delivery Settings and Serviceable States</td></tr>
+  <tr><td>Public API</td><td><code>GET /api/v1/settings/public</code> now also returns <code>codEnabled</code></td></tr>
+  <tr><td>Enforcement point</td><td><code>orderController.createOrder</code> only — Razorpay's own two-step flow (Section 8's table) is unaffected by this toggle, since it's a separate payment method entirely</td></tr>
+</table>
+
+<h2 class="section">10. Testing Reference</h2>
 <table>
   <tr><th>What</th><th>Value</th></tr>
   <tr><td>Admin login</td><td><code>7alpsadmin@7alps.com</code> / <code>7alps123</code></td></tr>
@@ -371,7 +412,7 @@
   <b>Avoid the generic <code>4111 1111 1111 1111</code> Visa test card</b> — Razorpay's test environment treats it as a foreign-issued card, and most test accounts (this one included) have international card acceptance disabled by default, so it fails with <code>international_transaction_not_allowed</code>. The Mastercard number above is domestic and works reliably.
 </div>
 
-<h2 class="section">10. Known Limitations</h2>
+<h2 class="section">11. Known Limitations</h2>
 <ul>
   <li><b>Serviceable-states matching is exact-name, not geographic</b> — a customer's typed state is compared against the admin's allow-list by string (trimmed, case-insensitive); it isn't validated against the city/pincode also on the form, so a customer could still type a served state name with a mismatched pincode. Acceptable for the current scope (a state-level, not address-level, restriction).</li>
   <li><b>Admin Quotes tab date-range filtering isn't exposed in the UI</b> — <code>GET /api/v1/admin/quotes</code> accepts <code>dateFrom</code>/<code>dateTo</code> alongside <code>status</code>, but the B2B Team page's Quotes tab UI only exposes a status dropdown (search now works correctly as of this round — that part of the earlier limitation is resolved).</li>
@@ -398,6 +439,10 @@
 
 <div class="callout info">
   <b>Serviceable states / delivery-area restriction (2026-09-13).</b> Added at the admin's request to limit which Indian states the store ships to while the business scales up gradually. Enforced identically at checkout (client-side warning) and on every order-placement API path (server-side, authoritative) — see Section 8.
+</div>
+
+<div class="callout info">
+  <b>Cash on Delivery toggle (2026-09-13).</b> A same-day follow-up request: the admin can now switch COD off entirely, leaving Pay Online as the only checkout option, enforced both by hiding the option in the UI and by rejecting <code>POST /customer/orders</code> server-side when it's off — see Section 9.
 </div>
 
 <p class="footer-note">7ALP's Platform Documentation — generated automatically from the current codebase.</p>

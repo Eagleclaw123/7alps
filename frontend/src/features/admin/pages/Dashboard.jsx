@@ -10,6 +10,7 @@ import { getDashboardStats } from "../../../shared/services/admin.service";
 import AdminDashboardVisuals from "../components/AdminDashboardVisuals";
 import DeliverySettings from "../components/DeliverySettings";
 import ServiceableStatesSettings from "../components/ServiceableStatesSettings";
+import CodSettings from "../components/CodSettings";
 
 const initialStats = {
   totalCustomers: 0,
@@ -53,6 +54,7 @@ const Dashboard = () => {
         />
       </div>
       <DeliverySettings />
+      <CodSettings />
       <ServiceableStatesSettings />
       {!loading && <AdminDashboardVisuals stats={stats} />}
     </section>

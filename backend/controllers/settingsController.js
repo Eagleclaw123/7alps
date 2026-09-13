@@ -17,6 +17,7 @@ exports.getPublicSettings = catchAsync(async (req, res, next) => {
       expectedDeliveryDays: settings.expectedDeliveryDays,
       serviceableStatesEnabled: settings.serviceableStatesEnabled,
       serviceableStates: settings.serviceableStates,
+      codEnabled: settings.codEnabled,
     },
   });
 });
@@ -33,9 +34,14 @@ exports.getSettings = catchAsync(async (req, res, next) => {
 // serviceable-states form (separate admin UI sections) can each save without
 // clobbering the other's value.
 exports.updateSettings = catchAsync(async (req, res, next) => {
-  const { expectedDeliveryDays, serviceableStatesEnabled, serviceableStates } = req.body;
+  const { expectedDeliveryDays, serviceableStatesEnabled, serviceableStates, codEnabled } = req.body;
 
-  if (expectedDeliveryDays === undefined && serviceableStatesEnabled === undefined && serviceableStates === undefined) {
+  if (
+    expectedDeliveryDays === undefined &&
+    serviceableStatesEnabled === undefined &&
+    serviceableStates === undefined &&
+    codEnabled === undefined
+  ) {
     return next(new AppError('Please provide at least one setting to update', 400));
   }
 
@@ -64,6 +70,13 @@ exports.updateSettings = catchAsync(async (req, res, next) => {
       return next(new AppError('Select at least one state before enabling this restriction', 400));
     }
     settings.serviceableStatesEnabled = serviceableStatesEnabled;
+  }
+
+  if (codEnabled !== undefined) {
+    if (typeof codEnabled !== 'boolean') {
+      return next(new AppError('codEnabled must be a boolean', 400));
+    }
+    settings.codEnabled = codEnabled;
   }
 
   await settings.save();

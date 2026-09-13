@@ -20,6 +20,13 @@ const settingsSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    // When false, Cash on Delivery is hidden at checkout and rejected
+    // server-side — customers can only pay online. Default true preserves
+    // existing behavior.
+    codEnabled: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true },
 );

@@ -164,12 +164,15 @@ const CheckoutPage = () => {
     states: [],
   });
 
+  const [codEnabled, setCodEnabled] = useState(true);
+
   const orderJustPlacedRef = useRef(false);
   const addressPrefilledRef = useRef(false);
 
   /*
-   * Admin-configured serviceable states — fetched once so we can warn the
-   * customer before they submit, not just after the server rejects it.
+   * Admin-configured serviceable states and COD availability — fetched once
+   * so we can warn/adjust the customer before they submit, not just after
+   * the server rejects it.
    */
   useEffect(() => {
     getPublicDeliverySettings()
@@ -178,6 +181,13 @@ const CheckoutPage = () => {
           enabled: Boolean(data?.data?.serviceableStatesEnabled),
           states: data?.data?.serviceableStates || [],
         });
+
+        const codAllowed = data?.data?.codEnabled !== false;
+        setCodEnabled(codAllowed);
+
+        if (!codAllowed) {
+          setPaymentMethod("Razorpay");
+        }
       })
       .catch(() => {});
   }, []);
@@ -369,6 +379,11 @@ const CheckoutPage = () => {
       setError(
         `We're currently not accepting orders in ${address.state}. Please see the delivery areas listed above.`,
       );
+      return;
+    }
+
+    if (paymentMethod === "COD" && !codEnabled) {
+      setError("Cash on Delivery is currently unavailable. Please pay online instead.");
       return;
     }
 
@@ -715,38 +730,40 @@ const CheckoutPage = () => {
                 <div className="border-t border-[#D8CCC0]">
                   {/* COD */}
 
-                  <label
-                    className={`group flex cursor-pointer items-center justify-between gap-5 border-b border-[#D8CCC0] px-5 py-6 transition-colors sm:px-6 ${
-                      paymentMethod === "COD"
-                        ? "bg-[#EAE0D4]"
-                        : "hover:bg-[#EEE5DA]"
-                    }`}
-                  >
-                    <div className="flex items-center gap-4">
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="COD"
-                        checked={paymentMethod === "COD"}
-                        onChange={() => setPaymentMethod("COD")}
-                        className="h-4 w-4 accent-[#211B17]"
-                      />
+                  {codEnabled && (
+                    <label
+                      className={`group flex cursor-pointer items-center justify-between gap-5 border-b border-[#D8CCC0] px-5 py-6 transition-colors sm:px-6 ${
+                        paymentMethod === "COD"
+                          ? "bg-[#EAE0D4]"
+                          : "hover:bg-[#EEE5DA]"
+                      }`}
+                    >
+                      <div className="flex items-center gap-4">
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          value="COD"
+                          checked={paymentMethod === "COD"}
+                          onChange={() => setPaymentMethod("COD")}
+                          className="h-4 w-4 accent-[#211B17]"
+                        />
 
-                      <div>
-                        <p className="font-manrope text-sm font-medium text-[#211B17]">
-                          Cash on Delivery
-                        </p>
+                        <div>
+                          <p className="font-manrope text-sm font-medium text-[#211B17]">
+                            Cash on Delivery
+                          </p>
 
-                        <p className="mt-1 font-manrope text-xs text-[#91847A]">
-                          Pay when your order arrives.
-                        </p>
+                          <p className="mt-1 font-manrope text-xs text-[#91847A]">
+                            Pay when your order arrives.
+                          </p>
+                        </div>
                       </div>
-                    </div>
 
-                    <span className="font-ibm-mono text-[8px] uppercase tracking-[0.16em] text-[#91847A]">
-                      COD
-                    </span>
-                  </label>
+                      <span className="font-ibm-mono text-[8px] uppercase tracking-[0.16em] text-[#91847A]">
+                        COD
+                      </span>
+                    </label>
+                  )}
 
                   {/* ONLINE */}
 

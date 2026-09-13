@@ -156,6 +156,13 @@ exports.createOrder = catchAsync(async (req, res, next) => {
 
   await assertStateServiceable(shippingAddress.state);
 
+  // This endpoint only ever creates COD orders (Razorpay has its own routes),
+  // so this is the one place that needs to check the toggle.
+  const settings = await Settings.getSingleton();
+  if (!settings.codEnabled) {
+    return next(new AppError('Cash on Delivery is currently unavailable. Please pay online instead.', 400));
+  }
+
   const session = await mongoose.startSession();
   let order;
 
