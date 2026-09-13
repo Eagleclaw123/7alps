@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>7ALP's Feature Reference</title>
+<link rel="stylesheet" href="_pdf-shared.css" />
+<style>
+  .role-badge {
+    display: inline-block;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 8px;
+    vertical-align: middle;
+    color: white;
+  }
+  .role-customer { background: #047B22; }
+  .role-admin { background: #0C447C; }
+  .role-b2b { background: #A8631B; }
+  .role-public { background: #5B5B5B; }
+  .flow-title {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #16311f;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 16px 0 4px 0;
+  }
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <div class="eyebrow">Complete Feature Reference</div>
+  <h1>7ALP's — Every<br/>Feature, Every Flow</h1>
+  <p class="lead">A single reference listing every feature across the customer storefront, admin console, and B2B wholesale portal — what each one does, exactly how a user moves through it step by step, and which backend endpoints power it.</p>
+  <div class="meta">Generated 2026-09-13 &middot; Companion to <code>7alps-platform-documentation.pdf</code> (architecture-first reference) &middot; This document is flow-first: organized by what a person does, not by code layer.</div>
+</section>
+
+<h2 class="section">Contents</h2>
+<div class="toc">
+<ol>
+  <li>How To Read This Document</li>
+  <li>Customer Storefront Features (13)</li>
+  <li>Admin Console Features (11)</li>
+  <li>B2B Wholesale Portal Features (6)</li>
+  <li>Cross-Cutting Systems (Auth, Email, Payments)</li>
+  <li>Content &amp; Marketing Pages</li>
+  <li>Full Route Map (Appendix)</li>
+</ol>
+</div>
+
+<h2 class="section">1. How To Read This Document</h2>
+<p>Every feature below is tagged with who can use it:</p>
+<p>
+  <span class="role-badge role-public">Public</span> anyone, no login &nbsp;
+  <span class="role-badge role-customer">Customer</span> requires customer login &nbsp;
+  <span class="role-badge role-admin">Admin</span> requires admin login &nbsp;
+  <span class="role-badge role-b2b">B2B</span> requires B2B member login
+</p>
+<p>Multi-step features include a numbered <b>Flow</b> — the literal sequence of clicks/screens a person goes through — followed by the API calls that happen behind the scenes. Endpoints are relative to <code>/api/v1</code> unless shown in full.</p>
+
+<h2 class="section">2. Customer Storefront Features</h2>
+
+<h3>2.1 Account: Email OTP Login &amp; Signup <span class="role-badge role-public">Public</span></h3>
+<p>One flow handles both signup and login — there's no separate "create account" page. The system tells new emails from returning ones automatically.</p>
+<div class="step"><div class="num">1</div><div class="body">
+<h3>Enter email</h3>
+<p>At <code>/customer/login</code>, the customer types their email. A new email also asks for a name at this step.</p>
+</div></div>
+<div class="step"><div class="num">2</div><div class="body">
+<h3>Verify OTP</h3>
+<p>A 6-digit OTP is emailed via Resend (<code>POST /customer/send-otp</code>). The customer enters it at <code>/customer/verify-otp</code> (<code>POST /customer/verify-otp</code>), which creates the account on first verification.</p>
+</div></div>
+<div class="step"><div class="num">3</div><div class="body">
+<h3>Add mobile (first time only)</h3>
+<p>If the account has no mobile number on file, verification returns <code>{needsMobile: true, pendingToken}</code> instead of a session — the customer is routed to <code>/customer/add-mobile</code> to enter an Indian mobile number (<code>POST /customer/complete-mobile</code>, validated against <code>^[6-9]\d&#123;9&#125;$</code> and checked for uniqueness).</p>
+</div></div>
+<div class="step"><div class="num">4</div><div class="body">
+<h3>Session starts</h3>
+<p>Only once both email and mobile are confirmed does the server issue the real <code>customerToken</code> httpOnly cookie, and the customer lands back in the app.</p>
+</div></div>
+<div class="callout info"><b>Why the two-step token.</b> The pending-mobile step uses a separate, 15-minute-lived JWT that cannot access any customer data, place an order, or otherwise act as a login — so a half-finished signup can't be used as a backdoor session.</div>
+
+<h3>2.2 Browse &amp; Filter Catalog <span class="role-badge role-public">Public</span></h3>
+<p>At <code>/products</code>: filter by category and price range, free-text search by name, and sort (including "Sort by Rating," backed by the admin-set display rating — see 3.4). Filtering/sorting/searching all query the backend rather than filtering a client-side list, so the catalog scales past what's loaded on one page.</p>
+
+<h3>2.3 Product Detail Page <span class="role-badge role-public">Public</span></h3>
+<p>At <code>/products/:id</code>: image gallery, description, ingredients, variant picker (each variant carries its own price/MRP/stock), quantity stepper, star rating + review count, published customer reviews, and related products. <b>Add to Cart</b> and <b>Buy Now</b> both live here.</p>
+
+<h3>2.4 Wishlist <span class="role-badge role-customer">Customer</span></h3>
+<div class="step"><div class="num">1</div><div class="body"><h3>Tap the heart icon</h3><p>Available on any product card (catalog, home, related products) and the product detail page. A guest tapping it is redirected to login first.</p></div></div>
+<div class="step"><div class="num">2</div><div class="body"><h3>Toggles instantly</h3><p>Adds/removes the product from <code>Customer.wishlist</code> with an optimistic UI update.</p></div></div>
+<div class="step"><div class="num">3</div><div class="body"><h3>Review saved items</h3><p>The dedicated <code>/customer/wishlist</code> page lists everything saved, with add-to-cart shortcuts.</p></div></div>
+
+<h3>2.5 Cart <span class="role-badge role-public">Public</span> (persists once logged in as <span class="role-badge role-customer">Customer</span>)</h3>
+<p>A guest can add items to a cart kept in <code>localStorage</code>. On login, that guest cart merges automatically into the customer's server-side cart (<code>Cart</code> collection, one document per customer). Quantity steppers add/remove lines; dropping a line's quantity below 1 removes it outright. The cart page also shows a real, admin-configured delivery estimate (see 3.2) and a newsletter signup banner (see 2.12).</p>
+
+<h3>2.6 Buy Now <span class="role-badge role-customer">Customer</span></h3>
+<p>From a product's detail page, <b>Buy Now</b> skips the cart entirely: it carries just that one product/variant/quantity via React Router navigation state straight into Checkout. It never reads or writes the persisted cart — so a Buy Now purchase can't accidentally clear or merge with whatever the customer already has sitting in their cart.</p>
+
+<h3>2.7 Checkout <span class="role-badge role-customer">Customer</span></h3>
+<p>The heart of the storefront transaction — shipping address, delivery-area check, and payment, all on <code>/checkout</code> (also used by Buy Now).</p>
+<div class="step"><div class="num">1</div><div class="body"><h3>Shipping address</h3><p>Pre-filled from the customer's default saved address if one exists. Can be re-entered via the embedded Google Maps picker (search + draggable pin + reverse geocode) or typed manually; name/phone/line1/line2/city/state/pincode are all validated client-side as the customer types or leaves a field.</p></div></div>
+<div class="step"><div class="num">2</div><div class="body"><h3>Delivery-area check<span class="role-badge" style="background:#047B22">new</span></h3><p>As soon as a state resolves, it's checked against the admin's serviceable-states allow-list (fetched once from <code>GET /settings/public</code>). If the state isn't served, a red banner appears — "Sorry, we don't currently accept orders from &lt;state&gt;," listing what is served — and the submit button disables. See Section 6.4 for the full mechanics.</p></div></div>
+<div class="step"><div class="num">3</div><div class="body"><h3>Choose payment method</h3><p><b>Cash on Delivery</b> or <b>Pay Online</b> (Razorpay) — a simple radio choice; the order total (including a &#8377;99 shipping fee waived above &#8377;999) updates live in the order summary.</p></div></div>
+<div class="step"><div class="num">4</div><div class="body"><h3>Place the order</h3><p><b>COD:</b> <code>POST /customer/orders</code> re-validates the address and the delivery-area check server-side, then atomically builds the order, decrements variant stock, and clears the cart in one MongoDB transaction. <b>Razorpay:</b> see 2.8 below.</p></div></div>
+<div class="step"><div class="num">5</div><div class="body"><h3>Confirmation</h3><p>Redirects to <code>/customer/orders</code> with a success flag; the newly placed order appears at the top with status <code>Confirmed</code>.</p></div></div>
+
+<h3>2.8 Payments — Razorpay &amp; COD <span class="role-badge role-customer">Customer</span></h3>
+<p>Cash on Delivery is always available and needs no setup. Online payment via Razorpay's Standard Checkout is fully live.</p>
+<div class="step"><div class="num">1</div><div class="body"><h3>Order sized server-side</h3><p><code>POST /customer/payments/razorpay-order</code> computes the charge itself from the customer's live server-side cart (or the specific Buy Now item) — never trusting a client-supplied amount — and validates the shipping address <i>and</i> the delivery-area restriction <b>before</b> creating the Razorpay order, so a customer outside the serviceable area is turned away before any charge happens.</p></div></div>
+<div class="step"><div class="num">2</div><div class="body"><h3>Razorpay checkout modal</h3><p>Opens in-page with the order amount/ID; the customer completes payment (card, UPI, netbanking, etc.).</p></div></div>
+<div class="step"><div class="num">3</div><div class="body"><h3>Verify &amp; create the order</h3><p>On success, <code>POST /customer/payments/razorpay-verify</code> checks Razorpay's HMAC-SHA256 signature, re-checks the delivery-area restriction as a final guard, then creates the real order, decrements stock, and clears the cart — identical to the COD path from that point on.</p></div></div>
+<div class="callout info"><b>Test card:</b> Mastercard <code>5267 3181 8797 5449</code>, any future expiry/CVV, OTP <code>1234</code> (any 4&ndash;10 digits works in test mode). Avoid the generic Visa <code>4111 1111 1111 1111</code> — it triggers an international-card block on this account.</div>
+
+<h3>2.9 Orders, Order Again &amp; Delivery Tracking <span class="role-badge role-customer">Customer</span></h3>
+<p>At <code>/customer/orders</code>: full history, searchable by order ID, product, status, or address. Each order shows itemized products with photos, the expected delivery date, and a visual tracking stepper (Confirmed &rarr; Processing &rarr; Shipped &rarr; Delivered). Two one-click actions live here:</p>
+<ul>
+  <li><b>Order Again</b> — re-adds every line item from a past order back into the cart at today's prices/stock, then the customer reviews and checks out normally.</li>
+  <li><b>Rate this product</b> — appears on each item once its order is <code>Delivered</code>, opening the review modal directly (skipped automatically once that product has already been reviewed by this customer).</li>
+</ul>
+
+<h3>2.10 Profile &amp; Address Book <span class="role-badge role-customer">Customer</span></h3>
+<p>At <code>/customer/profile</code>: editable display name (email is the verified account identity and can't be changed here; mobile is locked once set). A real address book — add/edit/delete/set-default, each entry fillable via the same Google Maps picker used at checkout. Saving your only address (or leaving none marked default) automatically promotes it to default.</p>
+
+<h3>2.11 Product Reviews <span class="role-badge role-customer">Customer</span></h3>
+<div class="step"><div class="num">1</div><div class="body"><h3>Submit</h3><p>From a product detail page, or via "Rate this product" on a delivered order line (2.9) — star rating + written comment.</p></div></div>
+<div class="step"><div class="num">2</div><div class="body"><h3>Held for moderation</h3><p>Saved as <code>Pending</code>; not shown publicly yet. One review per customer per product.</p></div></div>
+<div class="step"><div class="num">3</div><div class="body"><h3>Admin publishes or flags</h3><p>An admin moderates at <code>/admin/reviews</code> (3.8) — only <code>Published</code> reviews appear on the product page.</p></div></div>
+
+<h3>2.12 Newsletter Signup <span class="role-badge role-public">Public</span></h3>
+<p>The "Stay Connected" banner on the Cart page captures an email via <code>POST /newsletter/subscribe</code> into a dedicated subscriber list. Idempotent — resubscribing the same address just succeeds again. Capture-only for now: no unsubscribe flow or campaign sending yet.</p>
+
+<h3>2.13 Contact / Quote Request Form <span class="role-badge role-public">Public</span></h3>
+<p>At <code>/contact</code> (and mirrored on the <code>/b2b-portal</code> marketing page): name, email, message/quote request. Saved via <code>POST /contact</code> into a Contact collection; optionally emails an admin address if <code>CONTACT_NOTIFY_EMAIL</code> is configured. Managed by admin at <code>/admin/contacts</code> (3.9).</p>
+
+<h2 class="section">3. Admin Console Features</h2>
+<p>Everything below requires an <code>Admin</code>/<code>SuperAdmin</code> login at <code>/admin/login</code> and lives under <code>/admin/*</code>.</p>
+
+<h3>3.1 Dashboard <span class="role-badge role-admin">Admin</span></h3>
+<p>Live counts — total customers, orders, products, revenue — plus visual charts, and the two settings cards below (3.2, 3.3) surfaced right on the dashboard for quick access.</p>
+
+<h3>3.2 Delivery Settings <span class="role-badge role-admin">Admin</span></h3>
+<p>A single number: expected delivery window in days. Feeds the delivery estimate shown to customers on the Cart page and the expected-delivery date shown on every order. Backed by the singleton <code>Settings</code> document (<code>expectedDeliveryDays</code>).</p>
+
+<h3>3.3 Serviceable States <span class="role-badge role-admin">Admin</span><span class="role-badge" style="background:#047B22">new</span></h3>
+<p>Restrict which Indian states/UTs the store accepts orders from — built this round so the business can ship to a limited set of states while scaling up gradually.</p>
+<div class="step"><div class="num">1</div><div class="body"><h3>Open the Dashboard</h3><p>The <b>Serviceable States</b> card sits right below Delivery Settings.</p></div></div>
+<div class="step"><div class="num">2</div><div class="body"><h3>Toggle the restriction on</h3><p>"Restrict orders to selected states" — off by default (orders accepted from anywhere, same as before this feature existed).</p></div></div>
+<div class="step"><div class="num">3</div><div class="body"><h3>Check off served states</h3><p>A checkbox grid of all 28 states + 8 union territories. The toggle refuses to turn on with zero states checked (both in the UI and re-validated server-side), so the admin can't accidentally lock out every customer.</p></div></div>
+<div class="step"><div class="num">4</div><div class="body"><h3>Save</h3><p><code>PATCH /admin/settings</code> writes <code>serviceableStatesEnabled</code> + <code>serviceableStates</code> to the same <code>Settings</code> singleton as Delivery Settings. Takes effect immediately — the very next checkout page load picks it up.</p></div></div>
+<p>See Section 2.7 and 6.4 for exactly how this is enforced against customers.</p>
+
+<h3>3.4 Product Management <span class="role-badge role-admin">Admin</span></h3>
+<p>Full CRUD at <code>/admin/products</code>: name, description, category, multiple variants per product (each with its own label/price/MRP/stock), multi-image upload direct to Cloudflare R2, and an admin-set display rating (average + review count) shown on product cards and used for "Sort by Rating" until enough genuine reviews accumulate to compute it for real (2.11).</p>
+
+<h3>3.5 Category Management <span class="role-badge role-admin">Admin</span></h3>
+<p>Add/edit/activate/delete product categories at <code>/admin/categories</code>. Deleting a category still referenced by any product is blocked with a clear explanatory error rather than silently orphaning products.</p>
+
+<h3>3.6 Order Management <span class="role-badge role-admin">Admin</span></h3>
+<p>Every order — storefront and B2B — in one server-side paginated, searchable table at <code>/admin/orders</code> (search by order ID, customer, product, address, or payment method). Inline status changes walk an order through <code>Confirmed &rarr; Processing &rarr; Shipped &rarr; Delivered</code> or <code>Cancelled</code>, driving the tracking stepper customers see (2.9).</p>
+
+<h3>3.7 Customer Management <span class="role-badge role-admin">Admin</span></h3>
+<p>Every registered customer at <code>/admin/customers</code>, with aggregated order count and lifetime spend per customer.</p>
+
+<h3>3.8 Review Moderation <span class="role-badge role-admin">Admin</span></h3>
+<p>At <code>/admin/reviews</code>: every submitted review, with one-click Publish, Flag, or Delete — the gate between a customer's submission (2.11) and it appearing publicly on a product page.</p>
+
+<h3>3.9 Contact Submissions <span class="role-badge role-admin">Admin</span></h3>
+<p>At <code>/admin/contacts</code>: every Contact Us / quote-request submission (2.13), with a New &rarr; Read &rarr; Resolved status workflow and search.</p>
+
+<h3>3.10 Support Tickets <span class="role-badge role-admin">Admin</span></h3>
+<p>At <code>/admin/support-tickets</code>: every "Contact Support" message a B2B member sends from their dashboard (4.6), server-side paginated and searchable by subject, message, or the submitting member's name/email/business — same New/Read/Resolved workflow as Contact Submissions.</p>
+
+<h3>3.11 B2B Team Management &amp; Quote Approval <span class="role-badge role-admin">Admin</span></h3>
+<p>At <code>/admin/b2b</code> — the admin side of the wholesale relationship:</p>
+<ul>
+  <li><b>Team tab</b> — create marketing-team logins (B2B accounts are admin-created only, no self-signup); each member's bulk order count and earnings, sortable/filterable by month.</li>
+  <li><b>Quotes tab</b> — review a pending quote from any B2B member, optionally adjust the quantity or price, then either <b>Approve</b> (atomically decrements stock and creates a real order — see 4.4) or <b>Reject</b> with a reason. Searchable by member/business/product.</li>
+</ul>
+
+<h2 class="section">4. B2B Wholesale Portal Features</h2>
+<p>Requires a B2B login at <code>/b2b/login</code> (accounts created only by an admin — see 3.11). A B2B login represents an internal marketing-team member selling in bulk on behalf of a business buyer, not the buyer themself.</p>
+
+<h3>4.1 B2B Login <span class="role-badge role-b2b">B2B</span></h3>
+<p>Email + password (own <code>b2bToken</code> cookie, fully separate from Customer/Admin sessions). Forgot-password uses the same OTP-via-email pattern as Admin.</p>
+
+<h3>4.2 Catalog &amp; Bulk Pricing <span class="role-badge role-b2b">B2B</span></h3>
+<p>At <code>/b2b/catalog</code>: the same live product catalog customers see. The member picks a variant, a bulk quantity (10+ units), and proposes their own discounted unit price, capped at the listed retail price.</p>
+
+<h3>4.3 Request Quote <span class="role-badge role-b2b">B2B</span></h3>
+<div class="step"><div class="num">1</div><div class="body"><h3>Build a draft</h3><p>Products picked in Catalog (4.2) collect into an in-progress quote (kept in Redux state).</p></div></div>
+<div class="step"><div class="num">2</div><div class="body"><h3>Add buyer details</h3><p>At <code>/b2b/request-quote</code>: the buyer's business name and delivery address (Google Maps picker included).</p></div></div>
+<div class="step"><div class="num">3</div><div class="body"><h3>Submit</h3><p>Creates a <code>Quote</code> document, status <code>Pending</code>. Past quotes and their status are listed on the same page, searchable.</p></div></div>
+
+<h3>4.4 Quote-to-Order Approval <span class="role-badge role-b2b">B2B</span> / <span class="role-badge role-admin">Admin</span></h3>
+<p>The bridge between a B2B quote and a real order:</p>
+<div class="step"><div class="num">1</div><div class="body"><h3>Admin reviews</h3><p>At <code>/admin/b2b</code>'s Quotes tab (3.11), sees the requested items, quantities, and proposed prices.</p></div></div>
+<div class="step"><div class="num">2</div><div class="body"><h3>Approve or reject</h3><p>Approving atomically decrements stock for every line and creates a real <code>Order</code> (<code>source: 'B2B'</code>, linked to the originating quote and B2B member). Rejecting requires a reason, visible to the B2B member.</p></div></div>
+<div class="step"><div class="num">3</div><div class="body"><h3>Order appears both sides</h3><p>Shows up in the member's <code>/b2b/orders</code> and in the admin's unified <code>/admin/orders</code> (3.6) immediately.</p></div></div>
+
+<h3>4.5 B2B Orders <span class="role-badge role-b2b">B2B</span></h3>
+<p>At <code>/b2b/orders</code>: every order created from that member's approved quotes, searchable by order ID or product, with the same status filter as the admin view.</p>
+
+<h3>4.6 B2B Dashboard &amp; Support <span class="role-badge role-b2b">B2B</span></h3>
+<p>At <code>/b2b</code>: quote counts by status, total orders, and total sales at a glance. The "Contact Support" button opens a modal that submits a real ticket to the admin's Support Tickets queue (3.10).</p>
+
+<h2 class="section">5. Cross-Cutting Systems</h2>
+
+<h3>5.1 Three Independent Authentication Systems</h3>
+<table>
+  <tr><th>Role</th><th>Cookie</th><th>Who creates the account</th></tr>
+  <tr><td>Customer</td><td><code>customerToken</code></td><td>Self-signup via email OTP (2.1)</td></tr>
+  <tr><td>Admin</td><td><code>adminToken</code></td><td>Seeded directly (<code>node dev-data/seedAdmin.js</code>)</td></tr>
+  <tr><td>B2B</td><td><code>b2bToken</code></td><td>Created only by an Admin (3.11)</td></tr>
+</table>
+<p>A login in one role grants no access whatsoever to the other two — each is checked by its own middleware against its own JWT cookie.</p>
+
+<h3>5.2 Transactional Email (Resend)</h3>
+<p>Every email the platform sends — customer login OTP, admin signup OTP, Admin/B2B forgot-password OTP, and the optional contact-form admin notification — renders through one shared branded HTML template (<code>backend/utils/emailTemplates.js</code>) using the site's actual brand colors and logo, with a plain-text fallback alongside.</p>
+
+<h3>5.3 Payment Security Model</h3>
+<p>The backend always computes the charge amount itself from server-side data (the customer's live cart, or the specific Buy Now items) — it never trusts an amount sent by the client, which is standard practice against payment tampering. Razorpay's HMAC-SHA256 signature is verified before any order is created or stock decremented.</p>
+
+<h3>5.4 Serviceable-States Enforcement Architecture <span class="role-badge" style="background:#047B22">new</span></h3>
+<p>One shared backend helper — <code>backend/utils/serviceability.js</code>'s <code>assertStateServiceable()</code> — is called from all three order-placement entry points, so the restriction can never drift out of sync between payment methods:</p>
+<table>
+  <tr><th>Entry point</th><th>When checked</th></tr>
+  <tr><td><code>POST /customer/orders</code> (COD)</td><td>Before the order is built</td></tr>
+  <tr><td><code>POST /customer/payments/razorpay-order</code></td><td>Before the Razorpay order — and therefore before any charge — is created</td></tr>
+  <tr><td><code>POST /customer/payments/razorpay-verify</code></td><td>Re-checked as a guard in case the admin's list changed in the few seconds since order creation</td></tr>
+</table>
+<p>The frontend independently fetches the same allow-list (<code>GET /settings/public</code>) to warn the customer before they even attempt to submit — but the server-side check is what's actually authoritative; the API can't be tricked into accepting a blocked order by skipping the UI.</p>
+
+<h2 class="section">6. Content &amp; Marketing Pages</h2>
+<p>Public, brand storytelling and navigation aids that round out the storefront. Most are static copy with scroll-reveal animation only; the homepage is the exception, with one genuinely dynamic section.</p>
+
+<h3>6.1 Home <span class="role-badge role-public">Public</span> — <code>/</code></h3>
+<p>Assembles eight sections top to bottom: hero, <b>Categories</b> (clickable category tabs), <b>Our Featured Products</b>, "Why Choose 7ALP's," a quality-assurance banner, a promotional banner, <b>Testimonials</b>, and an FAQ accordion.</p>
+<div class="callout info"><b>The one dynamic section.</b> "Our Featured Products" is the only homepage section that calls the backend — it fetches the real product catalog on mount, derives its category tabs from whatever's actually returned, filters client-side per tab, and shows animated skeleton loaders while loading and an empty-state with a "view all" reset. Every other section (hero, testimonials, FAQs, category tiles) is static copy/imagery.</div>
+
+<h3>6.2 Our Process <span class="role-badge role-public">Public</span> — <code>/our-process</code></h3>
+<p>The sourcing/production story, built around <b>Powder Timeline</b> — a numbered step sequence (Source &rarr; Clean &rarr; Dry &rarr; Grind, etc.), each step with an image, description, and small key/value chips (sourcing method, temperature). Static content, scroll-reveal animation.</p>
+
+<h3>6.3 Why 7ALP's <span class="role-badge role-public">Public</span> — <code>/why-7alps</code></h3>
+<p>Brand positioning, anchored by a dark-themed "us vs. them" <b>Comparison</b> table (sourcing, grinding, fillers, drying, fineness, testing) rendered with check/cross icons. Static content.</p>
+
+<h3>6.4 Global Trade <span class="role-badge role-public">Public</span> — <code>/global-trade</code></h3>
+<p>Export/trade information for international buyers, including a stylized "Where 7ALP Travels" section — an animated origin marker (pulsing pin on Hyderabad) over a background photo with an Origin/Base/Reach metrics strip. Not an interactive map, purely illustrative. Static content.</p>
+
+<h3>6.5 404 Not Found <span class="role-badge role-public">Public</span> — any unmatched route</h3>
+<p>A themed not-found page — large "404" watermark, decorative image panel, a "Back to Home" link, and a "Go Back" button. Fully static.</p>
+
+<div class="callout warn">
+<b>Three unused scaffold folders exist in the codebase</b> (<code>features/process</code>, <code>features/partnerships</code>, <code>features/whyChooseUs</code>) — earlier/duplicate versions of the Our Process and Why 7ALP's pages above, superseded by <code>ourProcess</code> and <code>why7ALPs</code>. None are wired to any route or rendered anywhere in the app; they're dead code, not a live "Partnerships" page (despite what an older internal reference may have implied).
+</div>
+
+<h2 class="section">7. Full Route Map (Appendix)</h2>
+<p>See <code>7alps-platform-documentation.pdf</code>, Section 3, for the complete route table with every path, access requirement, and page — kept there as the canonical technical reference so it isn't duplicated (and risk drifting out of sync) across two documents.</p>
+
+<p class="footer-note">7ALP's Feature Reference — generated from the current codebase. Companion to 7alps-platform-documentation.pdf.</p>
+
+</body>
+</html>

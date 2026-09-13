@@ -6,6 +6,7 @@ const Settings = require('../models/settingsModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const { decrementVariantStock } = require('./productController');
+const { assertStateServiceable } = require('../utils/serviceability');
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
@@ -152,6 +153,8 @@ exports.createOrder = catchAsync(async (req, res, next) => {
   if (!shippingAddress || REQUIRED_ADDRESS_FIELDS.some((field) => !shippingAddress[field])) {
     return next(new AppError(`Please provide a complete shipping address (${REQUIRED_ADDRESS_FIELDS.join(', ')})`, 400));
   }
+
+  await assertStateServiceable(shippingAddress.state);
 
   const session = await mongoose.startSession();
   let order;

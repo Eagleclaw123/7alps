@@ -151,7 +151,7 @@
   <div class="eyebrow">Platform Documentation</div>
   <h1>7ALP's</h1>
   <p class="lead">A complete walkthrough of the storefront, admin console, and B2B wholesale portal — every login, route, and feature, as currently implemented.</p>
-  <div class="meta">Updated 2026-08-09 &middot; Frontend: React 19 + Vite + Redux Toolkit + Tailwind 4 &middot; Backend: Node.js + Express 5 + MongoDB (Mongoose)</div>
+  <div class="meta">Updated 2026-09-13 &middot; Frontend: React 19 + Vite + Redux Toolkit + Tailwind 4 &middot; Backend: Node.js + Express 5 + MongoDB (Mongoose)</div>
 </section>
 
 <h2 class="section">1. Architecture Overview</h2>
@@ -230,7 +230,6 @@
   <tr><td><code>/our-process</code></td><td>Sourcing/production story</td></tr>
   <tr><td><code>/why-7alps</code></td><td>Brand positioning / comparison</td></tr>
   <tr><td><code>/global-trade</code></td><td>Export/trade information</td></tr>
-  <tr><td><code>/partners</code></td><td>Partnerships page</td></tr>
   <tr><td><code>/b2b-portal</code></td><td>Wholesale marketing/landing page (static content, not the logged-in B2B portal). Its own Contact form now actually saves submissions<span class="badge-fixed">fixed</span> (same backend as the main Contact page), and every CTA on the page (tier cards, order builder) scrolls to it<span class="badge-fixed">fixed</span> instead of doing nothing.</td></tr>
   <tr><td><code>/contact</code></td><td>Contact / quote-request form<span class="badge-fixed">now saved</span> + map embed</td></tr>
   <tr><td><code>/cart</code></td><td>Shopping cart (guest or logged-in); real (not hardcoded) delivery estimate<span class="badge-fixed">fixed</span>; newsletter signup now actually subscribes<span class="badge-fixed">fixed</span></td></tr>
@@ -239,7 +238,7 @@
 <h3>Customer (requires customer login)</h3>
 <table>
   <tr><th>Route</th><th>Page</th></tr>
-  <tr><td><code>/checkout</code></td><td>Shipping address (with map picker, now auto-filled from the customer's default saved address<span class="badge-new">new</span>) + payment method + place order. Also handles standalone "Buy Now" purchases<span class="badge-fixed">fixed</span> — see Section 4.</td></tr>
+  <tr><td><code>/checkout</code></td><td>Shipping address (with map picker, now auto-filled from the customer's default saved address<span class="badge-fixed">fixed</span>) + payment method + place order. Also handles standalone "Buy Now" purchases<span class="badge-fixed">fixed</span>. Blocks the order with a warning banner if the delivery state isn't on the admin's serviceable-states list<span class="badge-new">new</span> — see Section 8.</td></tr>
   <tr><td><code>/customer/orders</code></td><td>Order history — product photo + expected delivery date per item<span class="badge-new">new</span>, "Order Again"<span class="badge-new">new</span>, "Rate this product" on delivered items<span class="badge-new">new</span>, search by ID/product/status/address<span class="badge-fixed">improved</span></td></tr>
   <tr><td><code>/customer/profile</code></td><td>Personal details + address book (with map picker); saving your only address (or none marked default) now auto-sets it as default<span class="badge-fixed">fixed</span></td></tr>
   <tr><td><code>/customer/wishlist</code></td><td>Saved products via the heart icon on any product card<span class="badge-new">new</span></td></tr>
@@ -248,7 +247,7 @@
 <h3>Admin (requires admin login)</h3>
 <table>
   <tr><th>Route</th><th>Page</th></tr>
-  <tr><td><code>/admin</code></td><td>Dashboard — customers, orders, products, revenue, plus a Delivery Settings card<span class="badge-new">new</span></td></tr>
+  <tr><td><code>/admin</code></td><td>Dashboard — customers, orders, products, revenue, plus a Delivery Settings card and a Serviceable States card<span class="badge-new">new</span> (Section 8)</td></tr>
   <tr><td><code>/admin/products</code></td><td>Product CRUD, variants, image upload, admin-set display rating<span class="badge-new">new</span></td></tr>
   <tr><td><code>/admin/categories</code></td><td>Category CRUD</td></tr>
   <tr><td><code>/admin/orders</code></td><td>All orders (customer + B2B); now server-side paginated and searchable by ID/customer/product/address/payment<span class="badge-fixed">rebuilt</span>, plus expected delivery date per order<span class="badge-new">new</span></td></tr>
@@ -276,7 +275,7 @@
   <li><b>Wishlist<span class="badge-new">new</span></b> — heart icon on any product card (listing pages, product detail, related products); toggles instantly, redirects a guest to login. Dedicated <code>/customer/wishlist</code> page lists everything saved.</li>
   <li><b>Cart</b> — guest cart in localStorage; merges into the server cart automatically on login. Decreasing quantity below 1 now removes the item instead of silently doing nothing<span class="badge-fixed">fixed</span>.</li>
   <li><b>Buy Now<span class="badge-fixed">fixed</span></b> — purchasing directly from a product page no longer touches the cart at all; checkout shows only that one item, and the customer's actual cart is left completely untouched.</li>
-  <li><b>Checkout</b> — shipping address form with an embedded Google Maps picker, now auto-filled from the customer's default saved address<span class="badge-new">new</span>; choice of <b>Cash on Delivery</b> or <b>Pay Online (Razorpay)</b>.</li>
+  <li><b>Checkout</b> — shipping address form with an embedded Google Maps picker, auto-filled from the customer's default saved address; choice of <b>Cash on Delivery</b> or <b>Pay Online (Razorpay)</b>. If the resolved delivery state isn't on the admin's serviceable-states allow-list, a red banner explains the order can't be placed and the Place Order/Pay button disables<span class="badge-new">new</span> — see Section 8.</li>
   <li><b>Orders</b> — history with status, itemized breakdown (product photo + expected delivery date per item), shipping address, broadened search (ID/product/status/address/date), and an "Order Again" button that re-adds every item from a past order to the cart<span class="badge-new">new</span>.</li>
   <li><b>Profile</b> — editable name only (email is the verified account identity set at signup, and is no longer editable from the profile page<span class="badge-fixed">changed</span>; mobile was already locked); a real address book (add/edit/delete/set-default), each entry fillable via the same map picker. The only (or first) saved address is now always guaranteed to be the default<span class="badge-fixed">fixed</span>.</li>
   <li><b>Reviews</b> — logged-in customers can rate &amp; review a product from the product page, and are now also prompted with a "Rate this product" link on delivered order items<span class="badge-new">new</span> (skipped once already reviewed); reviews are held as <code>Pending</code> until an admin publishes them.</li>
@@ -284,7 +283,7 @@
 
 <h3>Admin console</h3>
 <ul>
-  <li><b>Dashboard</b> — live counts: customers, orders, products, revenue; plus a <b>Delivery Settings</b> card<span class="badge-new">new</span> to set the expected-delivery window (in days) shown to customers at checkout and on their orders.</li>
+  <li><b>Dashboard</b> — live counts: customers, orders, products, revenue; plus a <b>Delivery Settings</b> card to set the expected-delivery window (in days), and a <b>Serviceable States</b> card<span class="badge-new">new</span> to restrict which Indian states/UTs the store accepts orders from — see Section 8.</li>
   <li><b>Products</b> — full CRUD, multiple variants per product (label/price/MRP/stock), multi-image upload to Cloudflare R2, plus an admin-set display rating (average + count)<span class="badge-new">new</span> — see Section 5.</li>
   <li><b>Categories</b> — add/edit/activate/delete; delete is blocked if products still reference the category, with a clear error explaining why.</li>
   <li><b>Orders<span class="badge-fixed">rebuilt</span></b> — every order (storefront and B2B) in one place; now paginated and searched server-side (order ID, customer, product, address, payment, status) instead of fetching the entire order collection on every load; inline status changes (Confirmed &rarr; Processing &rarr; Shipped &rarr; Delivered/Cancelled); expected delivery date per order.</li>
@@ -337,7 +336,28 @@
   <b>Domain verified — sandbox restriction lifted.</b> With <code>7alpsglobal.com</code> verified, OTP and notification emails send to any recipient, not just the Resend account owner's own inbox (Resend's default sandbox behavior for unverified senders).
 </div>
 
-<h2 class="section">8. Testing Reference</h2>
+<h2 class="section">8. Serviceable States (Delivery Area Restriction)<span class="badge-new">new</span></h2>
+<p>The admin can restrict which Indian states/UTs the store accepts orders from. When the restriction is off (the default), orders are accepted from anywhere, exactly as before this feature existed.</p>
+<h3>Admin configuration</h3>
+<p>On the <code>/admin</code> dashboard, the <b>Serviceable States</b> card lets the admin toggle "Restrict orders to selected states" and check off any combination of the 28 states + 8 union territories. Turning the toggle on is blocked (both client- and server-side) until at least one state is checked, so the admin can't accidentally lock out every customer with an empty allow-list.</p>
+<h3>Customer enforcement</h3>
+<p>The restriction is enforced at two layers:</p>
+<ul>
+  <li><b>Checkout UI</b> — as soon as the shipping state resolves (typed manually, or auto-filled by the Google Maps picker), the checkout page checks it against the admin's list (fetched from the public settings endpoint). If it isn't allowed, a red banner reads "Sorry, we don't currently accept orders from &lt;state&gt;" and lists the states currently served; the Place Order / Pay button disables.</li>
+  <li><b>Backend (authoritative)</b> — the same check runs again on the server for every order-placement path, so the restriction can't be bypassed by calling the API directly: <code>POST /customer/orders</code> (COD), <code>POST /customer/payments/razorpay-order</code> (checked <i>before</i> the Razorpay order — and therefore before any charge — is created), and <code>POST /customer/payments/razorpay-verify</code> (re-checked as a guard in case the admin's list changes in the few seconds between the two Razorpay steps). A blocked request returns <code>422</code> with the same "not currently accepted" message.</li>
+</ul>
+<div class="callout info">
+  <b>Matching is on the state name customers already type.</b> The shipping address form has always had a free-text State field (auto-filled from Google's <code>administrative_area_level_1</code> when the map picker is used). The serviceability check compares that value to the admin's list case-insensitively and trimmed, so "karnataka " and "Karnataka" both match — no new dropdown or pincode lookup was introduced.
+</div>
+<table>
+  <tr><th>Field</th><th>Detail</th></tr>
+  <tr><td>Data model</td><td><code>Settings.serviceableStatesEnabled</code> (Boolean, default <code>false</code>) + <code>Settings.serviceableStates</code> (String array, default <code>[]</code>) — same singleton document as Delivery Settings</td></tr>
+  <tr><td>Admin API</td><td><code>GET/PATCH /api/v1/admin/settings</code> — the existing endpoint, extended to also accept <code>serviceableStatesEnabled</code>/<code>serviceableStates</code> alongside <code>expectedDeliveryDays</code>, each independently optional</td></tr>
+  <tr><td>Public API</td><td><code>GET /api/v1/settings/public</code> now also returns <code>serviceableStatesEnabled</code>/<code>serviceableStates</code>, alongside the existing <code>expectedDeliveryDays</code></td></tr>
+  <tr><td>Shared logic</td><td><code>backend/utils/serviceability.js</code> — one <code>assertStateServiceable()</code> helper used identically by the COD and both Razorpay steps, so all three paths can never drift out of sync</td></tr>
+</table>
+
+<h2 class="section">9. Testing Reference</h2>
 <table>
   <tr><th>What</th><th>Value</th></tr>
   <tr><td>Admin login</td><td><code>7alpsadmin@7alps.com</code> / <code>7alps123</code></td></tr>
@@ -351,8 +371,9 @@
   <b>Avoid the generic <code>4111 1111 1111 1111</code> Visa test card</b> — Razorpay's test environment treats it as a foreign-issued card, and most test accounts (this one included) have international card acceptance disabled by default, so it fails with <code>international_transaction_not_allowed</code>. The Mastercard number above is domestic and works reliably.
 </div>
 
-<h2 class="section">9. Known Limitations</h2>
+<h2 class="section">10. Known Limitations</h2>
 <ul>
+  <li><b>Serviceable-states matching is exact-name, not geographic</b> — a customer's typed state is compared against the admin's allow-list by string (trimmed, case-insensitive); it isn't validated against the city/pincode also on the form, so a customer could still type a served state name with a mismatched pincode. Acceptable for the current scope (a state-level, not address-level, restriction).</li>
   <li><b>Admin Quotes tab date-range filtering isn't exposed in the UI</b> — <code>GET /api/v1/admin/quotes</code> accepts <code>dateFrom</code>/<code>dateTo</code> alongside <code>status</code>, but the B2B Team page's Quotes tab UI only exposes a status dropdown (search now works correctly as of this round — that part of the earlier limitation is resolved).</li>
   <li><b>Mobile number is validated, not OTP-verified</b> — the Indian mobile number collected right after email verification is format- and uniqueness-checked, but (unlike email) no confirmation code is sent to it. This is a deliberate scope choice for this round, not an oversight; adding a second, mobile-based OTP step is a possible future enhancement if it's ever needed.</li>
   <li><b>The home page's decorative "Shop by category" tiles are static content</b> (curated imagery in a fixed 3-tile layout), separate from the real, admin-managed Category system used everywhere else (product forms, filters, B2B catalog).</li>
@@ -360,6 +381,7 @@
   <li><b>Product ratings are admin-entered, not computed from real reviews</b> — a deliberate interim state for launch (see Section 5), not a bug; genuine review collection is running in parallel for a future switch-over.</li>
   <li><b>Newsletter subscription is capture-only</b> — no admin page to view/export subscribers (the data and a listing endpoint exist, just no screen for it yet), no unsubscribe flow, no campaign sending.</li>
   <li><b>B2B member deletion has no admin UI</b> — the backend supports actually deleting a B2B member (<code>DELETE /api/v1/admin/b2b/:id</code>), but the B2B Team admin page only offers toggling a member active/inactive. Worth confirming whether soft-delete-only is the intended policy.</li>
+  <li><b>Three unused scaffold folders</b> — <code>frontend/src/features/process</code>, <code>features/partnerships</code>, and <code>features/whyChooseUs</code> are earlier/duplicate versions of the Our Process and Why 7ALP's pages, superseded by <code>ourProcess</code>/<code>why7ALPs</code> and not wired to any route. Harmless dead code, not a live "Partnerships" page — the Route Map above has been corrected to drop the stale <code>/partners</code> entry a prior pass of this document listed in error.</li>
 </ul>
 
 <div class="callout info">
@@ -372,6 +394,10 @@
 
 <div class="callout info">
   <b>Customer auth rework &amp; branded email templates (2026-08-09).</b> Customer login/signup moved from mobile-number OTP (which had never had a real SMS provider behind it — it only simulated delivery and accepted a universal <code>123456</code> bypass code) to real email OTP delivery via Resend, per a direct request to drop SMS OTP entirely. A new mandatory step now collects and validates an Indian mobile number right after email verification, before a full login session is granted — see Section 2. Separately, every transactional email the platform sends (not just the new customer flow) was rebuilt from plain unstyled text onto one shared branded HTML template — see Section 7.
+</div>
+
+<div class="callout info">
+  <b>Serviceable states / delivery-area restriction (2026-09-13).</b> Added at the admin's request to limit which Indian states the store ships to while the business scales up gradually. Enforced identically at checkout (client-side warning) and on every order-placement API path (server-side, authoritative) — see Section 8.
 </div>
 
 <p class="footer-note">7ALP's Platform Documentation — generated automatically from the current codebase.</p>

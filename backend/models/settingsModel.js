@@ -8,6 +8,18 @@ const settingsSchema = new mongoose.Schema(
       default: 5,
       min: [1, 'Expected delivery days must be at least 1'],
     },
+    // When true, only customers whose shipping address state appears in
+    // `serviceableStates` may place an order — everyone else is turned away
+    // with a "not accepted in your area" message. When false (default),
+    // orders are accepted from anywhere, same as before this feature existed.
+    serviceableStatesEnabled: {
+      type: Boolean,
+      default: false,
+    },
+    serviceableStates: {
+      type: [String],
+      default: [],
+    },
   },
   { timestamps: true },
 );

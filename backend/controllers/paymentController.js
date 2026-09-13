@@ -6,6 +6,7 @@ const Product = require('../models/productModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const { buildOrderFromCart, buildOrderFromItems } = require('./orderController');
+const { assertStateServiceable } = require('../utils/serviceability');
 
 const FREE_SHIPPING_THRESHOLD = 999;
 const SHIPPING_FEE = 99;
@@ -33,7 +34,18 @@ const getRazorpayInstance = () => {
 // (see verifyRazorpayPayment below), matching how COD only creates the Order
 // at the point of a confirmed action.
 exports.createRazorpayOrder = catchAsync(async (req, res, next) => {
-  const { items } = req.body;
+  const { items, shippingAddress } = req.body;
+
+  if (!shippingAddress || REQUIRED_ADDRESS_FIELDS.some((field) => !shippingAddress[field])) {
+    return next(new AppError(`Please provide a complete shipping address (${REQUIRED_ADDRESS_FIELDS.join(', ')})`, 400));
+  }
+
+  // Checked here — before a Razorpay order (and any charge) is even created —
+  // so a customer outside the serviceable area is turned away before paying,
+  // not after. Re-checked again in verifyRazorpayPayment below as a guard
+  // against the admin's allow-list changing in the few seconds in between.
+  await assertStateServiceable(shippingAddress.state);
+
   let itemsTotal = 0;
 
   if (Array.isArray(items) && items.length) {
@@ -107,6 +119,8 @@ exports.verifyRazorpayPayment = catchAsync(async (req, res, next) => {
   if (!shippingAddress || REQUIRED_ADDRESS_FIELDS.some((field) => !shippingAddress[field])) {
     return next(new AppError(`Please provide a complete shipping address (${REQUIRED_ADDRESS_FIELDS.join(', ')})`, 400));
   }
+
+  await assertStateServiceable(shippingAddress.state);
 
   if (!process.env.RAZORPAY_KEY_SECRET) {
     return next(new AppError('Online payments are not configured yet.', 503));

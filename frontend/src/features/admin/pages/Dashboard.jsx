@@ -9,6 +9,7 @@ import StatCard from "../../../shared/dashboard/components/StatCard";
 import { getDashboardStats } from "../../../shared/services/admin.service";
 import AdminDashboardVisuals from "../components/AdminDashboardVisuals";
 import DeliverySettings from "../components/DeliverySettings";
+import ServiceableStatesSettings from "../components/ServiceableStatesSettings";
 
 const initialStats = {
   totalCustomers: 0,
@@ -52,6 +53,7 @@ const Dashboard = () => {
         />
       </div>
       <DeliverySettings />
+      <ServiceableStatesSettings />
       {!loading && <AdminDashboardVisuals stats={stats} />}
     </section>
   );

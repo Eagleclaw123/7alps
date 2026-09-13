@@ -19,6 +19,7 @@ import {
   verifyRazorpayPayment,
 } from "../../../shared/services/payment.service";
 
+import { getPublicDeliverySettings } from "../../../shared/services/admin.service";
 import { loadRazorpayScript } from "../../../shared/utils/loadRazorpayScript";
 import AddressMapPicker from "../../../shared/components/map/AddressMapPicker";
 import HeroBanner from "../../../shared/components/ui/HeroBanner";
@@ -158,8 +159,37 @@ const CheckoutPage = () => {
   const [fieldErrors, setFieldErrors] = useState({});
   const [touched, setTouched] = useState({});
 
+  const [serviceability, setServiceability] = useState({
+    enabled: false,
+    states: [],
+  });
+
   const orderJustPlacedRef = useRef(false);
   const addressPrefilledRef = useRef(false);
+
+  /*
+   * Admin-configured serviceable states — fetched once so we can warn the
+   * customer before they submit, not just after the server rejects it.
+   */
+  useEffect(() => {
+    getPublicDeliverySettings()
+      .then(({ data }) => {
+        setServiceability({
+          enabled: Boolean(data?.data?.serviceableStatesEnabled),
+          states: data?.data?.serviceableStates || [],
+        });
+      })
+      .catch(() => {});
+  }, []);
+
+  const isStateServiceable =
+    !serviceability.enabled ||
+    !address.state.trim() ||
+    serviceability.states.some(
+      (s) => s.trim().toLowerCase() === address.state.trim().toLowerCase(),
+    );
+
+  const showUnserviceableBanner = serviceability.enabled && address.state.trim() && !isStateServiceable;
 
   /*
    * Prefill saved customer address once.
@@ -259,6 +289,7 @@ const CheckoutPage = () => {
    */
   const payWithRazorpay = async () => {
     const { data: orderData } = await createRazorpayOrder(
+      address,
       isBuyNow ? buyNowItems : undefined,
     );
 
@@ -331,6 +362,13 @@ const CheckoutPage = () => {
 
     if (!validateAll()) {
       setError("Please fix the errors below before placing your order.");
+      return;
+    }
+
+    if (!isStateServiceable) {
+      setError(
+        `We're currently not accepting orders in ${address.state}. Please see the delivery areas listed above.`,
+      );
       return;
     }
 
@@ -643,6 +681,20 @@ const CheckoutPage = () => {
                     )}
                   </div>
                 </div>
+
+                {/* NOT SERVICEABLE BANNER */}
+
+                {showUnserviceableBanner && (
+                  <div className="border-t border-[#D8CCC0] bg-red-50 px-5 py-5 sm:px-6">
+                    <p className="font-manrope text-sm font-medium text-red-700">
+                      Sorry, we don't currently accept orders from{" "}
+                      {address.state}.
+                    </p>
+                    <p className="mt-2 font-manrope text-xs leading-5 text-red-600">
+                      We're currently delivering to: {serviceability.states.join(", ")}.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* =================================================
@@ -860,15 +912,17 @@ const CheckoutPage = () => {
                   <button
                     type="submit"
                     form="checkout-form"
-                    disabled={submitting}
+                    disabled={submitting || showUnserviceableBanner}
                     className="group mt-7 flex w-full items-center justify-between bg-[#211B17] px-5 py-4 font-manrope text-sm font-medium text-[#F4EDE2] transition-colors hover:bg-[#C56B4E] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     <span>
                       {submitting
                         ? "Processing..."
-                        : paymentMethod === "Razorpay"
-                          ? `Pay — ₹${total.toLocaleString()}`
-                          : `Place Order — ₹${total.toLocaleString()}`}
+                        : showUnserviceableBanner
+                          ? "Not deliverable to your area"
+                          : paymentMethod === "Razorpay"
+                            ? `Pay — ₹${total.toLocaleString()}`
+                            : `Place Order — ₹${total.toLocaleString()}`}
                     </span>
 
                     <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#F4EDE2] text-[#211B17] transition-transform duration-300 group-hover:translate-x-1">
