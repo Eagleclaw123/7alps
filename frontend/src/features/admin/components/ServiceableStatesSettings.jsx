@@ -40,6 +40,9 @@ const ServiceableStatesSettings = () => {
     );
   };
 
+  const checkAll = () => setSelected([...INDIAN_STATES]);
+  const clearAll = () => setSelected([]);
+
   const handleSave = async () => {
     if (enabled && selected.length === 0) {
       setMessage("Select at least one state before enabling this restriction.");
@@ -73,8 +76,11 @@ const ServiceableStatesSettings = () => {
         <h3 className="font-medium text-gray-800">Serviceable States</h3>
       </div>
       <p className="mb-4 text-sm text-gray-500">
-        Restrict orders to customers shipping to selected Indian states/UTs.
-        When off, orders are accepted from anywhere.
+        When on, only customers shipping to a{" "}
+        <b className="text-gray-700">checked</b> state can place an order —
+        everyone else sees a "not accepted in your area" message. Leave a
+        state <b className="text-gray-700">unchecked</b> to block orders from
+        it. When off, orders are accepted from anywhere.
       </p>
 
       {loading ? (
@@ -99,21 +105,43 @@ const ServiceableStatesSettings = () => {
             </span>
           </label>
 
+          <div className="mb-3 flex items-center gap-3">
+            <button
+              type="button"
+              onClick={checkAll}
+              className="text-xs font-medium text-[#16442C] underline underline-offset-2"
+            >
+              Check all (ship everywhere)
+            </button>
+            <button
+              type="button"
+              onClick={clearAll}
+              className="text-xs font-medium text-gray-500 underline underline-offset-2"
+            >
+              Clear all (block everywhere)
+            </button>
+          </div>
+
           <div className="mb-4 grid max-h-64 grid-cols-2 gap-x-4 gap-y-2 overflow-y-auto rounded-lg border border-gray-100 p-3 sm:grid-cols-3 md:grid-cols-4">
-            {INDIAN_STATES.map((state) => (
-              <label
-                key={state}
-                className="flex cursor-pointer items-center gap-2 text-sm text-gray-600"
-              >
-                <input
-                  type="checkbox"
-                  checked={selected.includes(state)}
-                  onChange={() => toggleState(state)}
-                  className="h-3.5 w-3.5 accent-[#16442C]"
-                />
-                {state}
-              </label>
-            ))}
+            {INDIAN_STATES.map((state) => {
+              const checked = selected.includes(state);
+              return (
+                <label
+                  key={state}
+                  className={`flex cursor-pointer items-center gap-2 rounded px-1.5 py-0.5 text-sm ${
+                    checked ? "bg-green-50 text-gray-800" : "text-gray-500"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => toggleState(state)}
+                    className="h-3.5 w-3.5 accent-[#16442C]"
+                  />
+                  {state}
+                </label>
+              );
+            })}
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -125,7 +153,11 @@ const ServiceableStatesSettings = () => {
               {saving ? "Saving..." : "Save"}
             </button>
             <span className="text-sm text-gray-500">
-              {selected.length} state{selected.length === 1 ? "" : "s"} selected
+              Shipping to <b className="text-gray-700">{selected.length}</b> of{" "}
+              {INDIAN_STATES.length} states/UTs
+              {enabled && selected.length < INDIAN_STATES.length
+                ? ` — ${INDIAN_STATES.length - selected.length} blocked`
+                : ""}
             </span>
             {message ? (
               <span className="text-sm text-gray-500">{message}</span>
