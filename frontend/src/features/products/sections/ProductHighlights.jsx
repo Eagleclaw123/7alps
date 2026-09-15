@@ -1,77 +1,97 @@
 import { FiCheck } from "react-icons/fi";
 
 const DEFAULT_HIGHLIGHTS = [
-  { label: "100% Natural", subtitle: "No fillers or additives" },
-  { label: "Chemical Free", subtitle: "Safe for daily use" },
-  { label: "Premium Quality", subtitle: "Farm-sourced, hand-picked" },
-  { label: "Rich in Nutrients", subtitle: "Vitamins, antioxidants and more" },
+  { label: "100% Natural" },
+  { label: "Chemical Free" },
+  { label: "Premium Quality" },
+  { label: "Rich in Nutrients" },
 ];
 
 const ProductHighlights = ({ product }) => {
   const highlights =
     product?.keyHighlights?.length > 0
-      ? product.keyHighlights.map((label, i) => ({
-          label,
-          subtitle: DEFAULT_HIGHLIGHTS[i % DEFAULT_HIGHLIGHTS.length].subtitle,
-        }))
+      ? product.keyHighlights.map((label) => ({ label }))
       : DEFAULT_HIGHLIGHTS;
 
   return (
-    <section className="bg-[#211B17] px-5 py-20 text-[#F4EDE2] sm:px-8 lg:py-28 xl:px-16">
+    <section className="bg-[#211B17] px-5 py-24 text-[#F4EDE2] sm:px-8 lg:py-32 xl:px-16">
       <div className="mx-auto max-w-[1600px]">
-        {/* Heading */}
-        <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
+        {/* Header */}
+        <div className="grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
           <div>
-            <div className="mb-6 flex items-center gap-3">
-              <span className="font-ibm-mono text-[10px] uppercase tracking-[0.3em] text-[#A85F43]">
+            <div className="mb-7 flex items-center gap-3">
+              <span className="font-ibm-mono text-[10px] uppercase tracking-[0.3em] text-[#C56B4E]">
                 01
               </span>
-              <span className="h-px w-10 bg-[#C56B4E]" />
 
-              <span className="font-ibm-mono text-[9px] uppercase tracking-[0.3em] text-[#C56B4E]">
+              <span className="h-px w-12 bg-[#C56B4E]" />
+
+              <span className="font-ibm-mono text-[9px] uppercase tracking-[0.3em] text-[#A89589]">
                 Product standards
               </span>
             </div>
 
-            <h2 className="font-manrope text-[clamp(3.5rem,6vw,6.5rem)] font-medium leading-[1.0] tracking-[-0.07em]">
+            <h2 className="max-w-4xl font-manrope text-[clamp(3.5rem,7vw,7.5rem)] font-medium leading-[0.9] tracking-[-0.075em]">
               Nothing
               <br />
               <span className="text-[#C56B4E]">unnecessary.</span>
             </h2>
           </div>
 
-          <p className="max-w-xl font-manrope text-sm leading-7 text-[#B9ACA2] lg:pb-2 lg:text-base">
-            Every 7ALP product begins with carefully selected ingredients and
-            ends with standards designed to keep the natural goodness intact.
-          </p>
+          <div className="lg:pb-3">
+            <span className="mb-4 block font-ibm-mono text-[9px] uppercase tracking-[0.28em] text-[#756A62]">
+              Our promise
+            </span>
+
+            <p className="max-w-lg font-manrope text-sm leading-7 text-[#B9ACA2] md:text-base md:leading-8">
+              Every 7ALP product begins with carefully selected ingredients and
+              ends with standards designed to keep the natural goodness intact.
+            </p>
+          </div>
         </div>
 
         {/* Highlights */}
-        <div className="mt-16 border-t border-white/15">
-          {highlights.map(({ label, subtitle }, index) => (
+        <div className="mt-24 grid border-t border-white/15 md:grid-cols-2">
+          {highlights.map(({ label }, index) => (
             <div
               key={index}
-              className="group grid gap-5 border-b border-white/15 py-7 transition-colors hover:bg-white/[0.03] md:grid-cols-[70px_1fr_1fr] md:items-center"
+              className={`group relative flex min-h-[220px] items-center border-b border-white/15 p-7 transition-colors duration-500 hover:bg-[#2A231F] md:min-h-[250px] md:p-10 ${
+                index % 2 === 0 ? "md:border-r" : ""
+              }`}
             >
-              <span className="font-ibm-mono text-[9px] text-[#756A62]">
-                0{index + 1}
-              </span>
-
-              <div className="flex items-center gap-4">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center border border-[#C56B4E]/50 text-[#C56B4E]">
-                  <FiCheck size={14} />
+              <div className="w-full">
+                {/* Number */}
+                <span className="font-ibm-mono text-[9px] tracking-[0.2em] text-[#756A62]">
+                  0{index + 1}
                 </span>
 
-                <h3 className="font-manrope text-lg font-medium text-[#F4EDE2] md:text-xl">
-                  {label}
-                </h3>
+                {/* Highlight */}
+                <div className="mt-10 flex items-center gap-5">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center border border-[#C56B4E]/50 text-[#C56B4E] transition-all duration-500 group-hover:bg-[#C56B4E] group-hover:text-[#211B17]">
+                    <FiCheck size={17} />
+                  </span>
+
+                  <h3 className="font-manrope text-xl md:text-[22px] font-medium tracking-[-0.04em] text-[#F4EDE2] ">
+                    {label}
+                  </h3>
+                </div>
               </div>
 
-              <p className="font-manrope text-sm leading-6 text-[#91847A] md:max-w-sm">
-                {subtitle}
-              </p>
+              {/* Bottom accent */}
+              <span className="absolute bottom-0 left-0 h-[2px] w-0 bg-[#C56B4E] transition-all duration-500 group-hover:w-full" />
             </div>
           ))}
+        </div>
+
+        {/* Bottom Statement */}
+        <div className="flex flex-col gap-5 pt-10 md:flex-row md:items-center md:justify-between">
+          <span className="font-ibm-mono text-[9px] uppercase tracking-[0.28em] text-[#756A62]">
+            Selected with purpose
+          </span>
+
+          <span className="font-manrope text-sm text-[#91847A]">
+            Pure ingredients. Thoughtful standards.
+          </span>
         </div>
       </div>
     </section>

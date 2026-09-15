@@ -9,7 +9,7 @@ const ICONS = {
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="h-5 w-5"
+      className="h-[18px] w-[18px]"
     >
       <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
       <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
@@ -24,7 +24,7 @@ const ICONS = {
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="h-5 w-5"
+      className="h-[18px] w-[18px]"
     >
       <path d="m9 11 3 3L22 4" />
       <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
@@ -39,7 +39,7 @@ const ICONS = {
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="h-5 w-5"
+      className="h-[18px] w-[18px]"
     >
       <path d="M21 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v3" />
       <path d="M3 8h18v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Z" />
@@ -55,7 +55,8 @@ const ProductIngredients = ({ product }) => {
       : "100% Natural Herbal Ingredients with no artificial colors, preservatives, or harmful chemicals.";
 
   const hasUsage =
-    Array.isArray(product?.usageSuggestions) && product.usageSuggestions.length;
+    Array.isArray(product?.usageSuggestions) &&
+    product.usageSuggestions.length > 0;
 
   const hasStorage = Boolean(product?.storageInstructions);
 
@@ -68,23 +69,24 @@ const ProductIngredients = ({ product }) => {
   const [active, setActive] = useState(tabs[0].key);
 
   return (
-    <section className="bg-[#F4EDE2] px-5 py-20 sm:px-8 lg:py-28 xl:px-16">
+    <section className="bg-[#F4EDE2] px-5 py-16 text-[#211B17] sm:px-8 sm:py-20 md:py-24 lg:py-28 xl:px-16">
       <div className="mx-auto max-w-[1600px]">
         {/* Header */}
-        <div className="mb-14 grid gap-8 lg:grid-cols-[0.75fr_1.25fr] lg:items-end">
-          <div>
+        <div className="mb-12 grid gap-8 sm:mb-14 lg:grid-cols-[0.75fr_1.25fr] lg:items-end lg:gap-12">
+          <div className="min-w-0">
             <div className="mb-6 flex items-center gap-3">
-              <span className="font-ibm-mono text-[10px] uppercase tracking-[0.3em] text-[#A85F43]">
+              <span className="font-ibm-mono text-[9px] uppercase tracking-[0.28em] text-[#A85F43] sm:text-[10px] sm:tracking-[0.3em]">
                 02
               </span>
-              <span className="h-px w-10 bg-[#C56B4E]" />
 
-              <span className="font-ibm-mono text-[9px] uppercase tracking-[0.3em] text-[#C56B4E]">
+              <span className="h-px w-8 bg-[#C56B4E] sm:w-10" />
+
+              <span className="font-ibm-mono text-[8px] uppercase tracking-[0.25em] text-[#C56B4E] sm:text-[9px] sm:tracking-[0.3em]">
                 What's inside
               </span>
             </div>
 
-            <h2 className="font-manrope text-[clamp(3.5rem,6vw,6.5rem)] font-medium leading-[1.0] tracking-[-0.06em] text-[#211B17]">
+            <h2 className="font-manrope text-[clamp(3rem,10vw,6.5rem)] font-medium leading-[0.9] tracking-[-0.065em]">
               Grown.
               <br />
               Gathered.
@@ -93,103 +95,174 @@ const ProductIngredients = ({ product }) => {
             </h2>
           </div>
 
-          <p className="max-w-xl font-manrope text-sm leading-7 text-[#756A62] lg:pb-2 lg:text-base">
+          <p className="max-w-xl font-manrope text-[13px] leading-6 text-[#756A62] sm:text-sm sm:leading-7 md:text-base md:leading-8 lg:pb-2">
             Transparency matters. Explore what's inside your product, how to use
             it, and how to keep it at its best.
           </p>
         </div>
 
         {/* Content */}
-        <div className="grid border-t border-[#D8CCC0] lg:grid-cols-[280px_1fr]">
-          {/* Navigation */}
-          <div className="border-b border-[#D8CCC0] lg:border-b-0 lg:border-r lg:border-[#D8CCC0] lg:py-8">
-            <div className="flex gap-2 overflow-x-auto lg:flex-col lg:gap-0 lg:overflow-visible">
-              {tabs.map((tab, index) => {
-                const isActive = active === tab.key;
+        <div className="border-t border-[#D8CCC0]">
+          {/* ================= MOBILE / TABLET NAV ================= */}
+          <div className="border-b border-[#D8CCC0] lg:hidden">
+            <div
+              className="overflow-x-auto"
+              style={{
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+              }}
+            >
+              <div className="flex min-w-max items-center gap-2 px-1">
+                {tabs.map((tab, index) => {
+                  const isActive = active === tab.key;
 
-                return (
-                  <button
-                    key={tab.key}
-                    type="button"
-                    onClick={() => setActive(tab.key)}
-                    className={`group flex min-w-max items-center gap-4 px-4 py-5 text-left transition-all lg:px-6 ${
-                      isActive
-                        ? "text-[#211B17]"
-                        : "text-[#91847A] hover:text-[#211B17]"
-                    }`}
-                  >
-                    <span
-                      className={`font-ibm-mono text-[8px] ${
-                        isActive ? "text-[#C56B4E]" : "text-[#B9ACA2]"
+                  return (
+                    <button
+                      key={tab.key}
+                      type="button"
+                      onClick={() => setActive(tab.key)}
+                      className={`group relative flex shrink-0 items-center gap-3 px-3 py-5 transition-colors duration-300 sm:px-4 ${
+                        isActive
+                          ? "text-[#211B17]"
+                          : "text-[#91847A] hover:text-[#211B17]"
                       }`}
                     >
-                      0{index + 1}
-                    </span>
+                      {/* Number */}
+                      <span
+                        className={`font-ibm-mono text-[8px] tracking-[0.15em] ${
+                          isActive ? "text-[#C56B4E]" : "text-[#B9ACA2]"
+                        }`}
+                      >
+                        0{index + 1}
+                      </span>
 
-                    <span
-                      className={`transition-transform duration-300 ${
-                        isActive ? "translate-x-1 text-[#C56B4E]" : ""
-                      }`}
-                    >
-                      {ICONS[tab.key]}
-                    </span>
+                      {/* Icon */}
+                      <span
+                        className={`shrink-0 transition-transform duration-300 ${
+                          isActive ? "translate-y-[-1px] text-[#C56B4E]" : ""
+                        }`}
+                      >
+                        {ICONS[tab.key]}
+                      </span>
 
-                    <span className="font-manrope text-sm font-medium">
-                      {tab.label}
-                    </span>
-                  </button>
-                );
-              })}
+                      {/* Label */}
+                      <span className="whitespace-nowrap font-manrope text-xs font-medium sm:text-sm">
+                        {tab.label}
+                      </span>
+
+                      {/* Active line */}
+                      {isActive && (
+                        <span className="absolute bottom-0 left-3 right-3 h-[2px] bg-[#C56B4E] sm:left-4 sm:right-4" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
-          {/* Content */}
-          <div className="min-h-[300px] px-2 py-10 sm:px-8 lg:px-14 lg:py-14">
-            {active === "ingredients" && (
-              <div className="max-w-3xl">
-                <p className="mb-6 font-ibm-mono text-[8px] uppercase tracking-[0.25em] text-[#91847A]">
-                  Ingredients
-                </p>
+          {/* ================= DESKTOP CONTENT ================= */}
+          <div className="grid lg:grid-cols-[280px_minmax(0,1fr)]">
+            {/* Desktop Navigation */}
+            <div className="hidden border-r border-[#D8CCC0] py-8 lg:block">
+              <div className="flex flex-col">
+                {tabs.map((tab, index) => {
+                  const isActive = active === tab.key;
 
-                <p className="font-manrope leading-9 text-[#211B17] text-md md:leading-10">
-                  {ingredients}
-                </p>
-              </div>
-            )}
-
-            {active === "usage" && hasUsage && (
-              <div className="max-w-3xl">
-                <p className="mb-7 font-ibm-mono text-[8px] uppercase tracking-[0.25em] text-[#91847A]">
-                  How to use
-                </p>
-
-                <div className="divide-y divide-[#D8CCC0]">
-                  {product.usageSuggestions.map((suggestion, i) => (
-                    <div key={suggestion} className="flex gap-6 py-5">
-                      <span className="font-ibm-mono text-[9px] text-[#C56B4E]">
-                        0{i + 1}
+                  return (
+                    <button
+                      key={tab.key}
+                      type="button"
+                      onClick={() => setActive(tab.key)}
+                      className={`group relative flex items-center gap-4 px-6 py-5 text-left transition-colors duration-300 ${
+                        isActive
+                          ? "text-[#211B17]"
+                          : "text-[#91847A] hover:text-[#211B17]"
+                      }`}
+                    >
+                      <span
+                        className={`font-ibm-mono text-[8px] ${
+                          isActive ? "text-[#C56B4E]" : "text-[#B9ACA2]"
+                        }`}
+                      >
+                        0{index + 1}
                       </span>
 
-                      <p className="font-manrope text-[15px] leading-7 text-[#514740]">
-                        {suggestion}
-                      </p>
-                    </div>
-                  ))}
+                      <span
+                        className={`transition-transform duration-300 ${
+                          isActive ? "translate-x-1 text-[#C56B4E]" : ""
+                        }`}
+                      >
+                        {ICONS[tab.key]}
+                      </span>
+
+                      <span className="font-manrope text-sm font-medium">
+                        {tab.label}
+                      </span>
+
+                      {isActive && (
+                        <span className="absolute right-0 top-0 h-full w-[2px] bg-[#C56B4E]" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="min-w-0 px-0 py-10 sm:px-4 sm:py-12 md:px-8 lg:px-14 lg:py-14">
+              {/* Ingredients */}
+              {active === "ingredients" && (
+                <div className="max-w-3xl">
+                  <p className="mb-5 font-ibm-mono text-[8px] uppercase tracking-[0.25em] text-[#91847A] sm:mb-6">
+                    Ingredients
+                  </p>
+
+                  <p className="font-manrope text-lg leading-8 tracking-[-0.02em] text-[#211B17] sm:text-xl sm:leading-9 md:text-[22px] md:leading-10">
+                    {ingredients}
+                  </p>
                 </div>
-              </div>
-            )}
+              )}
 
-            {active === "storage" && hasStorage && (
-              <div className="max-w-3xl">
-                <p className="mb-6 font-ibm-mono text-[8px] uppercase tracking-[0.25em] text-[#91847A]">
-                  Storage
-                </p>
+              {/* Usage */}
+              {active === "usage" && hasUsage && (
+                <div className="max-w-3xl">
+                  <p className="mb-6 font-ibm-mono text-[8px] uppercase tracking-[0.25em] text-[#91847A] sm:mb-7">
+                    How to use
+                  </p>
 
-                <p className="font-manrope text-xl leading-9 text-[#211B17] md:text-2xl md:leading-10">
-                  {product.storageInstructions}
-                </p>
-              </div>
-            )}
+                  <div className="divide-y divide-[#D8CCC0]">
+                    {product.usageSuggestions.map((suggestion, i) => (
+                      <div
+                        key={suggestion}
+                        className="flex gap-4 py-5 sm:gap-6"
+                      >
+                        <span className="shrink-0 pt-1 font-ibm-mono text-[9px] text-[#C56B4E]">
+                          0{i + 1}
+                        </span>
+
+                        <p className="min-w-0 font-manrope text-lg leading-7 text-[#514740] sm:text-xl md:text-[22px] md:leading-8">
+                          {suggestion}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Storage */}
+              {active === "storage" && hasStorage && (
+                <div className="max-w-3xl">
+                  <p className="mb-5 font-ibm-mono text-[8px] uppercase tracking-[0.25em] text-[#91847A] sm:mb-6">
+                    Storage
+                  </p>
+
+                  <p className="font-manrope text-lg leading-8 tracking-[-0.02em] text-[#211B17] sm:text-xl sm:leading-9 md:text-[22px] md:leading-10">
+                    {product.storageInstructions}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
