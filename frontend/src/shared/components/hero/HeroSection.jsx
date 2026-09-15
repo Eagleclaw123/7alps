@@ -38,41 +38,50 @@ const HeroSection = ({
     <section
       className={`relative overflow-hidden bg-[#F4EDE2] ${containerHeight}`}
     >
-      {/* IMAGE SIDE */}
-      <div className="absolute inset-y-0 right-0 w-full lg:w-[57%]">
+      {/* =====================================================
+          IMAGE
+      ===================================================== */}
+      <div className="absolute inset-0 lg:inset-y-0 lg:right-0 lg:left-auto lg:w-[57%]">
         <img
           src={backgroundImage}
           alt="7ALP herbal powder ingredients"
-          className="h-full w-full object-cover object-center"
+          className="absolute inset-0 h-full w-full object-cover object-center"
         />
 
-        {/* Image treatment */}
-        <div className="absolute inset-0 bg-black/10" />
+        {/* Subtle cinematic tone */}
+        <div className="absolute inset-0 bg-[#211B17]/[0.04]" />
 
-        <div className="absolute inset-y-0 left-0 hidden w-48 bg-gradient-to-r from-[#F4EDE2] to-transparent lg:block" />
+        {/* Premium desktop blend */}
+        <div className="absolute inset-0 hidden lg:block bg-gradient-to-r from-[#F4EDE2] via-[#F4EDE2]/75 via-[14%] via-transparent via-[48%] to-transparent" />
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-black/5" />
+        {/* Very subtle bottom depth */}
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#211B17]/15 to-transparent" />
+
+        {/* Mobile readability */}
+        <div className="absolute inset-0 lg:hidden bg-gradient-to-b from-[#F4EDE2]/40 via-[#F4EDE2]/60 via-[38%] to-transparent" />
       </div>
 
-      {/* LEFT CONTENT */}
+      {/* =====================================================
+          CONTENT
+      ===================================================== */}
       <div className="relative z-10 flex h-full items-center">
-        <div className="mx-auto w-full max-w-[1600px] px-5 pt-28 sm:px-8 lg:px-12 xl:px-16">
+        <div className="mx-auto flex w-full max-w-[1600px] items-center px-5 pb-20 pt-32 sm:px-8 sm:pb-24 lg:px-12 lg:pb-0 lg:pt-28 xl:px-16">
           <motion.div
             variants={fadeUp}
             initial="hidden"
             animate="show"
-            className="max-w-[720px] lg:w-[48%]"
+            className="w-full max-w-[720px] lg:w-[48%]"
           >
             {/* Eyebrow */}
             {badgeText && (
-              <div className="mb-7 flex items-center gap-3">
+              <div className="mb-6 flex items-center gap-3 sm:mb-7">
                 <span
-                  className="h-[1px] w-10"
+                  className="h-[1px] w-8 sm:w-10"
                   style={{ backgroundColor: badgeColor }}
                 />
 
                 <span
-                  className="font-ibm-mono text-[9px] uppercase tracking-[0.3em]"
+                  className="font-ibm-mono text-[8px] uppercase tracking-[0.28em] sm:text-[9px] sm:tracking-[0.3em]"
                   style={{ color: badgeColor }}
                 >
                   {badgeText}
@@ -83,7 +92,7 @@ const HeroSection = ({
             {/* Heading */}
             {heading && (
               <h1
-                className={`font-manrope text-[clamp(3.5rem,6vw,6.5rem)] font-medium leading-[1.0] tracking-[-0.075em] ${textColor}`}
+                className={`font-manrope text-[clamp(3rem,13vw,6.5rem)] font-medium leading-[0.92] tracking-[-0.075em] ${textColor}`}
               >
                 {heading}
 
@@ -101,19 +110,19 @@ const HeroSection = ({
 
             {/* Description */}
             {description && (
-              <p className="mt-8 max-w-lg font-manrope text-sm leading-7 text-[#756A62] md:text-base">
+              <p className="mt-6 max-w-[560px] font-manrope text-sm leading-6 text-[#514740] sm:mt-8 sm:text-base sm:leading-7 lg:max-w-lg">
                 {description}
               </p>
             )}
 
             {/* CTA */}
             {buttons.length > 0 && (
-              <div className="mt-9 flex flex-wrap gap-4">
+              <div className="mt-7 flex flex-wrap gap-3 sm:mt-9 sm:gap-4">
                 {buttons.map((button, index) => (
                   <button
                     key={index}
                     onClick={button.onClick}
-                    className="group inline-flex items-center gap-4 bg-[#211B17] px-7 py-4 font-manrope text-sm font-medium text-[#F4EDE2] transition-all duration-300 hover:bg-[#C56B4E]"
+                    className="group inline-flex items-center gap-4 bg-[#211B17] px-6 py-3.5 font-manrope text-sm font-medium text-[#F4EDE2] transition-all duration-300 hover:bg-[#C56B4E] sm:px-7 sm:py-4"
                   >
                     {button.label}
 
@@ -129,11 +138,11 @@ const HeroSection = ({
 
             {/* Values */}
             {values.length > 0 && (
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div className="mt-7 flex flex-wrap gap-2 sm:mt-8 sm:gap-3">
                 {values.map((title) => (
                   <div
                     key={title}
-                    className="flex items-center gap-2 border border-[#D8CCC0] bg-white/40 px-4 py-3"
+                    className="flex items-center gap-2 border border-[#D8CCC0] bg-[#F4EDE2]/80 px-3 py-2.5 backdrop-blur-sm sm:px-4 sm:py-3"
                   >
                     <BsCheck2
                       className="shrink-0"
@@ -150,10 +159,10 @@ const HeroSection = ({
 
             {/* Highlights */}
             {highlights.length > 0 && (
-              <div className="mt-10 flex flex-wrap gap-8  pt-6">
+              <div className="mt-8 flex flex-wrap gap-6 border-t border-[#D8CCC0] pt-5 sm:mt-10 sm:gap-8 sm:pt-6">
                 {highlights.map(({ icon: Icon, title, subtitle }) => (
                   <div key={title} className="flex items-center gap-3">
-                    {Icon && <Icon size={22} style={{ color: badgeColor }} />}
+                    {Icon && <Icon size={20} style={{ color: badgeColor }} />}
 
                     <div>
                       <p className="font-manrope text-sm font-medium text-[#211B17]">
@@ -161,7 +170,7 @@ const HeroSection = ({
                       </p>
 
                       {subtitle && (
-                        <p className="mt-0.5 font-manrope text-xs text-[#8A7D74]">
+                        <p className="mt-0.5 font-manrope text-xs text-gray-800">
                           {subtitle}
                         </p>
                       )}
@@ -171,16 +180,19 @@ const HeroSection = ({
               </div>
             )}
 
+            {/* Additional Content */}
             {additionalContent && (
-              <div className="mt-8">{additionalContent}</div>
+              <div className="mt-7 sm:mt-8">{additionalContent}</div>
             )}
           </motion.div>
         </div>
       </div>
 
-      {/* IMAGE LABEL */}
-      <div className="absolute bottom-7 right-7 z-20 hidden md:block">
-        <div className="flex items-center gap-3 border border-white/30 bg-black/20 px-4 py-3 backdrop-blur-md">
+      {/* =====================================================
+          IMAGE LABEL
+      ===================================================== */}
+      <div className="absolute bottom-6 right-5 z-20 hidden md:block lg:bottom-7 lg:right-7">
+        <div className="flex items-center gap-3 border border-white/25 bg-[#211B17]/15 px-4 py-3 backdrop-blur-md">
           <span
             className="h-1.5 w-1.5 rounded-full"
             style={{ backgroundColor: badgeColor }}
@@ -192,7 +204,9 @@ const HeroSection = ({
         </div>
       </div>
 
-      {/* Bottom information */}
+      {/* =====================================================
+          BOTTOM INFORMATION
+      ===================================================== */}
       <div className="absolute bottom-0 left-0 z-20 hidden w-[43%] border-t border-[#D8CCC0] lg:block">
         <div className="flex items-center justify-between px-12 py-4 xl:px-16">
           <span className="font-ibm-mono text-[8px] uppercase tracking-[0.2em] text-[#91847A]">

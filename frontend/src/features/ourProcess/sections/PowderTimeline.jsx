@@ -90,13 +90,13 @@ const steps = [
     title: "Lab-test & verify",
     description:
       "Each batch is tested for purity, moisture, microbial safety and heavy metals before it's cleared. Nothing ships without a passing certificate of analysis.",
-    image: "https://www.kelvinlabs.in/images/cctv.jpg",
+    image:
+      "https://res.cloudinary.com/dasvdkncm/image/upload/v1789453829/close-up-doctor-taking-medical-samples_fjaqcf.jpg",
     info: [
       { label: "Testing", value: "Metals · microbes" },
       { label: "Verification", value: "COA per lot" },
     ],
   },
-
   {
     number: "08",
     label: "Pack",
@@ -104,7 +104,7 @@ const steps = [
     description:
       "Cleared powder is sealed in airtight, light-proof packaging within hours, then stamped with its lot code and dispatch date — so you can trace it right back to the field.",
     image:
-      "https://s.alicdn.com/@sc04/kf/Hc598422e4b5b4a9797ed160078535fbcZ/High-Speed-Automatic-Small-Food-Bagging-Fine-Herbal-Corn-Milk-Rice-Matcha-Tea-Powder-Vffs-Packaging-Machine-Professing-Line.jpg",
+      "https://res.cloudinary.com/dasvdkncm/image/upload/v1789454045/top-view-organic-dye-pigment_wvyf7l.jpg",
     info: [
       { label: "Packaging", value: "Airtight, opaque" },
       { label: "Traceability", value: "Lot + date" },

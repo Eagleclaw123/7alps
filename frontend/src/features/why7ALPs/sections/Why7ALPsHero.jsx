@@ -10,8 +10,8 @@ const Why7ALPsHero = () => {
 
   return (
     <HeroSection
-      backgroundImage="https://res.cloudinary.com/dasvdkncm/image/upload/v1782801719/742844d1c23e017015bb41e7a69a764aab58c640_szfgnd.png"
-      badgeText="Why choose 7ALP"
+      backgroundImage="https://jurlique.com.au/cdn/shop/files/SEEDTOSKIN_BLOG2_HEADER_1920x1080_6e0632fc-d2f4-4afb-a1e2-62f4f92557a2.jpg?v=1708471554&width=1920"
+      badgeText="WHY CHOOSE 7ALP"
       badgeColor="#C56B4E"
       heading="Quality"
       headingHighlight="you can trust."
