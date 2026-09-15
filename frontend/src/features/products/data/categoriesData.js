@@ -3,30 +3,36 @@ export const categories = [
     id: 1,
     title: "Hair Care",
     image:
-      "https://res.cloudinary.com/dasvdkncm/image/upload/v1784795649/high-angle-bowl-with-powder-scoops_x2u4ki.jpg",
-    description: "Explore our carefully selected herbal products",
+      "https://www.lesamesfleurs.com/cdn/shop/files/ChatGPT_Image_22_mai_2026_14_40_20_700x.png?v=1779475288",
+    description:
+      "Discover botanical powders crafted for natural hair and scalp care.",
   },
+
   {
     id: 2,
     title: "Skin Care",
     image:
-      "https://res.cloudinary.com/dasvdkncm/image/upload/v1784534803/Gemini_Generated_Image_4wkv614wkv614wkv_okfwkj.png",
-    description: "Explore our carefully selected herbal products",
+      "https://blog.yanggebiotech.com/icms/upload/12fc8520c67f11efbefe2509c33111d5/ckftpdata/images/202549/1744186010263/upload_d6a855945c83024c7fda798610e836e9.webp?size=500x0",
+    description:
+      "Explore natural botanical ingredients for simple, mindful skincare.",
   },
+
   {
     id: 3,
     title: "Health & Wellness",
     image:
-      "https://res.cloudinary.com/dasvdkncm/image/upload/v1784534803/Gemini_Generated_Image_4wkv614wkv614wkv_okfwkj.png",
+      "https://cdn.sanity.io/images/0vv8moc6/nutrioutlook/9f87ae0145d81220836d9ca0a6630a0596bca2e6-2688x1792.jpg",
     className: "col-span-2 md:col-span-1 justify-self-center",
-    description: "Explore our carefully selected herbal products",
+    description:
+      "Explore carefully sourced herbs and powders for everyday wellness.",
   },
   {
     id: 4,
-    title: "Others",
+    title: "Digestive Care",
     image:
-      "https://res.cloudinary.com/dasvdkncm/image/upload/v1784534927/9_27f339d3-212c-49e5-b472-8918ff6a85fd_r78ubs.webp",
+      "https://res.cloudinary.com/dasvdkncm/image/upload/v1784795649/high-angle-bowl-with-powder-scoops_x2u4ki.jpg",
     className: "col-span-2 md:col-span-1 justify-self-center",
-    description: "Explore our carefully selected herbal products",
+    description:
+      "Explore carefully sourced herbal ingredients traditionally used to support digestive wellness.",
   },
 ];

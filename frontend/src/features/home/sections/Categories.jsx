@@ -2,6 +2,8 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { GoArrowUpRight } from "react-icons/go";
 
+import { Link } from "react-router-dom";
+
 import { categories } from "../../products/data/categoriesData";
 
 const Categories = () => {
@@ -151,9 +153,12 @@ const Categories = () => {
                         {category.description}
                       </p>
 
-                      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/40 text-white transition-all duration-300 group-hover:rotate-45 group-hover:bg-white group-hover:text-[#173328]">
+                      <Link
+                        to="/products"
+                        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/40 text-white transition-all duration-300 group-hover:rotate-45 group-hover:bg-white group-hover:text-[#173328]"
+                      >
                         <GoArrowUpRight size={19} />
-                      </span>
+                      </Link>
                     </div>
                   </div>
                 </motion.div>
@@ -230,10 +235,13 @@ const Categories = () => {
                       {category.description}
                     </p>
 
-                    <div className="mt-5 flex items-center gap-3 text-sm font-medium text-white">
+                    <Link
+                      to="/products"
+                      className="mt-5 flex items-center gap-3 text-sm font-medium text-white"
+                    >
                       Explore collection
                       <GoArrowUpRight size={17} />
-                    </div>
+                    </Link>
                   </div>
                 </motion.div>
               </motion.div>

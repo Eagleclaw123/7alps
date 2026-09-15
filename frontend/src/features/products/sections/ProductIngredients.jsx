@@ -151,7 +151,7 @@ const ProductIngredients = ({ product }) => {
                   Ingredients
                 </p>
 
-                <p className="font-manrope text-xl leading-9 text-[#211B17] md:text-2xl md:leading-10">
+                <p className="font-manrope leading-9 text-[#211B17] text-md md:leading-10">
                   {ingredients}
                 </p>
               </div>

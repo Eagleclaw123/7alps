@@ -39,12 +39,12 @@ const ProductGallery = ({ product }) => {
         {/* Main Gallery Column */}
         <div className="order-1 w-full lg:order-2">
           {/* Main Image */}
-          <div className="relative h-[520px] w-full overflow-hidden bg-[#EAE0D4] lg:h-[640px]">
+          <div className="relative h-[520px] w-full overflow-hidden bg-[#EAE0D4] lg:h-[640px] rounded-4xl">
             {/* Full-Bleed Product Image */}
             <img
               src={images[activeIndex]}
               alt={product.ProductName}
-              className="absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ease-out"
+              className="absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ease-out rounded-4xl"
             />
 
             {/* Subtle Image Overlay */}

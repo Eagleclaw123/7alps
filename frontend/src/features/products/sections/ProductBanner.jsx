@@ -90,7 +90,7 @@ const ProductBanner = () => {
               className="mt-9"
             >
               <button
-                onClick={() => navigate("/contact")}
+                onClick={() => navigate("/products")}
                 className="group inline-flex items-center gap-5 bg-[#F4EDE2] px-7 py-4 font-manrope text-sm font-medium text-[#211B17] transition-all duration-300 hover:bg-[#C56B4E] hover:text-white"
               >
                 Enquire Now

@@ -74,7 +74,7 @@ const CartItem = ({
     : "lg:grid-cols-[2fr_0.9fr_0.7fr_1fr]";
 
   return (
-    <div className="w-full min-w-0">
+    <div className="w-full min-w-0 px-4">
       {/* =====================================================
           CARD LAYOUT (mobile + tablet, < lg)
           Fully fluid: wraps, shrinks, and reflows as needed.
