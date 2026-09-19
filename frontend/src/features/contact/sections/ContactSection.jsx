@@ -101,7 +101,7 @@ const ContactSection = () => {
                     </span>
 
                     <p className="mt-1 font-manrope text-sm text-[#211B17]">
-                      +91 72070 03679
+                      +91 77729 77750
                     </p>
                   </div>
                 </div>
@@ -126,7 +126,7 @@ const ContactSection = () => {
                     </span>
 
                     <p className="mt-1 font-manrope text-sm text-[#211B17]">
-                      Hyderabad, India
+                      Madhapur, Hyderabad, India
                     </p>
                   </div>
                 </div>

@@ -7,7 +7,7 @@ import CartIcon from "./CartIcon";
 const DesktopNav = ({ isActive, cartCount }) => {
   return (
     <div className="hidden justify-center lg:flex">
-      <nav className="flex items-center gap-2 rounded-xl bg-[#26262645] px-4 py-2 text-white shadow-lg backdrop-blur-md">
+      <nav className="flex items-center gap-2 rounded-xl bg-black/30 px-4 py-2 text-white shadow-lg backdrop-blur-md">
         <Link
           to="/"
           className="
@@ -19,7 +19,7 @@ const DesktopNav = ({ isActive, cartCount }) => {
             gap-3
           "
         >
-          <div
+          {/* <div
             className="
               flex
               h-10
@@ -34,22 +34,30 @@ const DesktopNav = ({ isActive, cartCount }) => {
             "
           >
             <img
-              src="https://res.cloudinary.com/dasvdkncm/image/upload/v1781664574/7_ALP_s_Logo-removebg-preview_e7kr1k.png"
+              src="https://res.cloudinary.com/dasvdkncm/image/upload/v1789745013/7alps-logo-removebg-preview_hjvqpf.png"
               alt="7ALP's"
               className="h-7 w-7 object-contain"
             />
-          </div>
+          </div> */}
 
-          <div className="hidden xl:block">
-            <p
-              className="
-                leading-none
-                tracking-[-0.04em]
-            text-white
-              "
-            >
-              7ALP's
-            </p>
+          <div
+            className="
+              flex
+              h-10
+              w-10
+              items-center
+              justify-center
+
+              transition-transform
+              duration-300
+              group-hover:scale-105
+            "
+          >
+            <img
+              src="https://res.cloudinary.com/dasvdkncm/image/upload/v1789824060/7_ALPs_logo_q69vip.jpg"
+              alt="7ALP's"
+              className="h-full w-full object-contain rounded-full"
+            />
           </div>
         </Link>
 

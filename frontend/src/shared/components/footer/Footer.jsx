@@ -44,7 +44,7 @@ const cols = [
   {
     title: "Contact",
     links: [
-      { label: "+91 72070 03679", href: "tel:+917207003679" },
+      { label: "+91 77729 77750", href: "tel:+917772977750" },
       {
         label: "7alps.global@gmail.com",
         href: "mailto:7alps.global@gmail.com",
@@ -148,27 +148,15 @@ const Footer = () => {
             variants={itemVariants}
             className="sm:col-span-2 lg:col-span-5 xl:col-span-4"
           >
-            <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center bg-[#F4EDE2] p-2 sm:h-16 sm:w-16">
-                <img
-                  src="https://res.cloudinary.com/dasvdkncm/image/upload/v1781664574/7_ALP_s_Logo-removebg-preview_e7kr1k.png"
-                  alt="7ALP's"
-                  className="h-full w-full object-contain"
-                />
-              </div>
-
-              <div className="min-w-0">
-                <p className="font-manrope text-2xl font-semibold tracking-[-0.04em] sm:text-3xl">
-                  7ALP's
-                </p>
-
-                <p className="mt-1 font-ibm-mono text-[8px] uppercase tracking-[0.2em] text-white/35">
-                  Natural wellness
-                </p>
-              </div>
+            <div className="flex h-18 w-18 shrink-0 items-center justify-center sm:h-20 sm:w-20">
+              <img
+                src="https://res.cloudinary.com/dasvdkncm/image/upload/v1789824145/7_ALPs_logo-removebg-preview_rv98fm.png"
+                alt="7ALP's"
+                className="h-full w-full object-contain"
+              />
             </div>
 
-            <p className="mt-7 max-w-md font-manrope text-sm leading-7 text-white/45">
+            <p className="mt-0 max-w-md font-manrope text-sm leading-7 text-white/45">
               Premium herbal ingredients and wellness solutions sourced directly
               from farmers and delivered to consumers, businesses, and global
               partners.
@@ -324,7 +312,7 @@ const Footer = () => {
               {/* Phone */}
               <li>
                 <a
-                  href="tel:+917207003679"
+                  href="tel:+917772977750"
                   className="
             group
             flex
@@ -340,7 +328,7 @@ const Footer = () => {
                 >
                   <FiPhone className="mt-0.5 shrink-0" size={16} />
 
-                  <span className="break-words">+91 72070 03679</span>
+                  <span className="break-words">+91 77729 77750</span>
                 </a>
               </li>
 

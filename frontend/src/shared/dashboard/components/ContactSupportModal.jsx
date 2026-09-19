@@ -41,20 +41,20 @@ const ContactSupportModal = ({ isOpen, onClose }) => {
     {
       icon: FiPhone,
       label: "Call us",
-      value: "+91 98765 43210",
-      href: "tel:+919876543210",
+      value: "+91 72070 03679",
+      href: "tel:+917207003679",
     },
     {
       icon: FiMail,
       label: "Email us",
-      value: "support@7alps.com",
-      href: "mailto:support@7alps.com",
+      value: "7alps.global@gmail.com",
+      href: "mailto:7alps.global@gmail.com",
     },
     {
       icon: FiMessageCircle,
       label: "WhatsApp",
       value: "Chat with us",
-      href: "https://wa.me/919876543210",
+      href: "https://wa.me/917207003679",
     },
   ];
 

@@ -4,6 +4,7 @@ import { SEO, homeSEO } from "../../../shared/seo";
 import Banner from "../sections/Banner";
 import Categories from "../sections/Categories";
 import FAQs from "../sections/FAQs";
+import FarmerToCustomer from "../sections/FarmerToCustomer";
 
 import MainHeroSection from "../sections/MainHeroSection";
 import OurFeaturedProducts from "../sections/OurFeaturedProducts";
@@ -20,6 +21,7 @@ const HomePage = () => {
         <MainHeroSection />
         <Categories />
         <OurFeaturedProducts />
+        <FarmerToCustomer />
         <WhyChoose7Alps />
         <QualityAssuranceSection />
         <Banner />

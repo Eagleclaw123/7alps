@@ -52,29 +52,19 @@ const MobileSidebar = ({ isOpen, onClose, isActive }) => (
 
       <div className="relative z-10">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#D8CDC2] px-6 py-5">
+        <div className="flex items-center justify-between border-b border-[#D8CDC2] p-4">
           {/* LOGO + BRAND */}
           <Link
             to="/"
             onClick={onClose}
             className="group flex items-center gap-3"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#211B17] p-2 transition-transform duration-300 group-hover:scale-105">
+            <div className="flex h-20 w-20 items-center justify-center p-2  transition-transform duration-300 group-hover:scale-105">
               <img
-                src="https://res.cloudinary.com/dasvdkncm/image/upload/v1781664574/7_ALP_s_Logo-removebg-preview_e7kr1k.png"
+                src="https://res.cloudinary.com/dasvdkncm/image/upload/v1789824060/7_ALPs_logo_q69vip.jpg"
                 alt="7ALP's"
-                className="h-full w-full object-contain"
+                className="h-full w-full object-contain rounded-full"
               />
-            </div>
-
-            <div>
-              <p className="font-manrope text-[20px] font-semibold tracking-[-0.045em] text-[#211B17]">
-                7ALP's
-              </p>
-
-              <p className="mt-0.5 font-ibm-mono text-[8px] uppercase tracking-[0.2em] text-[#95887F]">
-                Natural wellness
-              </p>
             </div>
           </Link>
 

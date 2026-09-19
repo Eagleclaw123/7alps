@@ -72,7 +72,7 @@ const OurFeaturedProducts = () => {
 
   return (
     <section className="overflow-hidden bg-[#F5EFE5]">
-      <div className="mx-auto max-w-[1600px] px-5 py-24 sm:px-8 md:pb-32 lg:px-12 xl:px-16">
+      <div className="mx-auto max-w-[1600px] px-5 py-24 sm:px-8 md:pb-16 lg:px-12 xl:px-16">
         {/* =====================================================
             SECTION HEADER
         ====================================================== */}
