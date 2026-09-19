@@ -122,12 +122,22 @@ const HeroSection = ({
                   <button
                     key={index}
                     onClick={button.onClick}
-                    className="group inline-flex items-center gap-4 bg-[#211B17] px-6 py-3.5 font-manrope text-sm font-medium text-[#F4EDE2] transition-all duration-300 hover:bg-[#C56B4E] sm:px-7 sm:py-4"
+                    className={`group inline-flex items-center gap-4 px-6 py-3.5 font-manrope text-sm font-medium transition-all duration-300 sm:px-7 sm:py-4 ${
+                      button.variant === "secondary"
+                        ? "border border-[#211B17] bg-transparent text-[#211B17] hover:bg-[#211B17] hover:text-[#F4EDE2]"
+                        : "bg-[#211B17] text-[#F4EDE2] hover:bg-[#C56B4E]"
+                    }`}
                   >
                     {button.label}
 
                     {button.showArrow !== false && (
-                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#F4EDE2] text-[#211B17] transition-transform duration-300 group-hover:translate-x-1">
+                      <span
+                        className={`flex h-7 w-7 items-center justify-center rounded-full transition-transform duration-300 group-hover:translate-x-1 ${
+                          button.variant === "secondary"
+                            ? "bg-[#211B17] text-[#F4EDE2]"
+                            : "bg-[#F4EDE2] text-[#211B17]"
+                        }`}
+                      >
                         <GoArrowRight size={14} />
                       </span>
                     )}

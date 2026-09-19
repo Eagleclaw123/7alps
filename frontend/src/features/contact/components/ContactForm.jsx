@@ -334,7 +334,7 @@ const ContactForm = () => {
       {/* Submit */}
       <motion.div
         variants={itemVariants}
-        className="mt-10 flex items-center justify-between border-t border-[#D8CCC0] pt-7"
+        className="mt-10 flex items-center justify-between pt-2"
       >
         <span className="hidden max-w-xs font-manrope text-xs leading-5 text-[#91847A] sm:block">
           We&apos;ll use your details only to respond to your enquiry.

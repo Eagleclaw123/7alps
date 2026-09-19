@@ -56,7 +56,7 @@ const DesktopNav = ({ isActive, cartCount }) => {
             <img
               src="https://res.cloudinary.com/dasvdkncm/image/upload/v1789824060/7_ALPs_logo_q69vip.jpg"
               alt="7ALP's"
-              className="h-full w-full object-contain rounded-full"
+              className="h-full w-full object-contain rounded-xl"
             />
           </div>
         </Link>

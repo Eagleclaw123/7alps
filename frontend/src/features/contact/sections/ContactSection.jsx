@@ -57,7 +57,7 @@ const ContactSection = () => {
             {/* Contact details */}
             <div className="mt-12 border-t border-[#D8CCC0]">
               <a
-                href="mailto:7alps.global@gmail.com"
+                href="mailto:7alp.global@gmail.com"
                 className="group flex items-center justify-between border-b border-[#D8CCC0] py-6"
               >
                 <div className="flex items-center gap-4">
@@ -73,7 +73,7 @@ const ContactSection = () => {
                     </span>
 
                     <p className="mt-1 font-manrope text-sm text-[#211B17]">
-                      7alps.global@gmail.com
+                      7alp.global@gmail.com
                     </p>
                   </div>
                 </div>
@@ -126,7 +126,7 @@ const ContactSection = () => {
                     </span>
 
                     <p className="mt-1 font-manrope text-sm text-[#211B17]">
-                      Madhapur, Hyderabad, India
+                      Madhapur, Hyderabad, India.
                     </p>
                   </div>
                 </div>

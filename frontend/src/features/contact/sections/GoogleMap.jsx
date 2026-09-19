@@ -38,7 +38,7 @@ const GoogleMap = () => {
 
               <div>
                 <p className="font-manrope text-base font-medium text-[#211B17]">
-                  Hyderabad, India
+                  Madhapur, Hyderabad, India.
                 </p>
 
                 <p className="mt-1 font-manrope text-sm leading-6 text-[#756A62]">

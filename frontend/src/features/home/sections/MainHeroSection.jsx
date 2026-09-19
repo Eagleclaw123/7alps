@@ -10,6 +10,11 @@ const MainHeroSection = () => {
       variant: "secondary",
       onClick: () => navigate("/products"),
     },
+    {
+      label: "Partner With Us",
+      variant: "primary",
+      onClick: () => navigate("/b2b/login"),
+    },
   ];
 
   return (

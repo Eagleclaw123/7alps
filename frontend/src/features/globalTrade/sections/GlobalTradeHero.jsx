@@ -1,10 +1,14 @@
+import { useNavigate } from "react-router-dom";
 import HeroSection from "../../../shared/components/hero/HeroSection";
 
 const GlobalTradeHero = () => {
+  const navigate = useNavigate();
+
   const buttons = [
     {
-      label: "Explore the trade",
+      label: "Request a Quote",
       variant: "primary",
+      onClick: () => navigate("/b2b/login"),
     },
   ];
 

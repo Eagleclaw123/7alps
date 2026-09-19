@@ -15,11 +15,11 @@ const PageNotFound = () => {
       <header className="absolute left-0 right-0 top-0 z-30">
         <div className="mx-auto flex h-24 max-w-[1600px] items-center justify-between px-6 sm:px-8 lg:px-12 xl:px-16">
           <Link to="/" className="group flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center bg-[#211B17] p-1.5">
+            <div className="flex h-10 w-10 items-center justify-center">
               <img
-                src="https://res.cloudinary.com/dasvdkncm/image/upload/v1781664574/7_ALP_s_Logo-removebg-preview_e7kr1k.png"
+                src="https://res.cloudinary.com/dasvdkncm/image/upload/v1789824060/7_ALPs_logo_q69vip.jpg"
                 alt="7ALP's"
-                className="h-full w-full object-contain"
+                className="h-full w-full object-contain rounded-xl"
               />
             </div>
 

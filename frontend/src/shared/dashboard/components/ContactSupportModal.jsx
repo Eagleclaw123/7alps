@@ -47,8 +47,8 @@ const ContactSupportModal = ({ isOpen, onClose }) => {
     {
       icon: FiMail,
       label: "Email us",
-      value: "7alps.global@gmail.com",
-      href: "mailto:7alps.global@gmail.com",
+      value: "7alp.global@gmail.com",
+      href: "mailto:7alp.global@gmail.com",
     },
     {
       icon: FiMessageCircle,
