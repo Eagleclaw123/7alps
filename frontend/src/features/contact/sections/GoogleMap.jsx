@@ -38,7 +38,7 @@ const GoogleMap = () => {
 
               <div>
                 <p className="font-manrope text-base font-medium text-[#211B17]">
-                  Madhapur, Hyderabad, India.
+                  Kukatpally, Hyderabad, 500018.
                 </p>
 
                 <p className="mt-1 font-manrope text-sm leading-6 text-[#756A62]">
@@ -64,10 +64,11 @@ const GoogleMap = () => {
             <div className="h-[400px] sm:h-[500px] lg:h-[620px]">
               <iframe
                 title="7ALP Location"
-                src="https://www.google.com/maps?q=Hyderabad&output=embed"
-                className="h-full w-full grayscale-[25%]"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d30443.061476312363!2d78.38419318261714!3d17.48923632067546!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb91ec0162f43d%3A0x3288c6fe4358cf48!2sKukatpally%2C%20Hyderabad%2C%20Telangana!5e0!3m2!1sen!2sin!4v1789833494869!5m2!1sen!2sin"
+                className="h-full w-full border-0 grayscale-[25%]"
                 loading="lazy"
                 allowFullScreen
+                referrerPolicy="strict-origin-when-cross-origin"
               />
             </div>
 
@@ -78,7 +79,8 @@ const GoogleMap = () => {
                 </span>
 
                 <p className="mt-1 font-manrope text-sm font-medium text-white">
-                  Hyderabad, Telangana
+                  12-7-133, A- Block, G-2, Road No. 6, Raghavendra Nagar, Habeeb
+                  Nagar, Kukatpally, Hyderabad, 500018.
                 </p>
               </div>
 

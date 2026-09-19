@@ -630,7 +630,8 @@ const Footer = () => {
                   <CiLocationOn className="mt-0.5 shrink-0 text-lg" />
 
                   <span className="break-words">
-                    Madhapur, Hyderabad, India.
+                    12-7-133, A- Block, G-2, Road No. 6, Raghavendra Nagar,
+                    Habeeb Nagar, Kukatpally, Hyderabad, 500018.
                   </span>
                 </a>
               </li>

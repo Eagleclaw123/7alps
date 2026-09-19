@@ -126,7 +126,8 @@ const ContactSection = () => {
                     </span>
 
                     <p className="mt-1 font-manrope text-sm text-[#211B17]">
-                      Madhapur, Hyderabad, India.
+                      12-7-133, A- Block, G-2, Road No. 6, Raghavendra Nagar,
+                      Habeeb Nagar, Kukatpally, Hyderabad, 500018.
                     </p>
                   </div>
                 </div>
