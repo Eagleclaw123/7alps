@@ -78,7 +78,7 @@ const PageLoader = () => {
             className="relative flex h-28 w-28 items-center justify-center rounded-full border border-[#211B17]/10 bg-[#F4EDE2] shadow-[0_20px_60px_rgba(33,27,23,0.08)] sm:h-32 sm:w-32"
           >
             <img
-              src="https://res.cloudinary.com/dasvdkncm/image/upload/v1781664574/7_ALP_s_Logo-removebg-preview_e7kr1k.png"
+              src="https://res.cloudinary.com/dasvdkncm/image/upload/v1791176598/7ALPS_LOGO-removebg-preview_doew0v.png"
               alt="7ALP's"
               className="h-16 w-auto object-contain sm:h-20"
             />

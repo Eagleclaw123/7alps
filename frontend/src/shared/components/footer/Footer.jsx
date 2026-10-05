@@ -386,7 +386,7 @@ const Footer = () => {
               "
             >
               <img
-                src="https://res.cloudinary.com/dasvdkncm/image/upload/v1789824145/7_ALPs_logo-removebg-preview_rv98fm.png"
+                src="https://res.cloudinary.com/dasvdkncm/image/upload/v1791176598/7ALPS_LOGO-removebg-preview_doew0v.png"
                 alt="7ALP's"
                 className="h-full w-full object-contain"
               />

@@ -61,7 +61,7 @@ const MobileSidebar = ({ isOpen, onClose, isActive }) => (
           >
             <div className="flex h-20 w-20 items-center justify-center p-2  transition-transform duration-300 group-hover:scale-105">
               <img
-                src="https://res.cloudinary.com/dasvdkncm/image/upload/v1789824060/7_ALPs_logo_q69vip.jpg"
+                src="https://res.cloudinary.com/dasvdkncm/image/upload/v1791176003/7ALPS_LOGO_xkavyt.png"
                 alt="7ALP's"
                 className="h-full w-full object-contain rounded-xl"
               />

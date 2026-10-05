@@ -5,7 +5,7 @@ const Logo = ({ collapsed = false }) => {
   return (
     <Link to="/" className="flex items-center gap-3 overflow-hidden">
       <img
-        src="https://res.cloudinary.com/dasvdkncm/image/upload/v1789824060/7_ALPs_logo_q69vip.jpg"
+        src="https://res.cloudinary.com/dasvdkncm/image/upload/v1791176003/7ALPS_LOGO_xkavyt.png"
         alt="7ALP's"
         className="h-11 w-11 shrink-0 object-contain rounded-xl"
       />
