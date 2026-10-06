@@ -37,7 +37,7 @@
   <div class="eyebrow">Complete Feature Reference</div>
   <h1>7ALP's — Every<br/>Feature, Every Flow</h1>
   <p class="lead">A single reference listing every feature across the customer storefront, admin console, and B2B wholesale portal — what each one does, exactly how a user moves through it step by step, and which backend endpoints power it.</p>
-  <div class="meta">Generated 2026-09-13 &middot; Companion to <code>7alps-platform-documentation.pdf</code> (architecture-first reference) &middot; This document is flow-first: organized by what a person does, not by code layer.</div>
+  <div class="meta">Generated 2026-10-06 &middot; Companion to <code>7alps-platform-documentation.pdf</code> (architecture-first reference) &middot; This document is flow-first: organized by what a person does, not by code layer.</div>
 </section>
 
 <h2 class="section">Contents</h2>
@@ -45,7 +45,7 @@
 <ol>
   <li>How To Read This Document</li>
   <li>Customer Storefront Features (13)</li>
-  <li>Admin Console Features (12)</li>
+  <li>Admin Console Features (13)</li>
   <li>B2B Wholesale Portal Features (6)</li>
   <li>Cross-Cutting Systems (Auth, Email, Payments)</li>
   <li>Content &amp; Marketing Pages</li>
@@ -106,19 +106,20 @@
 <p>The heart of the storefront transaction — shipping address, delivery-area check, and payment, all on <code>/checkout</code> (also used by Buy Now).</p>
 <div class="step"><div class="num">1</div><div class="body"><h3>Shipping address</h3><p>Pre-filled from the customer's default saved address if one exists. Can be re-entered via the embedded Google Maps picker (search + draggable pin + reverse geocode) or typed manually; name/phone/line1/line2/city/state/pincode are all validated client-side as the customer types or leaves a field.</p></div></div>
 <div class="step"><div class="num">2</div><div class="body"><h3>Delivery-area check<span class="role-badge" style="background:#047B22">new</span></h3><p>As soon as a state resolves, it's checked against the admin's serviceable-states allow-list (fetched once from <code>GET /settings/public</code>). If the state isn't served, a red banner appears — "Sorry, we don't currently accept orders from &lt;state&gt;," listing what is served — and the submit button disables. See Section 5.4 for the full mechanics.</p></div></div>
-<div class="step"><div class="num">3</div><div class="body"><h3>Choose payment method</h3><p><b>Cash on Delivery</b> (only shown if the admin has it enabled<span class="role-badge" style="background:#047B22">new</span> — 3.3) or <b>Pay Online</b> (Razorpay) — a simple radio choice; the order total (including a &#8377;99 shipping fee waived above &#8377;999) updates live in the order summary.</p></div></div>
-<div class="step"><div class="num">4</div><div class="body"><h3>Place the order</h3><p><b>COD:</b> <code>POST /customer/orders</code> re-validates the address and the delivery-area check server-side, then atomically builds the order, decrements variant stock, and clears the cart in one MongoDB transaction. <b>Razorpay:</b> see 2.8 below.</p></div></div>
-<div class="step"><div class="num">5</div><div class="body"><h3>Confirmation</h3><p>Redirects to <code>/customer/orders</code> with a success flag; the newly placed order appears at the top with status <code>Confirmed</code>.</p></div></div>
+<div class="step"><div class="num">3</div><div class="body"><h3>Apply a coupon (optional)<span class="role-badge" style="background:#047B22">new</span></h3><p>A coupon field sits above the totals. The customer types a code, or taps one of the <b>Available offers</b> chips: every active coupon, with offers the customer can't use right now (below the minimum, or one-time and already used) greyed out and labelled with what's missing. The discount is previewed through <code>POST /customer/coupons/preview</code> and shown as a green Discount line in the summary. Removing it, or changing the cart so it no longer qualifies, is handled automatically. See 3.13 and 5.6.</p></div></div>
+<div class="step"><div class="num">4</div><div class="body"><h3>Choose payment method</h3><p><b>Cash on Delivery</b> (only shown if the admin has it enabled<span class="role-badge" style="background:#047B22">new</span> — 3.3) or <b>Pay Online</b> (Razorpay) — a simple radio choice; the order total (including a &#8377;99 shipping fee waived above &#8377;999) updates live in the order summary.</p></div></div>
+<div class="step"><div class="num">5</div><div class="body"><h3>Place the order</h3><p><b>COD:</b> <code>POST /customer/orders</code> re-validates the address and the delivery-area check server-side, then atomically builds the order, decrements variant stock, and clears the cart in one MongoDB transaction. <b>Razorpay:</b> see 2.8 below.</p></div></div>
+<div class="step"><div class="num">6</div><div class="body"><h3>Confirmation</h3><p>Redirects to <code>/customer/orders</code> with a success flag; the newly placed order appears at the top with status <code>Confirmed</code>.</p></div></div>
 
 <h3>2.8 Payments — Razorpay &amp; COD <span class="role-badge role-customer">Customer</span></h3>
 <p>Cash on Delivery is on by default and needs no setup, but the admin can switch it off entirely (3.3) — leaving Pay Online as the only option. Online payment via Razorpay's Standard Checkout is fully live.</p>
-<div class="step"><div class="num">1</div><div class="body"><h3>Order sized server-side</h3><p><code>POST /customer/payments/razorpay-order</code> computes the charge itself from the customer's live server-side cart (or the specific Buy Now item) — never trusting a client-supplied amount — and validates the shipping address <i>and</i> the delivery-area restriction <b>before</b> creating the Razorpay order, so a customer outside the serviceable area is turned away before any charge happens.</p></div></div>
+<div class="step"><div class="num">1</div><div class="body"><h3>Order sized server-side</h3><p><code>POST /customer/payments/razorpay-order</code> computes the charge itself from the customer's live server-side cart (or the specific Buy Now item) — never trusting a client-supplied amount — and validates the shipping address <i>and</i> the delivery-area restriction <b>before</b> creating the Razorpay order, so a customer outside the serviceable area is turned away before any charge happens. If a coupon was applied, its code is part of this request, so the amount charged already includes the discount.</p></div></div>
 <div class="step"><div class="num">2</div><div class="body"><h3>Razorpay checkout modal</h3><p>Opens in-page with the order amount/ID; the customer completes payment (card, UPI, netbanking, etc.).</p></div></div>
-<div class="step"><div class="num">3</div><div class="body"><h3>Verify &amp; create the order</h3><p>On success, <code>POST /customer/payments/razorpay-verify</code> checks Razorpay's HMAC-SHA256 signature, re-checks the delivery-area restriction as a final guard, then creates the real order, decrements stock, and clears the cart — identical to the COD path from that point on.</p></div></div>
+<div class="step"><div class="num">3</div><div class="body"><h3>Verify &amp; create the order</h3><p>On success, <code>POST /customer/payments/razorpay-verify</code> checks Razorpay's HMAC-SHA256 signature, re-checks the delivery-area restriction and the coupon (if one was applied) as final guards, then creates the real order, decrements stock, and clears the cart — identical to the COD path from that point on.</p></div></div>
 <div class="callout info"><b>Test card:</b> Mastercard <code>5267 3181 8797 5449</code>, any future expiry/CVV, OTP <code>1234</code> (any 4&ndash;10 digits works in test mode). Avoid the generic Visa <code>4111 1111 1111 1111</code> — it triggers an international-card block on this account.</div>
 
 <h3>2.9 Orders, Order Again &amp; Delivery Tracking <span class="role-badge role-customer">Customer</span></h3>
-<p>At <code>/customer/orders</code>: full history, searchable by order ID, product, status, or address. Each order shows itemized products with photos, the expected delivery date, and a visual tracking stepper (Confirmed &rarr; Processing &rarr; Shipped &rarr; Delivered). Two one-click actions live here:</p>
+<p>At <code>/customer/orders</code>: full history, searchable by order ID, product, status, or address. Each order shows itemized products with photos, the expected delivery date, and a visual tracking stepper (Confirmed &rarr; Processing &rarr; Shipped &rarr; Delivered). An order placed with a coupon shows a Discount line with the code. Two one-click actions live here:</p>
 <ul>
   <li><b>Order Again</b> — re-adds every line item from a past order back into the cart at today's prices/stock, then the customer reviews and checks out normally.</li>
   <li><b>Rate this product</b> — appears on each item once its order is <code>Delivered</code>, opening the review modal directly (skipped automatically once that product has already been reviewed by this customer).</li>
@@ -189,6 +190,13 @@
   <li><b>Quotes tab</b> — review a pending quote from any B2B member, optionally adjust the quantity or price, then either <b>Approve</b> (atomically decrements stock and creates a real order — see 4.4) or <b>Reject</b> with a reason. Searchable by member/business/product.</li>
 </ul>
 
+<h3>3.13 Coupons <span class="role-badge role-admin">Admin</span><span class="role-badge" style="background:#047B22">new</span></h3>
+<p>Discount codes customers can apply at checkout. Managed at <code>/admin/coupons</code> (sidebar: Coupons).</p>
+<div class="step"><div class="num">1</div><div class="body"><h3>Create a coupon</h3><p>Choose a code (3–20 letters, numbers, dashes or underscores; stored in capitals), an optional description shown to customers, and the discount: <b>Percentage off</b> (1–100) or <b>Flat amount off</b> in rupees.</p></div></div>
+<div class="step"><div class="num">2</div><div class="body"><h3>Set when it's valid</h3><p>The minimum order amount, in rupees, measured on the items total before shipping. 0 means any order. Below the minimum the coupon is refused, with the amount still needed.</p></div></div>
+<div class="step"><div class="num">3</div><div class="body"><h3>Choose the usage rule</h3><p><b>Reusable</b>: each customer can use it on every order. <b>One-time</b>: each customer can use it once. A cancelled order doesn't count, so cancelling frees the coupon for that customer again.</p></div></div>
+<div class="step"><div class="num">4</div><div class="body"><h3>Activate, deactivate, edit, delete</h3><p>The switch on each card turns a coupon on or off immediately; inactive coupons are hidden from customers and refused at checkout. Editing affects future orders only, since each order keeps the discount it was placed with. Deleting is allowed only for a coupon that has never been used. A used coupon should be deactivated instead, which keeps its usage count.</p></div></div>
+
 <h2 class="section">4. B2B Wholesale Portal Features</h2>
 <p>Requires a B2B login at <code>/b2b/login</code> (accounts created only by an admin — see 3.12). A B2B login represents an internal marketing-team member selling in bulk on behalf of a business buyer, not the buyer themself.</p>
 
@@ -244,6 +252,16 @@
 
 <h3>5.5 Cash on Delivery Toggle Architecture <span class="role-badge" style="background:#047B22">new</span></h3>
 <p>A single <code>Settings.codEnabled</code> flag (default <code>true</code>) gates COD independently of the state restriction above — the two features don't interact. The frontend hides the COD radio option when it's off (and reassigns an already-selected COD choice to Razorpay), while <code>orderController.createOrder</code> — the only endpoint that ever creates a COD order — rejects with <code>400</code> if it's off, regardless of what the UI shows. Razorpay's own two-step flow is a separate payment method entirely and is unaffected by this toggle.</p>
+
+<h3>5.6 Coupon Pricing Architecture <span class="role-badge" style="background:#047B22">new</span></h3>
+<p>Coupons are priced in one place, <code>orderController.priceOrder</code>, which every payment path calls: COD (<code>POST /customer/orders</code>), Razorpay order creation (<code>POST /customer/payments/razorpay-order</code>) and Razorpay verification (<code>POST /customer/payments/razorpay-verify</code>). The validation rules live in <code>utils/coupon.js</code>.</p>
+<ul>
+  <li><b>Discount</b>: a percentage coupon takes that share of the items total, rounded to whole rupees. A flat coupon takes its fixed amount. Either is capped at the items total, so a discount can never make an order negative. Shipping is never discounted.</li>
+  <li><b>Free-shipping threshold</b>: the ₹999 rule is judged on the items total before the discount, so a coupon never costs the customer free delivery.</li>
+  <li><b>Re-checked at order time</b>: the code is validated again inside the order's MongoDB transaction (active, minimum met, one-time not already used by this customer). The checkout preview is advisory; the server is authoritative.</li>
+  <li><b>Snapshot</b>: the order stores the coupon's code, type, value and discount amount (<code>Order.coupon</code>, <code>Order.discountAmount</code>), so later edits or deletes never change a past order. <code>Coupon.usedCount</code> increments in the same transaction.</li>
+  <li><b>Razorpay caveat</b>: the amount charged is set when the Razorpay order is created. If the coupon is deactivated while the Razorpay window is open, verification can refuse the order after payment. See the Known Limitations in the platform document.</li>
+</ul>
 
 <h2 class="section">6. Content &amp; Marketing Pages</h2>
 <p>Public, brand storytelling and navigation aids that round out the storefront. Most are static copy with scroll-reveal animation only; the homepage is the exception, with one genuinely dynamic section.</p>

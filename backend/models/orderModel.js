@@ -30,6 +30,19 @@ const shippingAddressSchema = new mongoose.Schema(
   { _id: false },
 );
 
+// Snapshot of the coupon applied at checkout. Stored on the order itself so
+// later edits or deletes of the Coupon don't change what the customer paid.
+const orderCouponSchema = new mongoose.Schema(
+  {
+    code: { type: String, required: true },
+    description: String,
+    discountType: { type: String, enum: ['percentage', 'flat'], required: true },
+    discountValue: { type: Number, required: true },
+    discountAmount: { type: Number, required: true },
+  },
+  { _id: false },
+);
+
 const orderSchema = new mongoose.Schema(
   {
     source: {
@@ -65,6 +78,8 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
     itemsTotal: { type: Number, required: true },
+    coupon: orderCouponSchema,
+    discountAmount: { type: Number, default: 0 },
     shippingFee: { type: Number, required: true, default: 0 },
     totalAmount: { type: Number, required: true },
     status: {

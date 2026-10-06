@@ -20,6 +20,10 @@ import {
 } from "../../../shared/services/payment.service";
 
 import { getPublicDeliverySettings } from "../../../shared/services/admin.service";
+import {
+  getAvailableCoupons,
+  previewCoupon,
+} from "../../../shared/services/coupon.service";
 import { loadRazorpayScript } from "../../../shared/utils/loadRazorpayScript";
 import AddressMapPicker from "../../../shared/components/map/AddressMapPicker";
 import HeroBanner from "../../../shared/components/ui/HeroBanner";
@@ -115,6 +119,17 @@ const underlineInput = (hasError) =>
 const FREE_SHIPPING_THRESHOLD = 999;
 const SHIPPING_FEE = 99;
 
+// Short label for an offer in the "Available offers" list.
+const describeOffer = (offer, subtotal) => {
+  if (!offer.usable) return "Already used";
+  if (subtotal < offer.minOrderAmount) {
+    return `Add ₹${(offer.minOrderAmount - subtotal).toLocaleString("en-IN")} more`;
+  }
+  return offer.discountType === "percentage"
+    ? `${offer.discountValue}% off`
+    : `₹${offer.discountValue} off`;
+};
+
 const CheckoutPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -150,8 +165,6 @@ const CheckoutPage = () => {
       : 0
     : cartShipping;
 
-  const total = isBuyNow ? subtotal + shipping : cartTotal;
-
   const [address, setAddress] = useState(initialAddress);
   const [paymentMethod, setPaymentMethod] = useState("COD");
   const [submitting, setSubmitting] = useState(false);
@@ -168,6 +181,18 @@ const CheckoutPage = () => {
 
   const orderJustPlacedRef = useRef(false);
   const addressPrefilledRef = useRef(false);
+
+  // Coupon state. `appliedCoupon` holds the code the customer chose plus the
+  // discount the server last reported for it. The server re-checks everything
+  // at order time, so this is for display and for keeping the total honest.
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponError, setCouponError] = useState("");
+  const [couponBusy, setCouponBusy] = useState(false);
+  const [availableCoupons, setAvailableCoupons] = useState([]);
+
+  const discount = appliedCoupon?.discountAmount || 0;
+  const total = (isBuyNow ? subtotal + shipping : cartTotal) - discount;
 
   /*
    * Admin-configured serviceable states and COD availability — fetched once
@@ -191,6 +216,64 @@ const CheckoutPage = () => {
       })
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    getAvailableCoupons()
+      .then(({ data }) => setAvailableCoupons(data?.data?.coupons || []))
+      .catch(() => {});
+  }, []);
+
+  /*
+   * If the cart changes after a coupon was applied, the discount may no
+   * longer be valid (e.g. the cart dropped below the coupon's minimum), so
+   * re-check it against the new subtotal.
+   */
+  const appliedCode = appliedCoupon?.code;
+
+  useEffect(() => {
+    if (!appliedCode) return;
+
+    previewCoupon(appliedCode, isBuyNow ? buyNowItems : undefined)
+      .then(({ data }) => {
+        setAppliedCoupon((prev) =>
+          prev && prev.code === data.data.coupon.code
+            ? { ...prev, discountAmount: data.data.discountAmount }
+            : prev,
+        );
+      })
+      .catch((err) => {
+        setAppliedCoupon(null);
+        setCouponError(err.response?.data?.message || "This coupon no longer applies to your order.");
+      });
+  }, [appliedCode, subtotal, isBuyNow, buyNowItems]);
+
+  const applyCoupon = async (rawCode) => {
+    const code = rawCode.trim().toUpperCase();
+    if (!code) return;
+
+    setCouponBusy(true);
+    setCouponError("");
+
+    try {
+      const { data } = await previewCoupon(code, isBuyNow ? buyNowItems : undefined);
+      setAppliedCoupon({
+        code: data.data.coupon.code,
+        description: data.data.coupon.description,
+        discountAmount: data.data.discountAmount,
+      });
+      setCouponInput("");
+    } catch (err) {
+      setAppliedCoupon(null);
+      setCouponError(err.response?.data?.message || "Unable to apply this coupon.");
+    } finally {
+      setCouponBusy(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponError("");
+  };
 
   const isStateServiceable =
     !serviceability.enabled ||
@@ -301,6 +384,7 @@ const CheckoutPage = () => {
     const { data: orderData } = await createRazorpayOrder(
       address,
       isBuyNow ? buyNowItems : undefined,
+      appliedCoupon?.code,
     );
 
     const { razorpayOrderId, amount, currency, keyId } = orderData.data;
@@ -337,6 +421,7 @@ const CheckoutPage = () => {
               razorpaySignature: response.razorpay_signature,
               shippingAddress: address,
               ...(isBuyNow ? { items: buyNowItems } : {}),
+              ...(appliedCoupon ? { couponCode: appliedCoupon.code } : {}),
             });
 
             resolve(verifyData);
@@ -393,7 +478,7 @@ const CheckoutPage = () => {
       if (paymentMethod === "Razorpay") {
         await payWithRazorpay();
       } else {
-        await createOrder(address, isBuyNow ? buyNowItems : undefined);
+        await createOrder(address, isBuyNow ? buyNowItems : undefined, appliedCoupon?.code);
       }
 
       orderJustPlacedRef.current = true;
@@ -875,6 +960,97 @@ const CheckoutPage = () => {
                   ))}
                 </div>
 
+                {/* COUPON */}
+
+                <div className="border-b border-[#D8CCC0] px-6 py-6">
+                  <FieldLabel>Coupon code</FieldLabel>
+
+                  {appliedCoupon ? (
+                    <div className="mt-3 flex items-start justify-between gap-4 border border-[#C56B4E]/40 bg-[#C56B4E]/5 px-4 py-3">
+                      <div className="min-w-0">
+                        <p className="font-ibm-mono text-[11px] uppercase tracking-[0.12em] text-[#211B17]">
+                          {appliedCoupon.code} applied
+                        </p>
+
+                        {appliedCoupon.description && (
+                          <p className="mt-1 font-manrope text-xs leading-5 text-[#756A62]">
+                            {appliedCoupon.description}
+                          </p>
+                        )}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={removeCoupon}
+                        className="shrink-0 font-manrope text-xs font-medium text-[#C56B4E] underline underline-offset-4"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="mt-2 flex items-end gap-3">
+                      <input
+                        value={couponInput}
+                        onChange={(e) => setCouponInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            applyCoupon(couponInput);
+                          }
+                        }}
+                        placeholder="Enter code"
+                        className={`${underlineInput(false)} uppercase`}
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() => applyCoupon(couponInput)}
+                        disabled={couponBusy || !couponInput.trim()}
+                        className="shrink-0 bg-[#211B17] px-5 py-3 font-manrope text-xs font-medium text-[#F4EDE2] transition-colors hover:bg-[#C56B4E] disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {couponBusy ? "Checking..." : "Apply"}
+                      </button>
+                    </div>
+                  )}
+
+                  {couponError && (
+                    <p className="mt-3 font-manrope text-xs leading-5 text-red-600">{couponError}</p>
+                  )}
+
+                  {!appliedCoupon && availableCoupons.length > 0 && (
+                    <div className="mt-6">
+                      <p className="font-ibm-mono text-[8px] uppercase tracking-[0.16em] text-[#91847A]">
+                        Available offers
+                      </p>
+
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {availableCoupons.map((offer) => {
+                          const eligible = offer.usable && subtotal >= offer.minOrderAmount;
+
+                          return (
+                            <button
+                              key={offer.code}
+                              type="button"
+                              title={offer.description || offer.code}
+                              disabled={!eligible || couponBusy}
+                              onClick={() => applyCoupon(offer.code)}
+                              className="border border-[#D8CCC0] px-3 py-2 text-left transition-colors hover:border-[#C56B4E] disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              <span className="block font-ibm-mono text-[10px] tracking-[0.12em] text-[#211B17]">
+                                {offer.code}
+                              </span>
+
+                              <span className="block font-manrope text-xs text-[#756A62]">
+                                {describeOffer(offer, subtotal)}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 {/* TOTALS */}
 
                 <div className="px-6 py-6">
@@ -902,6 +1078,18 @@ const CheckoutPage = () => {
                         {shipping === 0 ? "FREE" : `₹${shipping}`}
                       </span>
                     </div>
+
+                    {/* DISCOUNT */}
+
+                    {discount > 0 && (
+                      <div className="flex justify-between gap-4 font-manrope text-sm text-[#756A62]">
+                        <span>Discount ({appliedCoupon.code})</span>
+
+                        <span className="font-medium text-[#C56B4E]">
+                          −₹{discount.toLocaleString()}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="my-6 border-t border-[#CFC2B6]" />

@@ -541,7 +541,10 @@ const CustomerOrders = () => {
                     0,
                   );
 
-                  const extraCharges = order.totalAmount - itemsTotal;
+                  // Coupon discount is subtracted from the items total, so add it back
+                  // before taking the remainder as shipping/taxes.
+                  const discountAmount = order.discountAmount || 0;
+                  const extraCharges = order.totalAmount - itemsTotal + discountAmount;
 
                   return (
                     <motion.article
@@ -804,6 +807,19 @@ const CustomerOrders = () => {
                                 {order.shippingAddress?.pincode}
                               </span>
                             </div>
+
+                            {discountAmount > 0 && (
+                              <div className="flex items-start justify-between gap-5">
+                                <span className="flex items-center gap-2 font-manrope text-xs text-[#91847A]">
+                                  <BadgeIndianRupee size={14} />
+                                  Discount ({order.coupon?.code})
+                                </span>
+
+                                <span className="font-manrope text-xs font-medium text-[#C56B4E]">
+                                  −₹{discountAmount}
+                                </span>
+                              </div>
+                            )}
 
                             {extraCharges !== 0 &&
                               !Number.isNaN(extraCharges) && (

@@ -5,6 +5,7 @@ const orderController = require('../controllers/orderController');
 const reviewController = require('../controllers/reviewController');
 const paymentController = require('../controllers/paymentController');
 const wishlistController = require('../controllers/wishlistController');
+const couponController = require('../controllers/couponController');
 
 const router = express.Router();
 
@@ -30,6 +31,10 @@ router.delete('/cart/items/:productId', cartController.removeItem);
 // Orders
 router.route('/orders').get(orderController.getMyOrders).post(orderController.createOrder);
 router.get('/orders/:id', orderController.getMyOrder);
+
+// Coupons
+router.get('/coupons/available', couponController.getAvailableCoupons);
+router.post('/coupons/preview', couponController.previewCoupon);
 
 // Reviews
 router.route('/reviews').get(reviewController.getMyReviews).post(reviewController.createReview);

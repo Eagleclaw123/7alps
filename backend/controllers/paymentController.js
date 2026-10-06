@@ -1,15 +1,16 @@
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 const Razorpay = require('razorpay');
-const Cart = require('../models/cartModel');
-const Product = require('../models/productModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
-const { buildOrderFromCart, buildOrderFromItems } = require('./orderController');
+const {
+  buildOrderFromCart,
+  buildOrderFromItems,
+  calculateItemsTotal,
+  priceOrder,
+} = require('./orderController');
 const { assertStateServiceable } = require('../utils/serviceability');
 
-const FREE_SHIPPING_THRESHOLD = 999;
-const SHIPPING_FEE = 99;
 const REQUIRED_ADDRESS_FIELDS = ['name', 'phone', 'line1', 'city', 'state', 'pincode'];
 
 const getRazorpayInstance = () => {
@@ -34,7 +35,7 @@ const getRazorpayInstance = () => {
 // (see verifyRazorpayPayment below), matching how COD only creates the Order
 // at the point of a confirmed action.
 exports.createRazorpayOrder = catchAsync(async (req, res, next) => {
-  const { items, shippingAddress } = req.body;
+  const { items, shippingAddress, couponCode } = req.body;
 
   if (!shippingAddress || REQUIRED_ADDRESS_FIELDS.some((field) => !shippingAddress[field])) {
     return next(new AppError(`Please provide a complete shipping address (${REQUIRED_ADDRESS_FIELDS.join(', ')})`, 400));
@@ -46,46 +47,10 @@ exports.createRazorpayOrder = catchAsync(async (req, res, next) => {
   // against the admin's allow-list changing in the few seconds in between.
   await assertStateServiceable(shippingAddress.state);
 
-  let itemsTotal = 0;
-
-  if (Array.isArray(items) && items.length) {
-    for (const requested of items) {
-      const { productId, variantLabel, quantity } = requested;
-      if (!productId || !variantLabel || !quantity) {
-        return next(new AppError('Each item requires productId, variantLabel, and quantity', 400));
-      }
-
-      const product = await Product.findOne({ _id: productId, active: true });
-      if (!product) return next(new AppError('One of the products in your order is no longer available', 400));
-
-      const variant = product.variants.find((v) => v.label === variantLabel);
-      if (!variant) {
-        return next(new AppError(`Variant "${variantLabel}" no longer exists for "${product.name}"`, 400));
-      }
-
-      itemsTotal += variant.price * quantity;
-    }
-  } else {
-    const cart = await Cart.findOne({ customer: req.customer._id }).populate('items.product');
-    if (!cart || !cart.items.length) {
-      return next(new AppError('Your cart is empty', 400));
-    }
-
-    for (const cartItem of cart.items) {
-      const product = cartItem.product;
-      if (!product) return next(new AppError('One of the products in your cart no longer exists', 400));
-
-      const variant = product.variants.find((v) => v.label === cartItem.variantLabel);
-      if (!variant) {
-        return next(new AppError(`Variant "${cartItem.variantLabel}" no longer exists for "${product.name}"`, 400));
-      }
-
-      itemsTotal += variant.price * cartItem.quantity;
-    }
-  }
-
-  const shippingFee = itemsTotal <= FREE_SHIPPING_THRESHOLD ? SHIPPING_FEE : 0;
-  const totalAmount = itemsTotal + shippingFee;
+  // The coupon is re-validated in verifyRazorpayPayment too; pricing here
+  // decides how much the customer is charged.
+  const itemsTotal = await calculateItemsTotal(req.customer._id, items);
+  const { totalAmount } = await priceOrder({ customerId: req.customer._id, itemsTotal, couponCode });
 
   const razorpay = getRazorpayInstance();
   const razorpayOrder = await razorpay.orders.create({
@@ -110,7 +75,7 @@ exports.createRazorpayOrder = catchAsync(async (req, res, next) => {
 // Verifies the payment signature Razorpay's checkout returns, then creates the
 // real Order (decrementing stock, clearing the cart) exactly like the COD path.
 exports.verifyRazorpayPayment = catchAsync(async (req, res, next) => {
-  const { razorpayOrderId, razorpayPaymentId, razorpaySignature, shippingAddress, items } = req.body;
+  const { razorpayOrderId, razorpayPaymentId, razorpaySignature, shippingAddress, items, couponCode } = req.body;
 
   if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
     return next(new AppError('Missing payment verification details', 400));
@@ -150,8 +115,8 @@ exports.verifyRazorpayPayment = catchAsync(async (req, res, next) => {
     await session.withTransaction(async () => {
       order =
         Array.isArray(items) && items.length
-          ? await buildOrderFromItems(req.customer._id, shippingAddress, items, session, paymentFields)
-          : await buildOrderFromCart(req.customer._id, shippingAddress, session, paymentFields);
+          ? await buildOrderFromItems(req.customer._id, shippingAddress, items, session, paymentFields, couponCode)
+          : await buildOrderFromCart(req.customer._id, shippingAddress, session, paymentFields, couponCode);
     });
   } finally {
     session.endSession();

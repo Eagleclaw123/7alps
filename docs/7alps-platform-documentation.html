@@ -171,7 +171,7 @@
   <div class="eyebrow">Platform Documentation</div>
   <h1>7ALP's</h1>
   <p class="lead">A complete walkthrough of the storefront, admin console, and B2B wholesale portal — every login, route, and feature, as currently implemented.</p>
-  <div class="meta">Updated 2026-09-13 &middot; Frontend: React 19 + Vite + Redux Toolkit + Tailwind 4 &middot; Backend: Node.js + Express 5 + MongoDB (Mongoose)</div>
+  <div class="meta">Updated 2026-10-06 &middot; Frontend: React 19 + Vite + Redux Toolkit + Tailwind 4 &middot; Backend: Node.js + Express 5 + MongoDB (Mongoose)</div>
 </section>
 
 <h2 class="section">1. Architecture Overview</h2>
@@ -270,6 +270,7 @@
   <tr><td><code>/admin</code></td><td>Dashboard — customers, orders, products, revenue, plus a Delivery Settings card and a Serviceable States card<span class="badge-new">new</span> (Section 8)</td></tr>
   <tr><td><code>/admin/products</code></td><td>Product CRUD, variants, image upload, admin-set display rating<span class="badge-new">new</span></td></tr>
   <tr><td><code>/admin/categories</code></td><td>Category CRUD</td></tr>
+  <tr><td><code>/admin/coupons</code></td><td>Coupon CRUD: percentage or flat discounts, minimum order amount, one-time or reusable per customer, activate/deactivate<span class="badge-new">new</span> (Section 10)</td></tr>
   <tr><td><code>/admin/orders</code></td><td>All orders (customer + B2B); now server-side paginated and searchable by ID/customer/product/address/payment<span class="badge-fixed">rebuilt</span>, plus expected delivery date per order<span class="badge-new">new</span></td></tr>
   <tr><td><code>/admin/customers</code></td><td>Customer list with order/spend stats</td></tr>
   <tr><td><code>/admin/reviews</code></td><td>Review moderation (genuine customer reviews, prompted after delivery)</td></tr>
@@ -296,6 +297,7 @@
   <li><b>Cart</b> — guest cart in localStorage; merges into the server cart automatically on login. Decreasing quantity below 1 now removes the item instead of silently doing nothing<span class="badge-fixed">fixed</span>.</li>
   <li><b>Buy Now<span class="badge-fixed">fixed</span></b> — purchasing directly from a product page no longer touches the cart at all; checkout shows only that one item, and the customer's actual cart is left completely untouched.</li>
   <li><b>Checkout</b> — shipping address form with an embedded Google Maps picker, auto-filled from the customer's default saved address; choice of <b>Cash on Delivery</b> or <b>Pay Online (Razorpay)</b> — COD only shown at all if the admin has it enabled<span class="badge-new">new</span> (Section 9). If the resolved delivery state isn't on the admin's serviceable-states allow-list, a red banner explains the order can't be placed and the Place Order/Pay button disables<span class="badge-new">new</span> — see Section 8.</li>
+  <li><b>Coupons<span class="badge-new">new</span></b> — a coupon field at checkout plus an "Available offers" list of active codes; the discount is previewed live, re-checked at order time, and shown on the order (Section 10).</li>
   <li><b>Orders</b> — history with status, itemized breakdown (product photo + expected delivery date per item), shipping address, broadened search (ID/product/status/address/date), and an "Order Again" button that re-adds every item from a past order to the cart<span class="badge-new">new</span>.</li>
   <li><b>Profile</b> — editable name only (email is the verified account identity set at signup, and is no longer editable from the profile page<span class="badge-fixed">changed</span>; mobile was already locked); a real address book (add/edit/delete/set-default), each entry fillable via the same map picker. The only (or first) saved address is now always guaranteed to be the default<span class="badge-fixed">fixed</span>.</li>
   <li><b>Reviews</b> — logged-in customers can rate &amp; review a product from the product page, and are now also prompted with a "Rate this product" link on delivered order items<span class="badge-new">new</span> (skipped once already reviewed); reviews are held as <code>Pending</code> until an admin publishes them.</li>
@@ -306,6 +308,7 @@
   <li><b>Dashboard</b> — live counts: customers, orders, products, revenue; plus a <b>Delivery Settings</b> card, a <b>Cash on Delivery</b> toggle<span class="badge-new">new</span> (Section 9), and a <b>Serviceable States</b> card<span class="badge-new">new</span> to restrict which Indian states/UTs the store accepts orders from — see Section 8.</li>
   <li><b>Products</b> — full CRUD, multiple variants per product (label/price/MRP/stock), multi-image upload to Cloudflare R2, plus an admin-set display rating (average + count)<span class="badge-new">new</span> — see Section 5.</li>
   <li><b>Categories</b> — add/edit/activate/delete; delete is blocked if products still reference the category, with a clear error explaining why.</li>
+  <li><b>Coupons<span class="badge-new">new</span></b> — create percentage or flat-amount codes with a minimum order value and a one-time or reusable usage rule; activate, deactivate, or delete unused ones (Section 10).</li>
   <li><b>Orders<span class="badge-fixed">rebuilt</span></b> — every order (storefront and B2B) in one place; now paginated and searched server-side (order ID, customer, product, address, payment, status) instead of fetching the entire order collection on every load; inline status changes (Confirmed &rarr; Processing &rarr; Shipped &rarr; Delivered/Cancelled); expected delivery date per order.</li>
   <li><b>Customers</b> — every registered customer with their order count and lifetime spend.</li>
   <li><b>Reviews</b> — moderate: publish, flag, or delete any submitted review.</li>
@@ -398,7 +401,36 @@
   <tr><td>Enforcement point</td><td><code>orderController.createOrder</code> only — Razorpay's own two-step flow (Section 8's table) is unaffected by this toggle, since it's a separate payment method entirely</td></tr>
 </table>
 
-<h2 class="section">10. Testing Reference</h2>
+<h2 class="section">10. Coupons<span class="badge-new">new</span></h2>
+<p>Admin-managed discount codes, set up at <code>/admin/coupons</code>. Customers apply them on the checkout page, the discount appears in the order summary, and it's stored on the placed order.</p>
+<div class="step"><div class="num">1</div><div class="body">
+<h3>Create the coupon (admin)</h3>
+<p>A code, an optional description, a discount type (<b>percentage</b>, 1–100, or <b>flat</b> rupee amount), a minimum order amount before shipping (0 means any order), and a usage rule (<b>reusable</b>, or <b>one-time per customer</b>). A new coupon is active on save; the switch on its card turns it on or off.</p>
+</div></div>
+<div class="step"><div class="num">2</div><div class="body">
+<h3>Customer sees the offers (checkout)</h3>
+<p>Checkout lists every active coupon as an "Available offers" chip. An offer the customer can't use right now is greyed out: either the order is below its minimum (the chip says how much more is needed), or it's a one-time coupon the customer has already used.</p>
+</div></div>
+<div class="step"><div class="num">3</div><div class="body">
+<h3>Apply a code</h3>
+<p>The customer types a code or taps an offer. <code>POST /api/v1/customer/coupons/preview</code> validates it against the current cart (or the Buy Now item) and returns the discount, shown as a green Discount line. If the cart changes so the coupon no longer qualifies, it's removed automatically and the reason is shown.</p>
+</div></div>
+<div class="step"><div class="num">4</div><div class="body">
+<h3>Order placed</h3>
+<p>The coupon is validated again on the server, inside the order transaction, for COD (<code>POST /customer/orders</code>) and for Razorpay (at order creation and again at verification). The order stores a snapshot of the coupon and the discount amount, and <code>Coupon.usedCount</code> increases.</p>
+</div></div>
+<table>
+  <tr><th>Rule</th><th>Detail</th></tr>
+  <tr><td>Data model</td><td><code>Coupon</code> collection (<code>code</code> unique, <code>discountType</code>, <code>discountValue</code>, <code>minOrderAmount</code>, <code>usageType</code>, <code>active</code>, <code>usedCount</code>). Orders gain <code>coupon</code> (a snapshot) and <code>discountAmount</code>.</td></tr>
+  <tr><td>Discount maths</td><td>Percentage discounts are rounded to whole rupees. Flat discounts are capped at the items total. Shipping is never discounted.</td></tr>
+  <tr><td>Free shipping</td><td>The ₹999 threshold is judged on the items total before the discount, so a coupon never removes free delivery.</td></tr>
+  <tr><td>One-time rule</td><td>One non-cancelled order per customer per coupon code. Cancelling an order frees the coupon for that customer.</td></tr>
+  <tr><td>Deleting</td><td>Allowed only for a coupon that has never been used. Otherwise deactivate it, which keeps the usage record.</td></tr>
+  <tr><td>Where it's enforced</td><td><code>utils/coupon.js</code> (validation rules) and <code>orderController.priceOrder</code> (pricing), shared by all three order endpoints.</td></tr>
+  <tr><td>Sample data</td><td><code>npm run seed:coupons</code> adds WELCOME10, FLAT100, SAVE20 and FLAT50. It only inserts codes that don't exist yet, so re-running it changes nothing.</td></tr>
+</table>
+
+<h2 class="section">11. Testing Reference</h2>
 <table>
   <tr><th>What</th><th>Value</th></tr>
   <tr><td>Admin login</td><td><code>7alpsadmin@7alps.com</code> / <code>7alps123</code></td></tr>
@@ -406,14 +438,17 @@
   <tr><td>Customer login<span class="badge-fixed">changed</span></td><td>Any real email address — OTP is genuinely emailed via Resend (check the inbox; no dev bypass code exists). A new account must then also enter a valid Indian mobile number (e.g. <code>9876543210</code> — must match <code>^[6-9]\d{9}$</code>) before login completes.</td></tr>
   <tr><td>Razorpay test card (recommended)</td><td><code>5267 3181 8797 5449</code> (Mastercard) — any future expiry, any 3-digit CVV</td></tr>
   <tr><td>Razorpay test OTP</td><td>Any 4-10 digit number (e.g. <code>1234</code>) — it's a test-mode simulation, not a fixed code</td></tr>
+  <tr><td>Sample coupons (after <code>npm run seed:coupons</code>)</td><td><code>WELCOME10</code> (10% off, min ₹499, one-time) · <code>FLAT100</code> (₹100 off, min ₹999, one-time) · <code>SAVE20</code> (20% off, min ₹1499, reusable) · <code>FLAT50</code> (₹50 off, min ₹499, reusable)</td></tr>
   <tr><td>Password-reset OTP (Admin/B2B)</td><td>Emailed via Resend from <code>support@7alpsglobal.com</code>, delivered to the real account email — now testable end to end from the actual login page (Section 2), including the final "set new password" step</td></tr>
 </table>
 <div class="callout warn">
   <b>Avoid the generic <code>4111 1111 1111 1111</code> Visa test card</b> — Razorpay's test environment treats it as a foreign-issued card, and most test accounts (this one included) have international card acceptance disabled by default, so it fails with <code>international_transaction_not_allowed</code>. The Mastercard number above is domestic and works reliably.
 </div>
 
-<h2 class="section">11. Known Limitations</h2>
+<h2 class="section">12. Known Limitations</h2>
 <ul>
+  <li><b>Coupon changes during a Razorpay payment</b> — a coupon is checked when the Razorpay order is created (that sets the amount charged) and again when the payment is verified. If an admin deactivates or changes the coupon while the Razorpay window is open, verification can refuse the order after the payment has been captured. The money is recorded in Razorpay, but the order would need to be created or refunded by hand. Trusting the price recorded at order creation would close this gap; that is a design choice still to be made.</li>
+  <li><b>One-time coupons aren't strictly atomic</b> — the once-per-customer check runs inside the order transaction, but two checkouts submitted at the same instant with the same one-time code could both pass it. Unlikely in practice for a single customer; a unique index would close it fully if it ever matters.</li>
   <li><b>Serviceable-states matching is exact-name, not geographic</b> — a customer's typed state is compared against the admin's allow-list by string (trimmed, case-insensitive); it isn't validated against the city/pincode also on the form, so a customer could still type a served state name with a mismatched pincode. Acceptable for the current scope (a state-level, not address-level, restriction).</li>
   <li><b>Admin Quotes tab date-range filtering isn't exposed in the UI</b> — <code>GET /api/v1/admin/quotes</code> accepts <code>dateFrom</code>/<code>dateTo</code> alongside <code>status</code>, but the B2B Team page's Quotes tab UI only exposes a status dropdown (search now works correctly as of this round — that part of the earlier limitation is resolved).</li>
   <li><b>Mobile number is validated, not OTP-verified</b> — the Indian mobile number collected right after email verification is format- and uniqueness-checked, but (unlike email) no confirmation code is sent to it. This is a deliberate scope choice for this round, not an oversight; adding a second, mobile-based OTP step is a possible future enhancement if it's ever needed.</li>
@@ -443,6 +478,10 @@
 
 <div class="callout info">
   <b>Cash on Delivery toggle (2026-09-13).</b> A same-day follow-up request: the admin can now switch COD off entirely, leaving Pay Online as the only checkout option, enforced both by hiding the option in the UI and by rejecting <code>POST /customer/orders</code> server-side when it's off — see Section 9.
+</div>
+
+<div class="callout info">
+  <b>Coupons (2026-10-06).</b> Admin-managed discount codes, percentage or flat, with a minimum order value and a one-time or reusable usage rule. Customers apply them at checkout, where they're previewed live and re-checked on the server when the order is created. The discount is stored on each order. See Section 10.
 </div>
 
 <p class="footer-note">7ALP's Platform Documentation — generated automatically from the current codebase.</p>

@@ -9,6 +9,7 @@ const settingsController = require('../controllers/settingsController');
 const contactController = require('../controllers/contactController');
 const newsletterController = require('../controllers/newsletterController');
 const supportTicketController = require('../controllers/supportTicketController');
+const couponController = require('../controllers/couponController');
 
 const router = express.Router();
 
@@ -47,6 +48,13 @@ router.patch('/contacts/:id/status', contactController.updateContactStatus);
 router.delete('/contacts/:id', contactController.deleteContact);
 
 router.get('/customers', adminController.getAllCustomers);
+
+router.route('/coupons').get(couponController.getAllCoupons).post(couponController.createCoupon);
+router
+  .route('/coupons/:id')
+  .patch(couponController.updateCoupon)
+  .delete(couponController.deleteCoupon);
+router.patch('/coupons/:id/toggle-status', couponController.toggleCouponStatus);
 
 router.get('/newsletter', newsletterController.getAllSubscribers);
 

@@ -91,6 +91,7 @@ const Products = lazy(() => import("../../features/admin/pages/Products"));
 const Orders = lazy(() => import("../../features/admin/pages/Orders"));
 const Customers = lazy(() => import("../../features/admin/pages/Customers"));
 const Categories = lazy(() => import("../../features/admin/pages/Categories"));
+const Coupons = lazy(() => import("../../features/admin/pages/Coupons"));
 const Reviews = lazy(() => import("../../features/admin/pages/Reviews"));
 const B2BTeam = lazy(() => import("../../features/admin/pages/B2BTeam"));
 const Contacts = lazy(() => import("../../features/admin/pages/Contacts"));
@@ -175,6 +176,7 @@ const AppRoutes = () => {
           <Route path="orders" element={<Orders />} />
           <Route path="customers" element={<Customers />} />
           <Route path="categories" element={<Categories />} />
+          <Route path="coupons" element={<Coupons />} />
           <Route path="reviews" element={<Reviews />} />
           <Route path="b2b" element={<B2BTeam />} />
           <Route path="contacts" element={<Contacts />} />

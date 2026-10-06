@@ -3,10 +3,12 @@ const Order = require('../models/orderModel');
 const Cart = require('../models/cartModel');
 const Product = require('../models/productModel');
 const Settings = require('../models/settingsModel');
+const Coupon = require('../models/couponModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const { decrementVariantStock } = require('./productController');
 const { assertStateServiceable } = require('../utils/serviceability');
+const { resolveCoupon, toOrderSnapshot } = require('../utils/coupon');
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
@@ -22,12 +24,73 @@ const SHIPPING_FEE = 99;
 
 const REQUIRED_ADDRESS_FIELDS = ['name', 'phone', 'line1', 'city', 'state', 'pincode'];
 
+// Subtotal of either the Buy Now items or the customer's saved cart. Prices
+// are always read from the product/variant, never trusted from the client.
+// Used to price Razorpay orders and to preview a coupon before checkout.
+exports.calculateItemsTotal = async (customerId, items) => {
+  let itemsTotal = 0;
+
+  if (Array.isArray(items) && items.length) {
+    for (const requested of items) {
+      const { productId, variantLabel, quantity } = requested;
+      if (!productId || !variantLabel || !quantity) {
+        throw new AppError('Each item requires productId, variantLabel, and quantity', 400);
+      }
+
+      const product = await Product.findOne({ _id: productId, active: true });
+      if (!product) throw new AppError('One of the products in your order is no longer available', 400);
+
+      const variant = product.variants.find((v) => v.label === variantLabel);
+      if (!variant) throw new AppError(`Variant "${variantLabel}" no longer exists for "${product.name}"`, 400);
+
+      itemsTotal += variant.price * quantity;
+    }
+    return itemsTotal;
+  }
+
+  const cart = await Cart.findOne({ customer: customerId }).populate('items.product');
+  if (!cart || !cart.items.length) throw new AppError('Your cart is empty', 400);
+
+  for (const cartItem of cart.items) {
+    const product = cartItem.product;
+    if (!product) throw new AppError('One of the products in your cart no longer exists', 400);
+
+    const variant = product.variants.find((v) => v.label === cartItem.variantLabel);
+    if (!variant) throw new AppError(`Variant "${cartItem.variantLabel}" no longer exists for "${product.name}"`, 400);
+
+    itemsTotal += variant.price * cartItem.quantity;
+  }
+
+  return itemsTotal;
+};
+
+// Shared by every payment path: applies the optional coupon to the items
+// total, then adds shipping. Free shipping is judged on the pre-discount items
+// total, so using a coupon never costs the customer their free delivery.
+// Pass `session` when calling inside a transaction.
+exports.priceOrder = async ({ customerId, itemsTotal, couponCode, session }) => {
+  const shippingFee = itemsTotal <= FREE_SHIPPING_THRESHOLD ? SHIPPING_FEE : 0;
+
+  if (!couponCode) {
+    return { shippingFee, discountAmount: 0, coupon: null, totalAmount: itemsTotal + shippingFee };
+  }
+
+  const { coupon, discountAmount } = await resolveCoupon({ code: couponCode, customerId, itemsTotal, session });
+
+  return {
+    shippingFee,
+    discountAmount,
+    coupon,
+    totalAmount: itemsTotal - discountAmount + shippingFee,
+  };
+};
+
 // Shared by COD (createOrder below) and the Razorpay verify-payment flow
 // (paymentController.js): validates the customer's cart, decrements stock for
 // each line atomically, creates the Order, and clears the cart — all within
 // the given session. `paymentFields` lets callers set paymentMethod/paymentStatus/
 // razorpay* fields; defaults to the COD shape when omitted.
-exports.buildOrderFromCart = async (customerId, shippingAddress, session, paymentFields = {}) => {
+exports.buildOrderFromCart = async (customerId, shippingAddress, session, paymentFields = {}, couponCode = null) => {
   const cart = await Cart.findOne({ customer: customerId }).populate('items.product').session(session);
   if (!cart || !cart.items.length) {
     throw new AppError('Your cart is empty', 400);
@@ -56,8 +119,7 @@ exports.buildOrderFromCart = async (customerId, shippingAddress, session, paymen
   }
 
   const itemsTotal = orderItems.reduce((sum, item) => sum + item.subtotal, 0);
-  const shippingFee = itemsTotal <= FREE_SHIPPING_THRESHOLD ? SHIPPING_FEE : 0;
-  const totalAmount = itemsTotal + shippingFee;
+  const pricing = await exports.priceOrder({ customerId, itemsTotal, couponCode, session });
   const expectedDeliveryDate = await exports.getExpectedDeliveryDate();
 
   const created = await Order.create(
@@ -67,14 +129,20 @@ exports.buildOrderFromCart = async (customerId, shippingAddress, session, paymen
         items: orderItems,
         shippingAddress,
         itemsTotal,
-        shippingFee,
-        totalAmount,
+        coupon: pricing.coupon ? toOrderSnapshot(pricing.coupon, pricing.discountAmount) : undefined,
+        discountAmount: pricing.discountAmount,
+        shippingFee: pricing.shippingFee,
+        totalAmount: pricing.totalAmount,
         expectedDeliveryDate,
         ...paymentFields,
       },
     ],
     { session },
   );
+
+  if (pricing.coupon) {
+    await Coupon.updateOne({ _id: pricing.coupon._id }, { $inc: { usedCount: 1 } }).session(session);
+  }
 
   cart.items = [];
   await cart.save({ session });
@@ -88,7 +156,7 @@ exports.buildOrderFromCart = async (customerId, shippingAddress, session, paymen
 // with whatever else the customer already has sitting in their cart. Prices
 // are always looked up from the product/variant here, never trusted from the
 // client, exactly like buildOrderFromCart above.
-exports.buildOrderFromItems = async (customerId, shippingAddress, items, session, paymentFields = {}) => {
+exports.buildOrderFromItems = async (customerId, shippingAddress, items, session, paymentFields = {}, couponCode = null) => {
   if (!Array.isArray(items) || !items.length) {
     throw new AppError('No items provided for this order', 400);
   }
@@ -121,8 +189,7 @@ exports.buildOrderFromItems = async (customerId, shippingAddress, items, session
   }
 
   const itemsTotal = orderItems.reduce((sum, item) => sum + item.subtotal, 0);
-  const shippingFee = itemsTotal <= FREE_SHIPPING_THRESHOLD ? SHIPPING_FEE : 0;
-  const totalAmount = itemsTotal + shippingFee;
+  const pricing = await exports.priceOrder({ customerId, itemsTotal, couponCode, session });
   const expectedDeliveryDate = await exports.getExpectedDeliveryDate();
 
   const created = await Order.create(
@@ -132,14 +199,20 @@ exports.buildOrderFromItems = async (customerId, shippingAddress, items, session
         items: orderItems,
         shippingAddress,
         itemsTotal,
-        shippingFee,
-        totalAmount,
+        coupon: pricing.coupon ? toOrderSnapshot(pricing.coupon, pricing.discountAmount) : undefined,
+        discountAmount: pricing.discountAmount,
+        shippingFee: pricing.shippingFee,
+        totalAmount: pricing.totalAmount,
         expectedDeliveryDate,
         ...paymentFields,
       },
     ],
     { session },
   );
+
+  if (pricing.coupon) {
+    await Coupon.updateOne({ _id: pricing.coupon._id }, { $inc: { usedCount: 1 } }).session(session);
+  }
 
   return created[0];
 };
@@ -148,7 +221,7 @@ exports.buildOrderFromItems = async (customerId, shippingAddress, items, session
 // Optional `items` in the body (Buy Now) bypasses the cart entirely; omitting
 // it (regular cart checkout) keeps the existing cart-based behavior.
 exports.createOrder = catchAsync(async (req, res, next) => {
-  const { shippingAddress, items } = req.body;
+  const { shippingAddress, items, couponCode } = req.body;
 
   if (!shippingAddress || REQUIRED_ADDRESS_FIELDS.some((field) => !shippingAddress[field])) {
     return next(new AppError(`Please provide a complete shipping address (${REQUIRED_ADDRESS_FIELDS.join(', ')})`, 400));
@@ -169,8 +242,8 @@ exports.createOrder = catchAsync(async (req, res, next) => {
   try {
     await session.withTransaction(async () => {
       order = Array.isArray(items) && items.length
-        ? await exports.buildOrderFromItems(req.customer._id, shippingAddress, items, session)
-        : await exports.buildOrderFromCart(req.customer._id, shippingAddress, session);
+        ? await exports.buildOrderFromItems(req.customer._id, shippingAddress, items, session, {}, couponCode)
+        : await exports.buildOrderFromCart(req.customer._id, shippingAddress, session, {}, couponCode);
     });
   } finally {
     session.endSession();

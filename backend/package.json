@@ -13,6 +13,7 @@
     "seed": "node dev-data/seedProducts.js",
     "seed:b2b": "node dev-data/seedB2B.js",
     "seed:categories": "node dev-data/seedCategories.js",
+    "seed:coupons": "node dev-data/seedCoupons.js",
     "format": "prettier --write ."
   },
   "author": "Gundu Manideep",
